@@ -814,11 +814,8 @@ function attachFiltersToProduct(
 				$nextFilterId
 			);
 
-			$groupDisplayName = getFilterGroupLabel($definition['group'], 'uk-ua');
-			$filterDisplayName = getFilterValueLabel($definition, 'uk-ua');
-
-			registerFilterLink($categoryFilters, (string)$categoryId, $groupDisplayName, $filterDisplayName);
-			registerFilterLink($productFilters, (string)$productId, $groupDisplayName, $filterDisplayName);
+			registerFilterLinkById($categoryFilters, (string)$categoryId, $filterGroupId, $filterId);
+			registerFilterLinkById($productFilters, (string)$productId, $filterGroupId, $filterId);
 
 			break;
 		}
@@ -895,19 +892,11 @@ function buildFilterNames(array $definition, array $languages): array {
 	return $names;
 }
 
-function getFilterValueLabel(array $definition, string $language): string {
-	$names = $definition['names'] ?? [];
-	return $names[$language]
-		?? $names['uk-ua']
-		?? $names['en-gb']
-		?? humanizeLabel($definition['key']);
-}
-
 /**
- * @param array<string,array<string,array<string,bool>>> $registry
+ * @param array<string,array<int,array<int,bool>>> $registry
  */
-function registerFilterLink(array &$registry, string $entityId, string $groupName, string $filterName): void {
-	if ($entityId === '' || $groupName === '' || $filterName === '') {
+function registerFilterLinkById(array &$registry, string $entityId, int $filterGroupId, int $filterId): void {
+	if ($entityId === '' || $filterGroupId <= 0 || $filterId <= 0) {
 		return;
 	}
 
@@ -915,27 +904,27 @@ function registerFilterLink(array &$registry, string $entityId, string $groupNam
 		$registry[$entityId] = [];
 	}
 
-	if (!isset($registry[$entityId][$groupName])) {
-		$registry[$entityId][$groupName] = [];
+	if (!isset($registry[$entityId][$filterGroupId])) {
+		$registry[$entityId][$filterGroupId] = [];
 	}
 
-	$registry[$entityId][$groupName][$filterName] = true;
+	$registry[$entityId][$filterGroupId][$filterId] = true;
 }
 
 /**
- * @param array<string,array<string,array<string,bool>>> $registry
+ * @param array<string,array<int,array<int,bool>>> $registry
  * @return array<int,array<int,string>>
  */
 function buildFilterAssignmentRows(array $registry): array {
 	$rows = [];
 
 	foreach ($registry as $entityId => $groups) {
-		ksort($groups, SORT_NATURAL | SORT_FLAG_CASE);
-		foreach ($groups as $groupName => $filters) {
-			$filterNames = array_keys($filters);
-			sort($filterNames, SORT_NATURAL | SORT_FLAG_CASE);
-			foreach ($filterNames as $filterName) {
-				$rows[] = [$entityId, $groupName, $filterName];
+		ksort($groups, SORT_NUMERIC);
+		foreach ($groups as $groupId => $filters) {
+			$filterIds = array_keys($filters);
+			sort($filterIds, SORT_NUMERIC);
+			foreach ($filterIds as $filterId) {
+				$rows[] = [$entityId, (string)$groupId, (string)$filterId];
 			}
 		}
 	}
@@ -943,19 +932,19 @@ function buildFilterAssignmentRows(array $registry): array {
 	usort(
 		$rows,
 		static function (array $left, array $right): int {
-			$leftId = (int)$left[0];
-			$rightId = (int)$right[0];
-			$idComparison = $leftId <=> $rightId;
+			$leftEntity = (int)$left[0];
+			$rightEntity = (int)$right[0];
+			$idComparison = $leftEntity <=> $rightEntity;
 			if ($idComparison !== 0) {
 				return $idComparison;
 			}
 
-			$groupComparison = strcmp($left[1], $right[1]);
+			$groupComparison = (int)$left[1] <=> (int)$right[1];
 			if ($groupComparison !== 0) {
 				return $groupComparison;
 			}
 
-			return strcmp($left[2], $right[2]);
+			return (int)$left[2] <=> (int)$right[2];
 		}
 	);
 
@@ -983,7 +972,7 @@ function writeFilterSheets(
 
 	$categoryFiltersSheet = $spreadsheet->createSheet();
 	$categoryFiltersSheet->setTitle('CategoryFilters');
-	$categoryFiltersSheet->fromArray(['category_id', 'filter_group', 'filter'], null, 'A1', true);
+	$categoryFiltersSheet->fromArray(['category_id', 'filter_group_id', 'filter_id'], null, 'A1', true);
 	$rowIndex = 2;
 	$categoryRows = buildFilterAssignmentRows($categoryFilters);
 	foreach ($categoryRows as $row) {
@@ -1027,7 +1016,7 @@ function writeFilterSheets(
 
 	$productFiltersSheet = $spreadsheet->createSheet();
 	$productFiltersSheet->setTitle('ProductFilters');
-	$productFiltersSheet->fromArray(['product_id', 'filter_group', 'filter'], null, 'A1', true);
+	$productFiltersSheet->fromArray(['product_id', 'filter_group_id', 'filter_id'], null, 'A1', true);
 	$rowIndex = 2;
 	$productRows = buildFilterAssignmentRows($productFilters);
 	foreach ($productRows as $row) {
