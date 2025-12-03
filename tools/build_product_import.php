@@ -802,8 +802,8 @@ function attachFiltersToProduct(
 				$nextFilterId
 			);
 
-			$groupDisplayName = getFilterGroupLabel($definition['group'], 'uk-ua');
-			$filterDisplayName = getFilterValueLabel($definition, 'uk-ua');
+			$groupDisplayName = getFilterGroupLabel($definition['group'], 'en-gb');
+			$filterDisplayName = getFilterValueLabel($definition, 'en-gb');
 
 			registerFilterLink($categoryFilters, (string)$categoryId, $groupDisplayName, $filterDisplayName);
 			registerFilterLink($productFilters, (string)$productId, $groupDisplayName, $filterDisplayName);
