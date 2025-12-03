@@ -35,6 +35,25 @@ class Extension extends \Opencart\System\Engine\Controller {
 			$this->config->addPath('extension/' . $result['code'], DIR_EXTENSION . $result['code'] . '/system/config/');
 		}
 
+		$installed_codes = array_column($results, 'code');
+
+		// Manually register bundled extensions that are copied directly into DIR_EXTENSION.
+		foreach (['export_import'] as $code) {
+			if (in_array($code, $installed_codes, true) || !is_dir(DIR_EXTENSION . $code . '/admin')) {
+				continue;
+			}
+
+			$extension = str_replace(['_', '/'], ['', '\\'], ucwords($code, '_/'));
+
+			$this->autoloader->register('Opencart\Admin\Controller\Extension\\' . $extension, DIR_EXTENSION . $code . '/admin/controller/');
+			$this->autoloader->register('Opencart\Admin\Model\Extension\\' . $extension, DIR_EXTENSION . $code . '/admin/model/');
+			$this->autoloader->register('Opencart\System\Library\Extension\\' . $extension, DIR_EXTENSION . $code . '/system/library/');
+
+			$this->template->addPath('extension/' . $code, DIR_EXTENSION . $code . '/admin/view/template/');
+			$this->language->addPath('extension/' . $code, DIR_EXTENSION . $code . '/admin/language/');
+			$this->config->addPath('extension/' . $code, DIR_EXTENSION . $code . '/system/config/');
+		}
+
 		// Register OCMOD
 		$this->autoloader->register('Opencart\Admin\Controller\Extension\Ocmod', DIR_EXTENSION . 'ocmod/admin/controller/');
 		$this->autoloader->register('Opencart\Admin\Model\Extension\Ocmod', DIR_EXTENSION . 'ocmod/admin/model/');
