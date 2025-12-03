@@ -34,6 +34,88 @@ const PRODUCT_LANGUAGES = [
 		'tags' => 'tags'
 	],
 ];
+const FILTER_GROUP_LABELS = [
+	'growth' => [
+		'sort' => 1,
+		'labels' => [
+			'en-gb' => 'Growth',
+			'uk-ua' => 'Ріст',
+			'ru-ru' => 'Рост'
+		]
+	],
+	'color' => [
+		'sort' => 2,
+		'labels' => [
+			'en-gb' => 'Color',
+			'uk-ua' => 'Колір',
+			'ru-ru' => 'Цвет'
+		]
+	],
+	'texture' => [
+		'sort' => 3,
+		'labels' => [
+			'en-gb' => 'Texture',
+			'uk-ua' => 'Текстура',
+			'ru-ru' => 'Текстура'
+		]
+	],
+	'resistance' => [
+		'sort' => 4,
+		'labels' => [
+			'en-gb' => 'Resistance',
+			'uk-ua' => 'Стійкість',
+			'ru-ru' => 'Устойчивость'
+		]
+	],
+	'traits' => [
+		'sort' => 5,
+		'labels' => [
+			'en-gb' => 'Traits',
+			'uk-ua' => 'Ознаки',
+			'ru-ru' => 'Характеристики'
+		]
+	],
+	'shape' => [
+		'sort' => 6,
+		'labels' => [
+			'en-gb' => 'Shape',
+			'uk-ua' => 'Форма',
+			'ru-ru' => 'Форма'
+		]
+	],
+	'maturity' => [
+		'sort' => 7,
+		'labels' => [
+			'en-gb' => 'Maturity',
+			'uk-ua' => 'Дозрівання',
+			'ru-ru' => 'Созревание'
+		]
+	],
+	'yield' => [
+		'sort' => 8,
+		'labels' => [
+			'en-gb' => 'Yield',
+			'uk-ua' => 'Урожайність',
+			'ru-ru' => 'Урожайность'
+		]
+	],
+	'usage' => [
+		'sort' => 9,
+		'labels' => [
+			'en-gb' => 'Usage',
+			'uk-ua' => 'Використання',
+			'ru-ru' => 'Использование'
+		]
+	],
+	'cultivation' => [
+		'sort' => 10,
+		'labels' => [
+			'en-gb' => 'Cultivation',
+			'uk-ua' => 'Вирощування',
+			'ru-ru' => 'Культивация'
+		]
+	]
+];
 const CATEGORY_SOURCE = __DIR__ . '/../shared/data/categories_list.csv';
 
 [$source, $target] = resolveArguments($argv ?? []);
@@ -715,7 +797,7 @@ function registerFilterDefinition(
 		$filterGroupMap[$groupKey] = $nextFilterGroupId;
 		$filterGroups[] = [
 			'id' => $nextFilterGroupId,
-			'sort_order' => count($filterGroups) + 1,
+			'sort_order' => FILTER_GROUP_LABELS[$groupKey]['sort'] ?? (count($filterGroups) + 1),
 			'names' => buildGroupNames($definition['group'], $languages)
 		];
 		$nextFilterGroupId++;
@@ -737,10 +819,16 @@ function registerFilterDefinition(
 }
 
 function buildGroupNames(string $group, array $languages): array {
-	$label = humanizeLabel($group);
+	$key = strtolower($group);
 	$names = [];
 	foreach (array_keys($languages) as $code) {
-		$names[$code] = $label;
+		if (isset(FILTER_GROUP_LABELS[$key]['labels'][$code])) {
+			$names[$code] = FILTER_GROUP_LABELS[$key]['labels'][$code];
+		} elseif (isset(FILTER_GROUP_LABELS[$key]['labels']['en-gb'])) {
+			$names[$code] = FILTER_GROUP_LABELS[$key]['labels']['en-gb'];
+		} else {
+			$names[$code] = humanizeLabel($group);
+		}
 	}
 	return $names;
 }
