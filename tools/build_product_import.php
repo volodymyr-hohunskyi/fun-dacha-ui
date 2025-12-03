@@ -564,10 +564,23 @@ function formatDate(string $value): string {
 function formatYearDate(string $year, string $fallback): string {
 	$year = trim($year);
 	if ($year !== '' && ctype_digit($year)) {
-		return sprintf('%s-01-01', $year);
+		$date = sprintf('%s-01-01', $year);
+	} else {
+		$date = formatDate($fallback);
 	}
 
-	return formatDate($fallback);
+	$timestamp = strtotime($date);
+	$today = strtotime(date('Y-m-d'));
+
+	if ($timestamp === false) {
+		return date('Y-m-d');
+	}
+
+	if ($timestamp > $today) {
+		return date('Y-m-d');
+	}
+
+	return date('Y-m-d', $timestamp);
 }
 
 function mapWeightUnit(string $unit): string {
