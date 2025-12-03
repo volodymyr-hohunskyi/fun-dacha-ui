@@ -380,7 +380,8 @@ function mapWeightUnit(string $unit): string {
 	return match ($unit) {
 		'гр', 'г', 'gram', 'grams' => 'g',
 		'кг', 'kg' => 'kg',
-		default => 'kg',
+		'шт', 'sht', 'pcs', 'pieces' => 'pcs',
+		default => 'g',
 	};
 }
 
