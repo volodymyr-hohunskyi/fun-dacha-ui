@@ -189,11 +189,11 @@ button:focus {
 }
 /* menu */
 #menu {
-  background-color: #445155;
-  background-image: linear-gradient(to bottom, #737c80, #606b6e);
+  background-color: #576955;
+  background-image: linear-gradient(to bottom, #818e80, #70806e);
   background-repeat: repeat-x;
-  border: 1px solid #606b6e;
-  border-color: #606b6e #606b6e #333d40;
+  border: 1px solid #70806e;
+  border-color: #70806e #70806e #414f40;
   min-height: 40px;
   border-radius: 4px;
   padding: 0 1rem;
