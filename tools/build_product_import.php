@@ -866,6 +866,22 @@ function writeFilterSheets(
 
 	$languageCodes = array_keys($languages);
 
+	$categoryFiltersSheet = $spreadsheet->createSheet();
+	$categoryFiltersSheet->setTitle('CategoryFilters');
+	$categoryFiltersSheet->fromArray(['category_id', 'filter_group_id', 'filter_id'], null, 'A1', true);
+	$rowIndex = 2;
+	foreach ($categoryFilters as $categoryId => $filterMapRow) {
+		foreach ($filterMapRow as $filterId => $filterGroupId) {
+			$categoryFiltersSheet->fromArray(
+				[$categoryId, $filterGroupId, $filterId],
+				null,
+				sprintf('A%d', $rowIndex),
+				true
+			);
+			$rowIndex++;
+		}
+	}
+
 	$filterGroupSheet = $spreadsheet->createSheet();
 	$filterGroupSheet->setTitle('FilterGroups');
 	$groupHeader = ['filter_group_id', 'sort_order'];
@@ -898,22 +914,6 @@ function writeFilterSheets(
 		}
 		$filtersSheet->fromArray($row, null, sprintf('A%d', $rowIndex), true);
 		$rowIndex++;
-	}
-
-	$categoryFiltersSheet = $spreadsheet->createSheet();
-	$categoryFiltersSheet->setTitle('CategoryFilters');
-	$categoryFiltersSheet->fromArray(['category_id', 'filter_group_id', 'filter_id'], null, 'A1', true);
-	$rowIndex = 2;
-	foreach ($categoryFilters as $categoryId => $filterMapRow) {
-		foreach ($filterMapRow as $filterId => $filterGroupId) {
-			$categoryFiltersSheet->fromArray(
-				[$categoryId, $filterGroupId, $filterId],
-				null,
-				sprintf('A%d', $rowIndex),
-				true
-			);
-			$rowIndex++;
-		}
 	}
 
 	$productFiltersSheet = $spreadsheet->createSheet();
