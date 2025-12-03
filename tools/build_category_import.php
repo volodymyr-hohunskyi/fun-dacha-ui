@@ -101,7 +101,7 @@ function buildWorkbook(array $rows, string $language): Spreadsheet {
 	$categoriesSheet = $spreadsheet->getActiveSheet();
 	$categoriesSheet->setTitle('Categories');
 
-	$categoryHeader = [
+$categoryHeader = [
 		'category_id',
 		'parent_id',
 		sprintf('name(%s)', $language),
@@ -118,19 +118,20 @@ function buildWorkbook(array $rows, string $language): Spreadsheet {
 
 	$categoriesSheet->fromArray($categoryHeader, null, 'A1', true);
 
-	$seoSheet = $spreadsheet->createSheet();
-	$seoSheet->setTitle('CategorySEOKeywords');
-	$seoHeader = [
-		'category_id',
-		'store_id',
-		sprintf('keyword(%s)', $language),
-	];
-	$seoSheet->fromArray($seoHeader, null, 'A1', true);
+$seoSheet = $spreadsheet->createSheet();
+$seoSheet->setTitle('CategorySEOKeywords');
+$seoHeader = [
+	'category_id',
+	'store_id',
+	sprintf('keyword(%s)', $language),
+];
+$seoSheet->fromArray($seoHeader, null, 'A1', true);
 
-	$categoryRowIndex = 2;
-	$seoRowIndex = 2;
+$categoryRowIndex = 2;
+$seoRowIndex = 2;
+$keywordRegistry = [];
 
-	foreach ($rows as $row) {
+foreach ($rows as $row) {
 		$categoryId = trim($row['id'] ?? '');
 		if ($categoryId === '') {
 			continue;
@@ -162,12 +163,14 @@ function buildWorkbook(array $rows, string $language): Spreadsheet {
 			true
 		);
 
-		if ($seoKeyword !== '') {
+	$uniqueKeyword = ensureUniqueKeyword($seoKeyword, $categoryId, $language, DEFAULT_STORE_IDS, $keywordRegistry);
+
+	if ($uniqueKeyword !== '') {
 			$seoSheet->fromArray(
 				[
 					$categoryId,
 					DEFAULT_STORE_IDS,
-					$seoKeyword,
+				$uniqueKeyword,
 				],
 				null,
 				sprintf('A%d', $seoRowIndex),
@@ -179,5 +182,32 @@ function buildWorkbook(array $rows, string $language): Spreadsheet {
 		$categoryRowIndex++;
 	}
 
-	return $spreadsheet;
+return $spreadsheet;
+}
+
+function ensureUniqueKeyword(string $keyword, string $categoryId, string $language, string $storeId, array &$registry): string {
+	$keyword = trim($keyword);
+
+	if ($keyword === '') {
+		return '';
+	}
+
+	$registryKey = $storeId . '|' . $language;
+
+	if (!isset($registry[$registryKey])) {
+		$registry[$registryKey] = [];
+	}
+
+	$candidate = $keyword;
+	$counter = 1;
+
+	while (isset($registry[$registryKey][$candidate])) {
+		$suffix = ($counter === 1) ? '-' . $categoryId : '-' . $categoryId . '-' . $counter;
+		$candidate = $keyword . $suffix;
+		$counter++;
+	}
+
+	$registry[$registryKey][$candidate] = true;
+
+	return $candidate;
 }
