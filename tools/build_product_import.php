@@ -16,6 +16,7 @@ require_once __DIR__ . '/../extension/export_import/system/library/export_import
 
 const DEFAULT_PRODUCT_SOURCE = __DIR__ . '/../shared/data/list.csv';
 const DEFAULT_PRODUCT_TARGET = __DIR__ . '/../shared/data/products_import.xlsx';
+const TAGS_SOURCE = __DIR__ . '/../shared/data/tags.csv';
 const PRODUCT_LANGUAGES = [
 	'en-gb' => [
 		'name' => 'name',
@@ -38,12 +39,13 @@ const CATEGORY_SOURCE = __DIR__ . '/../shared/data/categories_list.csv';
 [$source, $target] = resolveArguments($argv ?? []);
 $rows = readCsv($source);
 $categoryNames = loadCategoryNames(CATEGORY_SOURCE);
+$tagDefinitions = loadTagDefinitions(TAGS_SOURCE);
 
 if (empty($rows)) {
 	throw new RuntimeException(sprintf('No product rows found in %s', $source));
 }
 
-$spreadsheet = buildProductWorkbook($rows, PRODUCT_LANGUAGES, $categoryNames);
+$spreadsheet = buildProductWorkbook($rows, PRODUCT_LANGUAGES, $categoryNames, $tagDefinitions);
 $writer = new Xlsx($spreadsheet);
 $targetDir = dirname($target);
 
@@ -107,8 +109,9 @@ function readCsv(string $path): array {
  * @param array<int,array<string,string>> $rows
  * @param array<string,array<string,string>> $languages
  * @param array<string,array<string,string>> $categoryNames
+ * @param array<string,array<string,array<string,array<string,string>>>> $tagDefinitions
  */
-function buildProductWorkbook(array $rows, array $languages, array $categoryNames): Spreadsheet {
+function buildProductWorkbook(array $rows, array $languages, array $categoryNames, array $tagDefinitions): Spreadsheet {
 	$spreadsheet = new Spreadsheet();
 	$productsSheet = $spreadsheet->getActiveSheet();
 	$productsSheet->setTitle('Products');
@@ -128,6 +131,15 @@ function buildProductWorkbook(array $rows, array $languages, array $categoryName
 		$seoHeader[] = sprintf('keyword(%s)', $code);
 	}
 	$seoSheet->fromArray($seoHeader, null, 'A1', true);
+
+	$filterGroups = [];
+	$filters = [];
+	$filterGroupMap = [];
+	$filterMap = [];
+	$categoryFilters = [];
+	$productFilters = [];
+	$nextFilterGroupId = 1;
+	$nextFilterId = 1;
 
 	$productRowIndex = 2;
 	$additionalRowIndex = 2;
@@ -156,7 +168,33 @@ function buildProductWorkbook(array $rows, array $languages, array $categoryName
 			true
 		);
 		$seoRowIndex++;
+
+		if (!empty($tagDefinitions)) {
+			attachFiltersToProduct(
+				$product['product_id'],
+				$row,
+				$tagDefinitions,
+				$languages,
+				$filterGroups,
+				$filterGroupMap,
+				$filters,
+				$filterMap,
+				$categoryFilters,
+				$productFilters,
+				$nextFilterGroupId,
+				$nextFilterId
+			);
+		}
 	}
+
+	writeFilterSheets(
+		$spreadsheet,
+		$filterGroups,
+		$filters,
+		$categoryFilters,
+		$productFilters,
+		$languages
+	);
 
 	return $spreadsheet;
 }
@@ -542,6 +580,269 @@ function transliterateToLatin(string $value): string {
 	];
 
 	return strtr($value, $map);
+}
+
+/**
+ * @return array<string,array<string,array<string,array<string,string>>>>
+ */
+function loadTagDefinitions(string $path): array {
+	if (!is_file($path)) {
+		return [];
+	}
+
+	$handle = fopen($path, 'r');
+	if ($handle === false) {
+		return [];
+	}
+
+	$headers = [];
+	$definitions = [];
+	while (($data = fgetcsv($handle)) !== false) {
+		if (empty($headers)) {
+			$headers = array_map(static fn(string $value): string => ltrim($value, "\u{FEFF}"), $data);
+			continue;
+		}
+
+		$row = [];
+		foreach ($headers as $index => $header) {
+			$row[$header] = $data[$index] ?? '';
+		}
+
+		$category = trim((string)($row['category'] ?? ''));
+		$group = trim($row['group'] ?? '');
+		$key = trim($row['key'] ?? '');
+		if ($category === '' || $group === '' || $key === '') {
+			continue;
+		}
+
+		if (!isset($definitions[$category])) {
+			$definitions[$category] = [];
+		}
+
+		$definitions[$category][$key] = [
+			'group' => $group,
+			'key' => $key,
+			'ua' => trim($row['ua'] ?? ''),
+			'ru' => trim($row['ru'] ?? '')
+		];
+	}
+
+	fclose($handle);
+
+	return $definitions;
+}
+
+function attachFiltersToProduct(
+	int $productId,
+	array $row,
+	array $tagDefinitions,
+	array $languages,
+	array &$filterGroups,
+	array &$filterGroupMap,
+	array &$filters,
+	array &$filterMap,
+	array &$categoryFilters,
+	array &$productFilters,
+	int &$nextFilterGroupId,
+	int &$nextFilterId
+): void {
+	$tags = array_filter(array_map('trim', explode(',', (string)($row['tags'] ?? ''))));
+	if (empty($tags)) {
+		return;
+	}
+
+	$categoryCandidates = [];
+	if (!empty($row['subcategory_id'])) {
+		$categoryCandidates[] = trim((string)$row['subcategory_id']);
+	}
+	if (!empty($row['category_id'])) {
+		$categoryCandidates[] = trim((string)$row['category_id']);
+	}
+	$categoryCandidates = array_values(array_unique(array_filter($categoryCandidates)));
+
+	if (empty($categoryCandidates)) {
+		return;
+	}
+
+	foreach ($tags as $tag) {
+		foreach ($categoryCandidates as $categoryId) {
+			if (!isset($tagDefinitions[$categoryId][$tag])) {
+				continue;
+			}
+
+			$definition = $tagDefinitions[$categoryId][$tag];
+			[$filterGroupId, $filterId] = registerFilterDefinition(
+				$definition,
+				$languages,
+				$filterGroups,
+				$filterGroupMap,
+				$filters,
+				$filterMap,
+				$nextFilterGroupId,
+				$nextFilterId
+			);
+
+			if (!isset($productFilters[$productId])) {
+				$productFilters[$productId] = [];
+			}
+			$productFilters[$productId][$filterId] = $filterGroupId;
+
+			if (!isset($categoryFilters[$categoryId])) {
+				$categoryFilters[$categoryId] = [];
+			}
+			$categoryFilters[$categoryId][$filterId] = $filterGroupId;
+
+			break;
+		}
+	}
+}
+
+/**
+ * @return array{0:int,1:int}
+ */
+function registerFilterDefinition(
+	array $definition,
+	array $languages,
+	array &$filterGroups,
+	array &$filterGroupMap,
+	array &$filters,
+	array &$filterMap,
+	int &$nextFilterGroupId,
+	int &$nextFilterId
+): array {
+	$groupKey = strtolower($definition['group']);
+	if (!isset($filterGroupMap[$groupKey])) {
+		$filterGroupMap[$groupKey] = $nextFilterGroupId;
+		$filterGroups[] = [
+			'id' => $nextFilterGroupId,
+			'sort_order' => count($filterGroups) + 1,
+			'names' => buildGroupNames($definition['group'], $languages)
+		];
+		$nextFilterGroupId++;
+	}
+
+	$filterKey = $groupKey . '|' . strtolower($definition['key']);
+	if (!isset($filterMap[$filterKey])) {
+		$filterMap[$filterKey] = $nextFilterId;
+		$filters[] = [
+			'id' => $nextFilterId,
+			'group_id' => $filterGroupMap[$groupKey],
+			'sort_order' => count($filters) + 1,
+			'names' => buildFilterNames($definition, $languages)
+		];
+		$nextFilterId++;
+	}
+
+	return [$filterGroupMap[$groupKey], $filterMap[$filterKey]];
+}
+
+function buildGroupNames(string $group, array $languages): array {
+	$label = humanizeLabel($group);
+	$names = [];
+	foreach (array_keys($languages) as $code) {
+		$names[$code] = $label;
+	}
+	return $names;
+}
+
+function buildFilterNames(array $definition, array $languages): array {
+	$names = [];
+	foreach (array_keys($languages) as $code) {
+		if ($code === 'uk-ua') {
+			$names[$code] = $definition['ua'] ?: humanizeLabel($definition['key']);
+		} elseif ($code === 'ru-ru') {
+			$names[$code] = $definition['ru'] ?: humanizeLabel($definition['key']);
+		} else {
+			$names[$code] = humanizeLabel($definition['key']);
+		}
+	}
+	return $names;
+}
+
+function humanizeLabel(string $value): string {
+	$value = str_replace(['_', '-'], ' ', $value);
+	return ucwords($value);
+}
+
+function writeFilterSheets(
+	Spreadsheet $spreadsheet,
+	array $filterGroups,
+	array $filters,
+	array $categoryFilters,
+	array $productFilters,
+	array $languages
+): void {
+	if (empty($filterGroups)) {
+		return;
+	}
+
+	$languageCodes = array_keys($languages);
+
+	$filterGroupSheet = $spreadsheet->createSheet();
+	$filterGroupSheet->setTitle('FilterGroups');
+	$groupHeader = ['filter_group_id', 'sort_order'];
+	foreach ($languageCodes as $code) {
+		$groupHeader[] = sprintf('name(%s)', $code);
+	}
+	$filterGroupSheet->fromArray($groupHeader, null, 'A1', true);
+	$rowIndex = 2;
+	foreach ($filterGroups as $group) {
+		$row = [$group['id'], $group['sort_order']];
+		foreach ($languageCodes as $code) {
+			$row[] = $group['names'][$code] ?? '';
+		}
+		$filterGroupSheet->fromArray($row, null, sprintf('A%d', $rowIndex), true);
+		$rowIndex++;
+	}
+
+	$filtersSheet = $spreadsheet->createSheet();
+	$filtersSheet->setTitle('Filters');
+	$filterHeader = ['filter_id', 'filter_group_id', 'sort_order'];
+	foreach ($languageCodes as $code) {
+		$filterHeader[] = sprintf('name(%s)', $code);
+	}
+	$filtersSheet->fromArray($filterHeader, null, 'A1', true);
+	$rowIndex = 2;
+	foreach ($filters as $filter) {
+		$row = [$filter['id'], $filter['group_id'], $filter['sort_order']];
+		foreach ($languageCodes as $code) {
+			$row[] = $filter['names'][$code] ?? '';
+		}
+		$filtersSheet->fromArray($row, null, sprintf('A%d', $rowIndex), true);
+		$rowIndex++;
+	}
+
+	$categoryFiltersSheet = $spreadsheet->createSheet();
+	$categoryFiltersSheet->setTitle('CategoryFilters');
+	$categoryFiltersSheet->fromArray(['category_id', 'filter_group_id', 'filter_id'], null, 'A1', true);
+	$rowIndex = 2;
+	foreach ($categoryFilters as $categoryId => $filterMapRow) {
+		foreach ($filterMapRow as $filterId => $filterGroupId) {
+			$categoryFiltersSheet->fromArray(
+				[$categoryId, $filterGroupId, $filterId],
+				null,
+				sprintf('A%d', $rowIndex),
+				true
+			);
+			$rowIndex++;
+		}
+	}
+
+	$productFiltersSheet = $spreadsheet->createSheet();
+	$productFiltersSheet->setTitle('ProductFilters');
+	$productFiltersSheet->fromArray(['product_id', 'filter_group_id', 'filter_id'], null, 'A1', true);
+	$rowIndex = 2;
+	foreach ($productFilters as $productId => $filterMapRow) {
+		foreach ($filterMapRow as $filterId => $filterGroupId) {
+			$productFiltersSheet->fromArray(
+				[$productId, $filterGroupId, $filterId],
+				null,
+				sprintf('A%d', $rowIndex),
+				true
+			);
+			$rowIndex++;
+		}
+	}
 }
 
 /**

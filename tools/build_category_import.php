@@ -154,6 +154,7 @@ foreach ($rows as $row) {
 		$image = trim($row['primary_image'] ?? '');
 		$parentId = trim($row['parent_id'] ?? '');
 		$seoKeyword = trim($row['seo'] ?? '');
+		$metaKeywords = $nameByLanguage;
 
 		$categoriesSheet->fromArray(
 			[
@@ -165,7 +166,7 @@ foreach ($rows as $row) {
 				...array_values($descByLanguage),
 				...array_values($nameByLanguage),
 				...array_values($descByLanguage),
-				...array_fill(0, count($languages), ''),
+				...array_values($metaKeywords),
 				DEFAULT_STORE_IDS,
 				'',
 				'true',
