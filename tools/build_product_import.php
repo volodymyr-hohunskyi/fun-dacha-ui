@@ -570,14 +570,13 @@ function formatYearDate(string $year, string $fallback): string {
 	}
 
 	$timestamp = strtotime($date);
-	$today = strtotime(date('Y-m-d'));
-
 	if ($timestamp === false) {
-		return date('Y-m-d');
+		return '2025-12-01';
 	}
 
-	if ($timestamp > $today) {
-		return date('Y-m-d');
+	$cutoff = strtotime('2025-12-01');
+	if ($timestamp > $cutoff) {
+		return '2025-12-01';
 	}
 
 	return date('Y-m-d', $timestamp);
