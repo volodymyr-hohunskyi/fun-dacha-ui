@@ -22,6 +22,11 @@ const PRODUCT_LANGUAGES = [
 		'description' => 'description',
 		'tags' => 'tags'
 	],
+	'uk-ua' => [
+		'name' => 'name',
+		'description' => 'description',
+		'tags' => 'tags'
+	],
 	'ru-ru' => [
 		'name' => 'name_ru',
 		'description' => 'description_ru',
@@ -354,7 +359,7 @@ function buildLocation(array $row, array $categoryNames): string {
 			continue;
 		}
 
-		$name = $categoryNames[$id]['name'] ?? '';
+		$name = $categoryNames[$id]['name_uk'] ?? '';
 		if ($name !== '') {
 			$parts[] = $name;
 		}
@@ -450,8 +455,10 @@ function loadCategoryNames(string $path): array {
 			continue;
 		}
 
+		$nameUk = trim($row['name_uk'] ?? '');
 		$categories[$id] = [
-			'name' => trim($row['name_uk'] ?? ''),
+			'name_uk' => $nameUk,
+			'name_en' => $nameUk !== '' ? transliterateToLatin($nameUk) : '',
 			'parent_id' => trim($row['parent_id'] ?? '')
 		];
 	}
@@ -496,19 +503,45 @@ function transliterateToLatin(string $value): string {
 		return '';
 	}
 
-	if (class_exists('\Transliterator')) {
-		$transliterator = \Transliterator::create('Any-Latin; Latin-ASCII');
-		if ($transliterator) {
-			return $transliterator->transliterate($value);
-		}
-	}
+	$map = [
+		'А' => 'A',  'а' => 'a',
+		'Б' => 'B',  'б' => 'b',
+		'В' => 'V',  'в' => 'v',
+		'Г' => 'H',  'г' => 'h',
+		'Ґ' => 'G',  'ґ' => 'g',
+		'Д' => 'D',  'д' => 'd',
+		'Е' => 'E',  'е' => 'e',
+		'Є' => 'Ye', 'є' => 'ie',
+		'Ж' => 'Zh', 'ж' => 'zh',
+		'З' => 'Z',  'з' => 'z',
+		'И' => 'Y',  'и' => 'y',
+		'І' => 'I',  'і' => 'i',
+		'Ї' => 'Yi', 'ї' => 'i',
+		'Й' => 'Y',  'й' => 'i',
+		'К' => 'K',  'к' => 'k',
+		'Л' => 'L',  'л' => 'l',
+		'М' => 'M',  'м' => 'm',
+		'Н' => 'N',  'н' => 'n',
+		'О' => 'O',  'о' => 'o',
+		'П' => 'P',  'п' => 'p',
+		'Р' => 'R',  'р' => 'r',
+		'С' => 'S',  'с' => 's',
+		'Т' => 'T',  'т' => 't',
+		'У' => 'U',  'у' => 'u',
+		'Ф' => 'F',  'ф' => 'f',
+		'Х' => 'Kh', 'х' => 'kh',
+		'Ц' => 'Ts', 'ц' => 'ts',
+		'Ч' => 'Ch', 'ч' => 'ch',
+		'Ш' => 'Sh', 'ш' => 'sh',
+		'Щ' => 'Shch', 'щ' => 'shch',
+		'Ю' => 'Yu', 'ю' => 'yu',
+		'Я' => 'Ya', 'я' => 'ya',
+		'Ь' => '',   'ь' => '',
+		'Ъ' => '',   'ъ' => '',
+		'’' => '',   '\'' => ''
+	];
 
-	$converted = iconv('UTF-8', 'ASCII//TRANSLIT', $value);
-	if ($converted !== false && $converted !== '') {
-		return $converted;
-	}
-
-	return $value;
+	return strtr($value, $map);
 }
 
 /**

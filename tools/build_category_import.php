@@ -24,8 +24,10 @@ const DEFAULT_SOURCE = __DIR__ . '/../shared/data/categories_list.csv';
 const DEFAULT_TARGET = __DIR__ . '/../shared/data/categories_import.xlsx';
 const DEFAULT_LANGUAGE = 'en-gb';
 const DEFAULT_STORE_IDS = '0';
+const CATEGORY_LANGUAGES = ['en-gb', 'uk-ua'];
 
-[$source, $target, $language] = resolveArguments($argv ?? []);
+[$source, $target, $primaryLanguage] = resolveArguments($argv ?? []);
+$languages = array_values(array_unique(array_merge([$primaryLanguage], CATEGORY_LANGUAGES)));
 
 $rows = readCsv($source);
 
@@ -33,7 +35,7 @@ if (empty($rows)) {
 	throw new RuntimeException(sprintf('No category rows found in %s', $source));
 }
 
-$spreadsheet = buildWorkbook($rows, $language);
+$spreadsheet = buildWorkbook($rows, $languages);
 $writer = new Xlsx($spreadsheet);
 $targetDir = dirname($target);
 
@@ -95,37 +97,43 @@ function readCsv(string $path): array {
 
 /**
  * @param array<int,array<string,string>> $rows
+ * @param array<int,string> $languages
  */
-function buildWorkbook(array $rows, string $language): Spreadsheet {
+function buildWorkbook(array $rows, array $languages): Spreadsheet {
 	$spreadsheet = new Spreadsheet();
 	$categoriesSheet = $spreadsheet->getActiveSheet();
 	$categoriesSheet->setTitle('Categories');
-
-$categoryHeader = [
-		'category_id',
-		'parent_id',
-		sprintf('name(%s)', $language),
-		'sort_order',
-		'image_name',
-		sprintf('description(%s)', $language),
-		sprintf('meta_title(%s)', $language),
-		sprintf('meta_description(%s)', $language),
-		sprintf('meta_keywords(%s)', $language),
-		'store_ids',
-		'layout',
-		'status',
-	];
+	$categoryHeader = ['category_id', 'parent_id'];
+	foreach ($languages as $code) {
+		$categoryHeader[] = sprintf('name(%s)', $code);
+	}
+	$categoryHeader[] = 'sort_order';
+	$categoryHeader[] = 'image_name';
+	foreach ($languages as $code) {
+		$categoryHeader[] = sprintf('description(%s)', $code);
+	}
+	foreach ($languages as $code) {
+		$categoryHeader[] = sprintf('meta_title(%s)', $code);
+	}
+	foreach ($languages as $code) {
+		$categoryHeader[] = sprintf('meta_description(%s)', $code);
+	}
+	foreach ($languages as $code) {
+		$categoryHeader[] = sprintf('meta_keywords(%s)', $code);
+	}
+	$categoryHeader[] = 'store_ids';
+	$categoryHeader[] = 'layout';
+	$categoryHeader[] = 'status';
 
 	$categoriesSheet->fromArray($categoryHeader, null, 'A1', true);
 
-$seoSheet = $spreadsheet->createSheet();
-$seoSheet->setTitle('CategorySEOKeywords');
-$seoHeader = [
-	'category_id',
-	'store_id',
-	sprintf('keyword(%s)', $language),
-];
-$seoSheet->fromArray($seoHeader, null, 'A1', true);
+	$seoSheet = $spreadsheet->createSheet();
+	$seoSheet->setTitle('CategorySEOKeywords');
+	$seoHeader = ['category_id', 'store_id'];
+	foreach ($languages as $code) {
+		$seoHeader[] = sprintf('keyword(%s)', $code);
+	}
+	$seoSheet->fromArray($seoHeader, null, 'A1', true);
 
 $categoryRowIndex = 2;
 $seoRowIndex = 2;
@@ -137,8 +145,12 @@ foreach ($rows as $row) {
 			continue;
 		}
 
-		$name = trim($row['name_uk'] ?? '');
-		$desc = trim($row['description_uk'] ?? '');
+		$nameByLanguage = [];
+		$descByLanguage = [];
+		foreach ($languages as $code) {
+			$nameByLanguage[$code] = getLocalizedCategoryValue($row, $code, 'name');
+			$descByLanguage[$code] = getLocalizedCategoryValue($row, $code, 'description');
+		}
 		$image = trim($row['primary_image'] ?? '');
 		$parentId = trim($row['parent_id'] ?? '');
 		$seoKeyword = trim($row['seo'] ?? '');
@@ -147,13 +159,13 @@ foreach ($rows as $row) {
 			[
 				$categoryId,
 				$parentId === '' ? '0' : $parentId,
-				$name,
+				...array_values($nameByLanguage),
 				(string)($categoryRowIndex - 1),
 				$image,
-				$desc,
-				$name,
-				$desc,
-				'',
+				...array_values($descByLanguage),
+				...array_values($nameByLanguage),
+				...array_values($descByLanguage),
+				...array_fill(0, count($languages), ''),
 				DEFAULT_STORE_IDS,
 				'',
 				'true',
@@ -163,21 +175,12 @@ foreach ($rows as $row) {
 			true
 		);
 
-	$uniqueKeyword = ensureUniqueKeyword($seoKeyword, $categoryId, $language, DEFAULT_STORE_IDS, $keywordRegistry);
-
-	if ($uniqueKeyword !== '') {
-			$seoSheet->fromArray(
-				[
-					$categoryId,
-					DEFAULT_STORE_IDS,
-				$uniqueKeyword,
-				],
-				null,
-				sprintf('A%d', $seoRowIndex),
-				true
-			);
-			$seoRowIndex++;
+		$seoRow = [$categoryId, DEFAULT_STORE_IDS];
+		foreach ($languages as $code) {
+			$seoRow[] = ensureUniqueKeyword($seoKeyword, $categoryId, $code, DEFAULT_STORE_IDS, $keywordRegistry);
 		}
+		$seoSheet->fromArray($seoRow, null, sprintf('A%d', $seoRowIndex), true);
+		$seoRowIndex++;
 
 		$categoryRowIndex++;
 	}
@@ -210,4 +213,77 @@ function ensureUniqueKeyword(string $keyword, string $categoryId, string $langua
 	$registry[$registryKey][$candidate] = true;
 
 	return $candidate;
+}
+
+function getLocalizedCategoryValue(array $row, string $code, string $type): string {
+	$fieldMap = [
+		'uk-ua' => [
+			'name' => 'name_uk',
+			'description' => 'description_uk',
+		],
+		'en-gb' => [
+			'name' => '',
+			'description' => '',
+		],
+	];
+
+	$field = $fieldMap[$code][$type] ?? '';
+	$value = trim($field !== '' ? ($row[$field] ?? '') : '');
+
+	if ($value === '') {
+		$fallback = $type === 'description' ? 'description_uk' : 'name_uk';
+		$value = trim($row[$fallback] ?? '');
+	}
+
+	if ($code === 'en-gb' && $value !== '') {
+		$value = transliterateToLatin($value);
+	}
+
+	return $value;
+}
+
+function transliterateToLatin(string $value): string {
+	if ($value === '') {
+		return '';
+	}
+
+	$map = [
+		'А' => 'A',  'а' => 'a',
+		'Б' => 'B',  'б' => 'b',
+		'В' => 'V',  'в' => 'v',
+		'Г' => 'H',  'г' => 'h',
+		'Ґ' => 'G',  'ґ' => 'g',
+		'Д' => 'D',  'д' => 'd',
+		'Е' => 'E',  'е' => 'e',
+		'Є' => 'Ye', 'є' => 'ie',
+		'Ж' => 'Zh', 'ж' => 'zh',
+		'З' => 'Z',  'з' => 'z',
+		'И' => 'Y',  'и' => 'y',
+		'І' => 'I',  'і' => 'i',
+		'Ї' => 'Yi', 'ї' => 'i',
+		'Й' => 'Y',  'й' => 'i',
+		'К' => 'K',  'к' => 'k',
+		'Л' => 'L',  'л' => 'l',
+		'М' => 'M',  'м' => 'm',
+		'Н' => 'N',  'н' => 'n',
+		'О' => 'O',  'о' => 'o',
+		'П' => 'P',  'п' => 'p',
+		'Р' => 'R',  'р' => 'r',
+		'С' => 'S',  'с' => 's',
+		'Т' => 'T',  'т' => 't',
+		'У' => 'U',  'у' => 'u',
+		'Ф' => 'F',  'ф' => 'f',
+		'Х' => 'Kh', 'х' => 'kh',
+		'Ц' => 'Ts', 'ц' => 'ts',
+		'Ч' => 'Ch', 'ч' => 'ch',
+		'Ш' => 'Sh', 'ш' => 'sh',
+		'Щ' => 'Shch', 'щ' => 'shch',
+		'Ю' => 'Yu', 'ю' => 'yu',
+		'Я' => 'Ya', 'я' => 'ya',
+		'Ь' => '',   'ь' => '',
+		'Ъ' => '',   'ъ' => '',
+		'’' => '',   '\'' => ''
+	];
+
+	return strtr($value, $map);
 }
