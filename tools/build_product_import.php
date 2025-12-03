@@ -252,9 +252,11 @@ function normalizeProductRow(array $row, array $languages, array $categoryNames)
 
 	$sheetRow[] = $productId;
 
+	$namesByLanguage = [];
 	foreach ($languageCodes as $code) {
-		$field = $languages[$code]['name'] ?? '';
-		$sheetRow[] = trim($row[$field] ?? $row['name'] ?? '');
+		$nameValue = getLocalizedValue($row, $languages, $code, 'name');
+		$namesByLanguage[$code] = $nameValue;
+		$sheetRow[] = $nameValue;
 	}
 
 	$sheetRow[] = buildCategoryString($row);
@@ -278,24 +280,26 @@ function normalizeProductRow(array $row, array $languages, array $categoryNames)
 	$sheetRow[] = 'true';
 	$sheetRow[] = '0';
 
+	$descriptionsByLanguage = [];
 	foreach ($languageCodes as $code) {
-		$field = $languages[$code]['description'] ?? 'description';
-		$sheetRow[] = trim($row[$field] ?? $row['description'] ?? '');
+		$descriptionValue = getLocalizedValue($row, $languages, $code, 'description');
+		$descriptionsByLanguage[$code] = $descriptionValue;
+		$sheetRow[] = $descriptionValue;
 	}
 
 	foreach ($languageCodes as $code) {
-		$field = $languages[$code]['name'] ?? 'name';
-		$sheetRow[] = trim($row[$field] ?? $row['name'] ?? '');
+		$sheetRow[] = $namesByLanguage[$code];
 	}
 
 	foreach ($languageCodes as $code) {
-		$field = $languages[$code]['description'] ?? 'description';
-		$sheetRow[] = trim($row[$field] ?? $row['description'] ?? '');
+		$sheetRow[] = $descriptionsByLanguage[$code];
 	}
 
+	$tagsByLanguage = [];
 	foreach ($languageCodes as $code) {
-		$field = $languages[$code]['tags'] ?? 'tags';
-		$sheetRow[] = trim($row[$field] ?? $row['tags'] ?? '');
+		$tagValue = getLocalizedValue($row, $languages, $code, 'tags');
+		$tagsByLanguage[$code] = $tagValue;
+		$sheetRow[] = $tagValue;
 	}
 
 	$stockStatus = ((int)($row['availability'] ?? 0) > 0) ? '7' : '5';
@@ -305,8 +309,7 @@ function normalizeProductRow(array $row, array $languages, array $categoryNames)
 	$sheetRow[] = '';
 
 	foreach ($languageCodes as $code) {
-		$field = $languages[$code]['tags'] ?? 'tags';
-		$sheetRow[] = trim($row[$field] ?? $row['tags'] ?? '');
+		$sheetRow[] = $tagsByLanguage[$code];
 	}
 
 	$sheetRow[] = (string)$productId;
@@ -456,6 +459,56 @@ function loadCategoryNames(string $path): array {
 	fclose($handle);
 
 	return $categories;
+}
+
+/**
+ * @param array<string,array<string,string>> $languages
+ */
+function getLocalizedValue(array $row, array $languages, string $code, string $type): string {
+	$field = $languages[$code][$type] ?? '';
+	$value = trim($field !== '' ? ($row[$field] ?? '') : '');
+
+	if ($value === '') {
+		$fallbackOrder = match ($type) {
+			'name' => ['name', 'name_ru'],
+			'description' => ['description', 'description_ru'],
+			'tags' => ['tags'],
+			default => [],
+		};
+
+		foreach ($fallbackOrder as $fallback) {
+			$value = trim($row[$fallback] ?? '');
+			if ($value !== '') {
+				break;
+			}
+		}
+	}
+
+	if ($code === 'en-gb' && $value !== '') {
+		$value = transliterateToLatin($value);
+	}
+
+	return $value;
+}
+
+function transliterateToLatin(string $value): string {
+	if ($value === '') {
+		return '';
+	}
+
+	if (class_exists('\Transliterator')) {
+		$transliterator = \Transliterator::create('Any-Latin; Latin-ASCII');
+		if ($transliterator) {
+			return $transliterator->transliterate($value);
+		}
+	}
+
+	$converted = iconv('UTF-8', 'ASCII//TRANSLIT', $value);
+	if ($converted !== false && $converted !== '') {
+		return $converted;
+	}
+
+	return $value;
 }
 
 /**
