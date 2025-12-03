@@ -2,6 +2,7 @@
 <?php
 declare(strict_types=1);
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -16,6 +17,7 @@ require_once __DIR__ . '/../extension/export_import/system/library/export_import
 
 const DEFAULT_PRODUCT_SOURCE = __DIR__ . '/../shared/data/list.csv';
 const DEFAULT_PRODUCT_TARGET = __DIR__ . '/../shared/data/products_import.xlsx';
+const CATEGORY_WORKBOOK_SOURCE = __DIR__ . '/../shared/data/categories_import.xlsx';
 const TAGS_SOURCE = __DIR__ . '/../shared/data/tags.csv';
 const PRODUCT_LANGUAGES = [
 	'en-gb' => [
@@ -117,6 +119,18 @@ const FILTER_GROUP_LABELS = [
 	]
 ];
 const CATEGORY_SOURCE = __DIR__ . '/../shared/data/categories_list.csv';
+const CATEGORY_WORKSHEETS = ['Categories', 'CategorySEOKeywords'];
+const WORKBOOK_SHEET_ORDER = [
+	'Categories',
+	'CategoryFilters',
+	'CategorySEOKeywords',
+	'Products',
+	'ProductFilters',
+	'ProductSEOKeywords',
+	'AdditionalImages',
+	'FilterGroups',
+	'Filters'
+];
 
 [$source, $target] = resolveArguments($argv ?? []);
 $rows = readCsv($source);
@@ -128,6 +142,8 @@ if (empty($rows)) {
 }
 
 $spreadsheet = buildProductWorkbook($rows, PRODUCT_LANGUAGES, $categoryNames, $tagDefinitions);
+prependCategorySheets($spreadsheet, CATEGORY_WORKBOOK_SOURCE);
+reorderWorkbookSheets($spreadsheet, WORKBOOK_SHEET_ORDER);
 $writer = new Xlsx($spreadsheet);
 $targetDir = dirname($target);
 
@@ -1005,6 +1021,49 @@ function writeFilterSheets(
 	foreach ($productRows as $row) {
 		$productFiltersSheet->fromArray($row, null, sprintf('A%d', $rowIndex), true);
 		$rowIndex++;
+	}
+}
+
+function prependCategorySheets(Spreadsheet $destination, string $categoryWorkbookPath): void {
+	if (!is_file($categoryWorkbookPath)) {
+		return;
+	}
+
+	$reader = IOFactory::createReaderForFile($categoryWorkbookPath);
+	$categoryWorkbook = $reader->load($categoryWorkbookPath);
+
+	foreach (array_reverse(CATEGORY_WORKSHEETS) as $sheetName) {
+		$sourceSheet = $categoryWorkbook->getSheetByName($sheetName);
+		if ($sourceSheet === null) {
+			continue;
+		}
+
+		$existing = $destination->getSheetByName($sheetName);
+		if ($existing !== null) {
+			$destination->removeSheetByIndex($destination->getIndex($existing));
+		}
+
+		$clonedSheet = clone $sourceSheet;
+		$clonedSheet->setTitle($sheetName);
+		$destination->addSheet($clonedSheet, 0);
+	}
+}
+
+/**
+ * @param array<int,string> $orderedTitles
+ */
+function reorderWorkbookSheets(Spreadsheet $spreadsheet, array $orderedTitles): void {
+	$position = 0;
+	foreach ($orderedTitles as $title) {
+		$sheet = $spreadsheet->getSheetByName($title);
+		if ($sheet === null) {
+			continue;
+		}
+
+		$currentIndex = $spreadsheet->getIndex($sheet);
+		$spreadsheet->removeSheetByIndex($currentIndex);
+		$spreadsheet->addSheet($sheet, $position);
+		$position++;
 	}
 }
 
