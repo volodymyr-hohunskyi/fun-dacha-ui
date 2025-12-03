@@ -11,5 +11,5 @@
 
 - Convert `shared/data/list.csv` into an export/import ready workbook with `php tools/build_product_import.php [source_csv] [target_xlsx]`.
 - Images referenced in the CSV should live under `image/catalog/products/`; the CSV already contains the `catalog/products/` prefix for primary and secondary images so uploads match the generated workbook automatically.
-- The script builds `Products`, `AdditionalImages`, and `ProductSEOKeywords` worksheets, filling multilingual columns (`en-gb`, `ru-ru`) and deduplicating SEO slugs.
+- The script builds `Products`, `AdditionalImages`, and `ProductSEOKeywords` worksheets, filling multilingual columns (`en-gb`, `ru-ru`), deduplicating SEO slugs, and populating the product `location` column with the human-readable category path to make admin searches easier.
 - A pre-built dataset is stored at `shared/data/products_import.xlsx`; import it via the Export/Import extension to load the full product list.

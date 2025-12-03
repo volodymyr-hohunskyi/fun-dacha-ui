@@ -28,15 +28,17 @@ const PRODUCT_LANGUAGES = [
 		'tags' => 'tags'
 	],
 ];
+const CATEGORY_SOURCE = __DIR__ . '/../shared/data/categories_list.csv';
 
 [$source, $target] = resolveArguments($argv ?? []);
 $rows = readCsv($source);
+$categoryNames = loadCategoryNames(CATEGORY_SOURCE);
 
 if (empty($rows)) {
 	throw new RuntimeException(sprintf('No product rows found in %s', $source));
 }
 
-$spreadsheet = buildProductWorkbook($rows, PRODUCT_LANGUAGES);
+$spreadsheet = buildProductWorkbook($rows, PRODUCT_LANGUAGES, $categoryNames);
 $writer = new Xlsx($spreadsheet);
 $targetDir = dirname($target);
 
@@ -99,8 +101,9 @@ function readCsv(string $path): array {
 /**
  * @param array<int,array<string,string>> $rows
  * @param array<string,array<string,string>> $languages
+ * @param array<string,array<string,string>> $categoryNames
  */
-function buildProductWorkbook(array $rows, array $languages): Spreadsheet {
+function buildProductWorkbook(array $rows, array $languages, array $categoryNames): Spreadsheet {
 	$spreadsheet = new Spreadsheet();
 	$productsSheet = $spreadsheet->getActiveSheet();
 	$productsSheet->setTitle('Products');
@@ -127,7 +130,7 @@ function buildProductWorkbook(array $rows, array $languages): Spreadsheet {
 	$seoRegistry = [];
 
 	foreach ($rows as $row) {
-		$product = normalizeProductRow($row, $languages);
+		$product = normalizeProductRow($row, $languages, $categoryNames);
 
 		if ($product === null) {
 			continue;
@@ -235,8 +238,9 @@ function buildProductHeader(array $languageCodes): array {
 /**
  * @param array<string,string> $row
  * @param array<string,array<string,string>> $languages
+ * @param array<string,array<string,string>> $categoryNames
  */
-function normalizeProductRow(array $row, array $languages): ?array {
+function normalizeProductRow(array $row, array $languages, array $categoryNames): ?array {
 	$productId = (int)trim((string)($row['id'] ?? ''));
 
 	if ($productId <= 0) {
@@ -254,7 +258,7 @@ function normalizeProductRow(array $row, array $languages): ?array {
 	}
 
 	$sheetRow[] = buildCategoryString($row);
-	$sheetRow[] = '';
+	$sheetRow[] = buildLocation($row, $categoryNames);
 	$sheetRow[] = (string)((int)($row['availability'] ?? 0));
 	$sheetRow[] = trim($row['product_id'] ?? sprintf('P-%d', $productId));
 	$sheetRow[] = '';
@@ -335,6 +339,31 @@ function buildCategoryString(array $row): string {
 	return implode(',', $categories);
 }
 
+/**
+ * @param array<string,array<string,string>> $categoryNames
+ */
+function buildLocation(array $row, array $categoryNames): string {
+	$parts = [];
+
+	foreach (['category_id', 'subcategory_id'] as $key) {
+		$id = trim((string)($row[$key] ?? ''));
+		if ($id === '' || !isset($categoryNames[$id])) {
+			continue;
+		}
+
+		$name = $categoryNames[$id]['name'] ?? '';
+		if ($name !== '') {
+			$parts[] = $name;
+		}
+	}
+
+	if (empty($parts)) {
+		return '';
+	}
+
+	return implode(' / ', array_unique($parts));
+}
+
 function formatImagePath(string $path): string {
 	$path = trim($path);
 	if ($path === '') {
@@ -383,6 +412,50 @@ function mapWeightUnit(string $unit): string {
 		'шт', 'sht', 'pcs', 'pieces' => 'pcs',
 		default => 'g',
 	};
+}
+
+/**
+ * @return array<string,array<string,string>>
+ */
+function loadCategoryNames(string $path): array {
+	if (!is_file($path)) {
+		return [];
+	}
+
+	$handle = fopen($path, 'r');
+
+	if ($handle === false) {
+		return [];
+	}
+
+	$headers = [];
+	$categories = [];
+
+	while (($data = fgetcsv($handle)) !== false) {
+		if (empty($headers)) {
+			$headers = array_map(static fn(string $value): string => ltrim($value, "\u{FEFF}"), $data);
+			continue;
+		}
+
+		$row = [];
+		foreach ($headers as $index => $header) {
+			$row[$header] = $data[$index] ?? '';
+		}
+
+		$id = trim((string)($row['id'] ?? ''));
+		if ($id === '') {
+			continue;
+		}
+
+		$categories[$id] = [
+			'name' => trim($row['name_uk'] ?? ''),
+			'parent_id' => trim($row['parent_id'] ?? '')
+		];
+	}
+
+	fclose($handle);
+
+	return $categories;
 }
 
 /**
