@@ -464,12 +464,6 @@ footer h5 {
   text-decoration: line-through;
 }
 
-.price-tax {
-  color: #999;
-  font-size: 12px;
-  display: block;
-}
-
 /* blog */
 .blog-thumb {
   border: 1px solid #ddd;
