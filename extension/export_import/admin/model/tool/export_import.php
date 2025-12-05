@@ -142,6 +142,23 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	protected function getRelevantLanguageIds() {
+		$languages = $this->getLanguages();
+		$language_ids = array();
+		foreach ($languages as $language) {
+			$language_ids[] = (int)$language['language_id'];
+		}
+		$default_language_id = (int)$this->getDefaultLanguageId();
+		if (!in_array($default_language_id, $language_ids, true)) {
+			$language_ids[] = $default_language_id;
+		}
+		if (empty($language_ids)) {
+			$language_ids[] = 1;
+		}
+		return array_values(array_unique($language_ids));
+	}
+
+
 	protected function getDefaultWeightUnit() {
 		$weight_class_id = $this->config->get( 'config_weight_class_id' );
 		$language_id = $this->getDefaultLanguageId();
@@ -2271,14 +2288,20 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function getAttributeGroupIds() {
-		$language_id = $this->getDefaultLanguageId();
+		$language_ids = $this->getRelevantLanguageIds();
 		$sql  = "SELECT attribute_group_id, name FROM `".DB_PREFIX."attribute_group_description` ";
-		$sql .= "WHERE language_id='".(int)$language_id."'";
+		if (!empty($language_ids)) {
+			$sql .= "WHERE language_id IN (" . implode(',', array_map('intval', $language_ids)) . ")";
+		}
 		$query = $this->db->query( $sql );
 		$attribute_group_ids = array();
 		foreach ($query->rows as $row) {
 			$attribute_group_id = $row['attribute_group_id'];
 			$name = html_entity_decode($row['name'],ENT_QUOTES,'UTF-8');
+			$name = trim($name);
+			if ($name==='') {
+				continue;
+			}
 			$attribute_group_ids[$name] = $attribute_group_id;
 		}
 		return $attribute_group_ids;
@@ -2286,16 +2309,22 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function getAttributeIds() {
-		$language_id = $this->getDefaultLanguageId();
+		$language_ids = $this->getRelevantLanguageIds();
 		$sql  = "SELECT a.attribute_group_id, ad.attribute_id, ad.name FROM `".DB_PREFIX."attribute_description` ad ";
 		$sql .= "INNER JOIN `".DB_PREFIX."attribute` a ON a.attribute_id=ad.attribute_id ";
-		$sql .= "WHERE ad.language_id='".(int)$language_id."'";
+		if (!empty($language_ids)) {
+			$sql .= "WHERE ad.language_id IN (" . implode(',', array_map('intval', $language_ids)) . ")";
+		}
 		$query = $this->db->query( $sql );
 		$attribute_ids = array();
 		foreach ($query->rows as $row) {
 			$attribute_group_id = $row['attribute_group_id'];
 			$attribute_id = $row['attribute_id'];
 			$name = html_entity_decode($row['name'],ENT_QUOTES,'UTF-8');
+			$name = trim($name);
+			if ($name==='') {
+				continue;
+			}
 			$attribute_ids[$attribute_group_id][$name] = $attribute_id;
 		}
 		return $attribute_ids;
@@ -4836,12 +4865,21 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$ok = true;
 		$export_import_settings_use_attribute_group_id = $this->config->get('export_import_settings_use_attribute_group_id');
 		$export_import_settings_use_attribute_id = $this->config->get('export_import_settings_use_attribute_id');
-		$language_id = $this->getDefaultLanguageId();
+		$language_ids = $this->getRelevantLanguageIds();
+		$language_filter = '';
+		if (!empty($language_ids)) {
+			$language_filter = implode(',', array_map('intval', $language_ids));
+		}
 		$sql  = "SELECT agd.attribute_group_id, agd.name AS attribute_group_name, ad.attribute_id, ad.name AS attribute_name ";
 		$sql .= "FROM `".DB_PREFIX."attribute_group_description` agd ";
 		$sql .= "LEFT JOIN `".DB_PREFIX."attribute` a ON a.attribute_group_id=agd.attribute_group_id ";
-		$sql .= "LEFT JOIN `".DB_PREFIX."attribute_description` ad ON ad.attribute_id=a.attribute_id AND ad.language_id='".(int)$language_id."' ";
-		$sql .= "WHERE agd.language_id='".(int)$language_id."'";
+		$sql .= "LEFT JOIN `".DB_PREFIX."attribute_description` ad ON ad.attribute_id=a.attribute_id ";
+		if ($language_filter !== '') {
+			$sql .= "AND ad.language_id IN (" . $language_filter . ") ";
+		}
+		if ($language_filter !== '') {
+			$sql .= "WHERE agd.language_id IN (" . $language_filter . ")";
+		}
 		$query = $this->db->query( $sql );
 		$attribute_groups = array();
 		foreach ($query->rows as $row) {
@@ -4863,6 +4901,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				}
 			} else {
 				$attribute_group_name = is_null($row['attribute_group_name']) ? '' : htmlspecialchars_decode($row['attribute_group_name']);
+				$attribute_group_name = trim($attribute_group_name);
 				if (!isset($attribute_groups[$attribute_group_name])) {
 					$attribute_groups[$attribute_group_name] = array();
 				}
@@ -4873,6 +4912,9 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					}
 				} else {
 					$attribute_name = is_null($row['attribute_name']) ? null : htmlspecialchars_decode($row['attribute_name']);
+					if (!is_null($attribute_name)) {
+						$attribute_name = trim($attribute_name);
+					}
 					if (!is_null($attribute_name)) {
 						$attribute_groups[$attribute_group_name][$attribute_name] = true;
 					}
