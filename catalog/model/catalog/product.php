@@ -70,6 +70,10 @@ class Product extends \Opencart\System\Engine\Model {
 		if ($query->num_rows) {
 			$product_data = $query->row;
 
+			if (!empty($product_data['image'])) {
+				$product_data['image'] = $this->normalizeImagePath($product_data['image']);
+			}
+
 			$product_data['variant'] = $query->row['variant'] ? json_decode($query->row['variant'], true) : [];
 			$product_data['override'] = $query->row['override'] ? json_decode($query->row['override'], true) : [];
 			$product_data['price'] = (float)($query->row['discount'] ?: $query->row['price']);
@@ -241,18 +245,21 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		$key = md5($sql);
+		$cache_key = 'product.' . $key;
 
-		$product_data = $this->cache->get('product.' . $key);
+		$product_data = $this->cache->get($cache_key);
 
 		if (!$product_data) {
 			$query = $this->db->query($sql);
 
-			$product_data = $query->rows;
+			$product_data = $this->normalizeImageRows($query->rows);
 
-			$this->cache->set('product.' . $key, $product_data);
+			$this->cache->set($cache_key, $product_data);
+
+			return $product_data;
 		}
 
-		return $product_data;
+		return $this->normalizeImageRows($product_data);
 	}
 
 	/**
@@ -647,7 +654,7 @@ class Product extends \Opencart\System\Engine\Model {
 	public function getImages(int $product_id): array {
 		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_image` WHERE `product_id` = '" . (int)$product_id . "' ORDER BY `sort_order` ASC");
 
-		return $query->rows;
+		return $this->normalizeImageRows($query->rows);
 	}
 
 	/**
@@ -737,18 +744,21 @@ class Product extends \Opencart\System\Engine\Model {
 		$sql = "SELECT DISTINCT *, `pd`.`name` AS `name`, `p`.`image`, " . $this->statement['discount'] . ", " . $this->statement['special'] . ", " . $this->statement['reward'] . ", " . $this->statement['review'] . " FROM `" . DB_PREFIX . "product_related` `pr` LEFT JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p2s`.`product_id` = `pr`.`product_id` AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "') LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `pr`.`related_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()) LEFT JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `pr`.`product_id` = '" . (int)$product_id . "' AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
 
 		$key = md5($sql);
+		$cache_key = 'product.' . $key;
 
-		$product_data = $this->cache->get('product.' . $key);
+		$product_data = $this->cache->get($cache_key);
 
 		if (!$product_data) {
 			$query = $this->db->query($sql);
 
-			$product_data = $query->rows;
+			$product_data = $this->normalizeImageRows($query->rows);
 
-			$this->cache->set('product.' . $key, $product_data);
+			$this->cache->set($cache_key, $product_data);
+
+			return (array)$product_data;
 		}
 
-		return (array)$product_data;
+		return (array)$this->normalizeImageRows($product_data);
 	}
 
 	/**
@@ -808,18 +818,21 @@ class Product extends \Opencart\System\Engine\Model {
 		}
 
 		$key = md5($sql);
+		$cache_key = 'product.' . $key;
 
-		$product_data = $this->cache->get('product.' . $key);
+		$product_data = $this->cache->get($cache_key);
 
 		if (!$product_data) {
 			$query = $this->db->query($sql);
 
-			$product_data = $query->rows;
+			$product_data = $this->normalizeImageRows($query->rows);
 
-			$this->cache->set('product.' . $key, $product_data);
+			$this->cache->set($cache_key, $product_data);
+
+			return (array)$product_data;
 		}
 
-		return (array)$product_data;
+		return (array)$this->normalizeImageRows($product_data);
 	}
 
 	/**
@@ -864,5 +877,57 @@ class Product extends \Opencart\System\Engine\Model {
 	 */
 	public function addReport(int $product_id, string $ip, string $country = ''): void {
 		$this->db->query("INSERT INTO `" . DB_PREFIX . "product_report` SET `product_id` = '" . (int)$product_id . "', `store_id` = '" . (int)$this->config->get('config_store_id') . "', `ip` = '" . $this->db->escape($ip) . "', `country` = '" . $this->db->escape($country) . "', `date_added` = NOW()");
+	}
+
+	/**
+	 * Normalize image values so filesystem checks stay local.
+	 *
+	 * @param string $image
+	 *
+	 * @return string
+	 */
+	protected function normalizeImagePath(string $image): string {
+		if ($image === '') {
+			return '';
+		}
+
+		$image = html_entity_decode($image, ENT_QUOTES, 'UTF-8');
+		$image = str_replace('\\', '/', $image);
+
+		$store_urls = array_filter([$this->config->get('config_url'), $this->config->get('config_ssl')]);
+
+		foreach ($store_urls as $store_url) {
+			$store_url = rtrim((string)$store_url, '/') . '/';
+
+			if ($store_url && stripos($image, $store_url) === 0) {
+				$image = substr($image, strlen($store_url));
+				break;
+			}
+		}
+
+		$image = ltrim($image, '/');
+
+		if (stripos($image, 'image/') === 0) {
+			$image = substr($image, 6);
+		}
+
+		return $image;
+	}
+
+	/**
+	 * Normalize image paths for an array of rows.
+	 *
+	 * @param array<int, array<string, mixed>> $rows
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function normalizeImageRows(array $rows): array {
+		foreach ($rows as $index => $row) {
+			if (!empty($row['image'])) {
+				$rows[$index]['image'] = $this->normalizeImagePath($row['image']);
+			}
+		}
+
+		return $rows;
 	}
 }
