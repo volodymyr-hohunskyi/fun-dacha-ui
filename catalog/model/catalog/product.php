@@ -70,6 +70,8 @@ class Product extends \Opencart\System\Engine\Model {
 		if ($query->num_rows) {
 			$product_data = $query->row;
 
+			$product_data['image_original'] = $product_data['image'] ?? '';
+
 			if (!empty($product_data['image'])) {
 				$product_data['image'] = $this->normalizeImagePath($product_data['image']);
 			}
@@ -932,6 +934,8 @@ class Product extends \Opencart\System\Engine\Model {
 	 */
 	protected function normalizeImageRows(array $rows): array {
 		foreach ($rows as $index => $row) {
+			$rows[$index]['image_original'] = $row['image'] ?? '';
+
 			if (!empty($row['image'])) {
 				$rows[$index]['image'] = $this->normalizeImagePath($row['image']);
 			}
