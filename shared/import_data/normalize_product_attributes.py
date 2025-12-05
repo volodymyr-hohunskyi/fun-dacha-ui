@@ -1,29 +1,31 @@
 #!/usr/bin/env python3
 """
-Normalize ProductAttributes so attribute names align with tag-based attributes.
+Normalize ProductAttributes so every row belongs to the single attribute group
+"Характеристики" and uses localized characteristic names (Колір, Ріст, etc.).
 
-Reads shared/import_data/products_import.xlsx and rewrites the ProductAttributes
-worksheet so that:
-  - Each comma-separated value becomes its own row
-  - `attribute` column matches the English label (e.g. 'Tall', 'Red')
-  - Text columns remain translated on a per-value basis
-
-Run after editing the workbook if attribute groups/values change:
-
+Usage:
     python3 shared/import_data/normalize_product_attributes.py
 """
 
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 
 from openpyxl import load_workbook
 
+try:
+    from attribute_schema import ATTRIBUTE_LOOKUP, CHARACTERISTICS_GROUP
+except ImportError:  # pragma: no cover - fallback when executed as a module
+    from .attribute_schema import (  # type: ignore
+        ATTRIBUTE_LOOKUP,
+        CHARACTERISTICS_GROUP,
+    )
+
 WORKBOOK_PATH = Path(__file__).with_name("products_import.xlsx")
-ATTR_WORKBOOK_PATH = Path(__file__).with_name("attributes_import.xlsx")
 SHEET_NAME = "ProductAttributes"
-TARGET_LANGUAGE = "uk-ua"  # must match store default language
+TARGET_LANGUAGE = "uk-ua"  # must match store default language for attributes
+ATTRIBUTE_GROUP_NAME = CHARACTERISTICS_GROUP["names"][TARGET_LANGUAGE]
 
 
 def split_values(raw: str | None) -> List[str]:
@@ -41,48 +43,23 @@ def pad(values: List[str], target: int, fallback: str = "") -> List[str]:
     return values + [fallback] * (target - len(values))
 
 
-def load_localized_names() -> tuple[Dict[str, str], Dict[str, str]]:
-    if not ATTR_WORKBOOK_PATH.exists():
-        raise SystemExit(
-            "Run build_attribute_workbook.py before normalizing product attributes."
-        )
-
-    wb = load_workbook(ATTR_WORKBOOK_PATH, data_only=True)
-    group_ws = wb["AttributeGroups"]
-    attr_ws = wb["Attributes"]
-
-    group_map: Dict[str, str] = {}
-    for row in group_ws.iter_rows(min_row=2, values_only=True):
-        _, _, name_en, name_ua, name_ru = row
-        if not name_en:
-            continue
-        if TARGET_LANGUAGE == "uk-ua":
-            group_map[name_en] = name_ua or name_en
-        elif TARGET_LANGUAGE == "ru-ru":
-            group_map[name_en] = name_ru or name_en
-        else:
-            group_map[name_en] = name_en
-
-    attr_map: Dict[str, str] = {}
-    for row in attr_ws.iter_rows(min_row=2, values_only=True):
-        _, _, _, name_en, name_ua, name_ru = row
-        if not name_en:
-            continue
-        if TARGET_LANGUAGE == "uk-ua":
-            attr_map[name_en] = name_ua or name_en
-        elif TARGET_LANGUAGE == "ru-ru":
-            attr_map[name_en] = name_ru or name_en
-        else:
-            attr_map[name_en] = name_en
-
-    return group_map, attr_map
+def resolve_attribute_definition(group: str, attribute: str):
+    group_key = (group or "").strip().lower()
+    if group_key:
+        definition = ATTRIBUTE_LOOKUP.get(group_key)
+        if definition:
+            return definition
+    attr_key = (attribute or "").strip().lower()
+    if attr_key:
+        definition = ATTRIBUTE_LOOKUP.get(attr_key)
+        if definition:
+            return definition
+    return None
 
 
 def main() -> None:
     if not WORKBOOK_PATH.exists():
         raise SystemExit(f"Workbook not found: {WORKBOOK_PATH}")
-
-    group_names, attribute_names = load_localized_names()
 
     wb = load_workbook(WORKBOOK_PATH)
     if SHEET_NAME not in wb.sheetnames:
@@ -95,9 +72,12 @@ def main() -> None:
     for product_id, group, attribute, text_en, text_ua, text_ru in rows:
         if product_id is None:
             continue
-        group = (group or "").strip()
-        if not group:
-            continue
+        definition = resolve_attribute_definition(group, attribute)
+        if not definition:
+            raise SystemExit(
+                f"Unknown attribute group '{group}' / attribute '{attribute}' in ProductAttributes worksheet."
+            )
+
         en_tokens = split_values(text_en) or [(text_en or "").strip()]
         ua_tokens = split_values(text_ua)
         ru_tokens = split_values(text_ru)
@@ -105,15 +85,15 @@ def main() -> None:
         ua_tokens = pad(ua_tokens, len(en_tokens), (text_ua or "").strip())
         ru_tokens = pad(ru_tokens, len(en_tokens), (text_ru or "").strip())
 
+        localized_attr = definition["names"].get(TARGET_LANGUAGE, definition["names"]["en-gb"])
+
         for idx, en_value in enumerate(en_tokens):
             if not en_value:
                 continue
-            localized_group = group_names.get(group, group)
-            localized_attr = attribute_names.get(en_value, en_value)
             normalized_rows.append(
                 (
                     product_id,
-                    localized_group,
+                    ATTRIBUTE_GROUP_NAME,
                     localized_attr,
                     en_value,
                     ua_tokens[idx],
