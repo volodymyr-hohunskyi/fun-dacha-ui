@@ -22,6 +22,14 @@ class Image extends \Opencart\System\Engine\Model {
 	 */
 	public function resize(string $filename, int $width, int $height, string $default = ''): string {
 		$filename = html_entity_decode($filename, ENT_QUOTES, 'UTF-8');
+		$filename = str_replace('\\', '/', $filename);
+		$filename = ltrim($filename, '/');
+
+		// Some stores persist full "image/..." paths in the database. Strip the duplicated prefix
+		// so that file_exists checks work regardless of how the path was saved.
+		if (stripos($filename, 'image/') === 0) {
+			$filename = substr($filename, 6);
+		}
 
 		if (!is_file(DIR_IMAGE . $filename) || substr(str_replace('\\', '/', realpath(DIR_IMAGE . $filename)), 0, strlen(DIR_IMAGE)) != DIR_IMAGE) {
 			return '';
