@@ -894,14 +894,20 @@ class Product extends \Opencart\System\Engine\Model {
 		$image = html_entity_decode($image, ENT_QUOTES, 'UTF-8');
 		$image = str_replace('\\', '/', $image);
 
-		$store_urls = array_filter([$this->config->get('config_url'), $this->config->get('config_ssl')]);
+		// Convert protocol-relative URLs to absolute so parse_url can work.
+		if (strpos($image, '//') === 0) {
+			$image = 'https:' . $image;
+		}
 
-		foreach ($store_urls as $store_url) {
-			$store_url = rtrim((string)$store_url, '/') . '/';
+		// Strip scheme/host/query from any absolute URL so the remaining path
+		// can be resolved relative to DIR_IMAGE.
+		if (preg_match('#^[a-z][a-z0-9+\\-.]*://#i', $image)) {
+			$parsed = parse_url($image);
 
-			if ($store_url && stripos($image, $store_url) === 0) {
-				$image = substr($image, strlen($store_url));
-				break;
+			if (!empty($parsed['path'])) {
+				$image = ltrim($parsed['path'], '/');
+			} else {
+				$image = '';
 			}
 		}
 
@@ -910,6 +916,9 @@ class Product extends \Opencart\System\Engine\Model {
 		if (stripos($image, 'image/') === 0) {
 			$image = substr($image, 6);
 		}
+
+		// Collapse accidental duplicate slashes.
+		$image = preg_replace('#/+#', '/', $image);
 
 		return $image;
 	}
