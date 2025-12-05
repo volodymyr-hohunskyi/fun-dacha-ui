@@ -10,7 +10,7 @@ Usage:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import List
+from typing import Dict, List, Tuple
 
 from openpyxl import load_workbook
 
@@ -68,7 +68,7 @@ def main() -> None:
     ws = wb[SHEET_NAME]
     rows = list(ws.iter_rows(min_row=2, values_only=True))
 
-    normalized_rows = []
+    aggregated: Dict[Tuple[int, str], Dict[str, List[str]]] = {}
     for product_id, group, attribute, text_en, text_ua, text_ru in rows:
         if product_id is None:
             continue
@@ -85,33 +85,47 @@ def main() -> None:
         ua_tokens = pad(ua_tokens, len(en_tokens), (text_ua or "").strip())
         ru_tokens = pad(ru_tokens, len(en_tokens), (text_ru or "").strip())
 
-        localized_attr = definition["names"].get(TARGET_LANGUAGE, definition["names"]["en-gb"])
-
+        localized_attr = definition["names"].get(
+            TARGET_LANGUAGE, definition["names"]["en-gb"]
+        )
+        key = (int(product_id), localized_attr)
+        bucket = aggregated.setdefault(
+            key,
+            {
+                "en": [],
+                "ua": [],
+                "ru": [],
+            },
+        )
         for idx, en_value in enumerate(en_tokens):
             if not en_value:
                 continue
-            normalized_rows.append(
-                (
-                    product_id,
-                    ATTRIBUTE_GROUP_NAME,
-                    localized_attr,
-                    en_value,
-                    ua_tokens[idx],
-                    ru_tokens[idx],
-                )
-            )
+            bucket["en"].append(en_value)
+            bucket["ua"].append(ua_tokens[idx])
+            bucket["ru"].append(ru_tokens[idx])
 
     # clear existing rows (except header)
     ws.delete_rows(2, ws.max_row)
 
-    for row in normalized_rows:
-        ws.append(row)
+    normalized_rows = 0
+    for (product_id, localized_attr), texts in sorted(aggregated.items()):
+        en_text = ", ".join(dict.fromkeys(filter(None, texts["en"])))
+        ua_text = ", ".join(dict.fromkeys(filter(None, texts["ua"])))
+        ru_text = ", ".join(dict.fromkeys(filter(None, texts["ru"])))
+        ws.append(
+            (
+                product_id,
+                ATTRIBUTE_GROUP_NAME,
+                localized_attr,
+                en_text,
+                ua_text,
+                ru_text,
+            )
+        )
+        normalized_rows += 1
 
     wb.save(WORKBOOK_PATH)
-    print(
-        f"Normalized {len(rows)} source rows into "
-        f"{len(normalized_rows)} attribute rows"
-    )
+    print(f"Normalized {len(rows)} source rows into {normalized_rows} attribute rows")
 
 
 if __name__ == "__main__":
