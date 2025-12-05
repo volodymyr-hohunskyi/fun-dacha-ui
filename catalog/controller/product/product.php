@@ -311,25 +311,24 @@ class Product extends \Opencart\System\Engine\Controller {
 			// Image
 			$this->load->model('tool/image');
 
-			if ($product_info['image'] && is_file(DIR_IMAGE . html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'))) {
-				$data['popup'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_popup_width'), $this->config->get('config_image_popup_height'));
-				$data['thumb'] = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_thumb_width'), $this->config->get('config_image_thumb_height'));
-			} else {
-				$data['popup'] = '';
-				$data['thumb'] = '';
-			}
+			$primary_image = $product_info['image'] ?? '';
+			$primary_original = $product_info['image_original'] ?? $primary_image;
+
+			$data['popup'] = $this->resolveProductImage($primary_image, $primary_original, $this->config->get('config_image_popup_width'), $this->config->get('config_image_popup_height'));
+			$data['thumb'] = $this->resolveProductImage($primary_image, $primary_original, $this->config->get('config_image_thumb_width'), $this->config->get('config_image_thumb_height'));
 
 			$data['images'] = [];
 
 			$results = $this->model_catalog_product->getImages($product_id);
 
 			foreach ($results as $result) {
-				if ($result['image'] && is_file(DIR_IMAGE . html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'))) {
-					$data['images'][] = [
-						'popup' => $this->model_tool_image->resize($result['image'], $this->config->get('config_image_popup_width'), $this->config->get('config_image_popup_height')),
-						'thumb' => $this->model_tool_image->resize($result['image'], $this->config->get('config_image_additional_width'), $this->config->get('config_image_additional_height'))
-					];
-				}
+				$images_image = $result['image'] ?? '';
+				$images_original = $result['image_original'] ?? $images_image;
+
+				$data['images'][] = [
+					'popup' => $this->resolveProductImage($images_image, $images_original, $this->config->get('config_image_popup_width'), $this->config->get('config_image_popup_height')),
+					'thumb' => $this->resolveProductImage($images_image, $images_original, $this->config->get('config_image_additional_width'), $this->config->get('config_image_additional_height'))
+				];
 			}
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
@@ -474,5 +473,90 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Attempt to resolve an image path into a usable URL, falling back to remote or placeholder assets.
+	 *
+	 * @param string|null $image_path      Normalized path stored in the database (relative to image dir when local).
+	 * @param string|null $image_original  Unmodified image value as stored in the database.
+	 * @param int         $width
+	 * @param int         $height
+	 *
+	 * @return string
+	 */
+	protected function resolveProductImage(?string $image_path, ?string $image_original, int $width, int $height): string {
+		$image_path = $image_path ?? '';
+		$image_original = $image_original ?? '';
+
+		$result = '';
+
+		if ($image_path) {
+			$decoded = html_entity_decode($image_path, ENT_QUOTES, 'UTF-8');
+
+			if (is_file(DIR_IMAGE . $decoded)) {
+				$result = $this->model_tool_image->resize($image_path, $width, $height);
+			}
+		}
+
+		if (!$result && $image_original && $this->isRemotePath($image_original)) {
+			$result = $this->buildPublicImageUrl($image_original);
+		}
+
+		if (!$result && $image_path && $this->isRemotePath($image_path)) {
+			$result = $this->buildPublicImageUrl($image_path);
+		}
+
+		if (!$result) {
+			$result = $this->model_tool_image->resize('placeholder.png', $width, $height);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Whether the provided image path points to a remote resource.
+	 *
+	 * @param string $path
+	 *
+	 * @return bool
+	 */
+	protected function isRemotePath(string $path): bool {
+		$path = trim(html_entity_decode($path, ENT_QUOTES, 'UTF-8'));
+
+		return (bool)preg_match('#^(https?:)?//#i', $path);
+	}
+
+	/**
+	 * Build an absolute URL for the provided image path.
+	 *
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	protected function buildPublicImageUrl(string $path): string {
+		$path = html_entity_decode($path, ENT_QUOTES, 'UTF-8');
+
+		if ($path === '') {
+			return '';
+		}
+
+		if ($this->isRemotePath($path)) {
+			if (strpos($path, '//') === 0) {
+				$scheme = (!empty($this->request->server['HTTPS']) && $this->request->server['HTTPS'] != 'off') ? 'https:' : 'http:';
+
+				return $scheme . $path;
+			}
+
+			return $path;
+		}
+
+		$base = (!empty($this->request->server['HTTPS']) && $this->request->server['HTTPS'] != 'off') ? $this->config->get('config_ssl') : $this->config->get('config_url');
+
+		if (!$base) {
+			$base = $this->config->get('config_url');
+		}
+
+		return rtrim((string)$base, '/') . '/' . ltrim($path, '/');
 	}
 }
