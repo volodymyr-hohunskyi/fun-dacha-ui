@@ -24,6 +24,10 @@ $_['text_semi_month']            = 'demi-mois';
 $_['text_month']                 = 'mois';
 $_['text_year']                  = 'année';
 
+// Boutons
+$_['button_wishlist']            = 'Ajouter à la liste de souhaits';
+$_['button_compare']             = 'Comparer ce produit';
+
 // Entrée
 $_['entry_qty']                  = 'Qté';
 $_['entry_rating']               = 'Évaluation';
