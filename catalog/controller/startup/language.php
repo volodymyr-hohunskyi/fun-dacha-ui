@@ -45,6 +45,8 @@ class Language extends \Opencart\System\Engine\Controller {
 			$this->config->set('config_language', $language_info['code']);
 
 			$this->load->language('default');
+
+			$this->applyLocaleOverrides($language_info['code']);
 		}
 	}
 
@@ -83,6 +85,40 @@ class Language extends \Opencart\System\Engine\Controller {
 
 			// Use $this->language->load so it's not triggering infinite loops
 			$this->language->load($path . $route, $prefix, $code);
+
+			$this->applyLocaleOverrides($code);
+		}
+	}
+
+	/**
+	 * Apply locale specific string overrides
+	 *
+	 * Ensures we can localize high-visibility strings even when we rely on the
+	 * base language pack for most content (e.g. UA store reusing en-gb files).
+	 *
+	 * @param string $code
+	 *
+	 * @return void
+	 */
+	private function applyLocaleOverrides(string $code): void {
+		if (!$code) {
+			return;
+		}
+
+		static $override_map = [
+			'uk-ua' => [
+				'button_cart' => 'Додати до кошика',
+			],
+		];
+
+		$normalized_code = strtolower($code);
+
+		if (!isset($override_map[$normalized_code])) {
+			return;
+		}
+
+		foreach ($override_map[$normalized_code] as $key => $value) {
+			$this->language->set($key, $value);
 		}
 	}
 }
