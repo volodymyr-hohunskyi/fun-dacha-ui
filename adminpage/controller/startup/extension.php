@@ -38,7 +38,7 @@ class Extension extends \Opencart\System\Engine\Controller {
 		$installed_codes = array_column($results, 'code');
 
 		// Manually register bundled extensions that are copied directly into DIR_EXTENSION.
-		foreach (['export_import'] as $code) {
+		foreach (['export_import', 'ocnp'] as $code) {
 			if (in_array($code, $installed_codes, true) || !is_dir(DIR_EXTENSION . $code . '/admin')) {
 				continue;
 			}
