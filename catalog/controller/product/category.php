@@ -237,10 +237,27 @@ class Category extends \Opencart\System\Engine\Controller {
 					$description = oc_substr($description, 0, $this->config->get('config_product_description_length')) . '..';
 				}
 
-				if ($result['image'] && is_file(DIR_IMAGE . html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'))) {
-					$image = $result['image'];
-				} else {
-					$image = 'placeholder.png';
+				$thumb = '';
+				$image_path = $result['image'];
+
+				if ($image_path && is_file(DIR_IMAGE . html_entity_decode($image_path, ENT_QUOTES, 'UTF-8'))) {
+					$thumb = $this->model_tool_image->resize($image_path, $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height'));
+				}
+
+				if (!$thumb && !empty($result['image_original'])) {
+					$thumb = html_entity_decode($result['image_original'], ENT_QUOTES, 'UTF-8');
+				}
+
+				if (
+					!$thumb &&
+					isset($result['image']) &&
+					preg_match('#^(https?:)?//#i', $result['image'])
+				) {
+					$thumb = html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8');
+				}
+
+				if (!$thumb) {
+					$thumb = $this->model_tool_image->resize('placeholder.png', $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height'));
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
@@ -263,7 +280,7 @@ class Category extends \Opencart\System\Engine\Controller {
 
 				$product_data = [
 					'description' => $description,
-					'thumb'       => $this->model_tool_image->resize($image, $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height')),
+					'thumb'       => $thumb,
 					'price'       => $price,
 					'special'     => $special,
 					'tax'         => $tax,
