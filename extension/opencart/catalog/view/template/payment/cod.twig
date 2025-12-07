@@ -1,7 +1,28 @@
 {# Removed duplicate button - only floating footer button is used #}
 <script type="text/javascript"><!--
+console.log('========================================');
+console.log('[cod.twig] SCRIPT LOADING STARTED');
+console.log('[cod.twig] Timestamp:', new Date().toISOString());
+console.log('========================================');
+
+// Immediate test - check if button exists right now
+console.log('[cod.twig] Immediate button check:', $('#button-confirm-footer').length > 0 ? 'FOUND' : 'NOT FOUND');
+console.log('[cod.twig] jQuery version:', typeof jQuery !== 'undefined' ? jQuery.fn.jquery : 'NOT LOADED');
+console.log('[cod.twig] Document ready state:', document.readyState);
+
 // Sync footer checkbox with confirm checkbox
 $(document).ready(function() {
+    console.log('[cod.twig] Document ready, checking button...');
+    
+    // Check if button exists immediately
+    var $footerBtn = $('#button-confirm-footer');
+    console.log('[cod.twig] Footer button found:', $footerBtn.length > 0);
+    if ($footerBtn.length > 0) {
+        console.log('[cod.twig] Footer button ID:', $footerBtn.attr('id'));
+        console.log('[cod.twig] Footer button classes:', $footerBtn.attr('class'));
+        console.log('[cod.twig] Footer button visible:', $footerBtn.is(':visible'));
+        console.log('[cod.twig] Footer button disabled:', $footerBtn.prop('disabled'));
+    }
     // Sync footer checkbox with any existing privacy checkbox
     $('#input-privacy-agree-footer').on('change', function() {
         $('#input-privacy-agree-confirm').prop('checked', $(this).is(':checked'));
@@ -16,36 +37,70 @@ $(document).ready(function() {
             validateOrderButton();
         }
     });
-    
-    // Use footer button for confirmation
-    $('#button-confirm-footer').on('click', function() {
-        $('#button-confirm').trigger('click');
-    });
 });
+
+// Function to show inline error message for a field
+function showFieldError(fieldId, message) {
+    var $field = $('#' + fieldId);
+    var $errorDiv = $('#error-' + fieldId);
+    
+    if ($field.length) {
+        $field.addClass('is-invalid');
+    }
+    
+    if ($errorDiv.length) {
+        $errorDiv.text(message).show();
+    }
+}
+
+// Function to clear inline error message for a field
+function clearFieldError(fieldId) {
+    var $field = $('#' + fieldId);
+    var $errorDiv = $('#error-' + fieldId);
+    
+    if ($field.length) {
+        $field.removeClass('is-invalid');
+    }
+    
+    if ($errorDiv.length) {
+        $errorDiv.text('').hide();
+    }
+}
+
 // Function to validate all required fields and enable/disable button (global function)
-// Clear validation rules:
-// 1. First Name and Last Name are not empty
-// 2. Phone Number is valid and not empty
-// 3. Region, City, and Nova Poshta Department are selected
-// 4. If Створити обліковий запис is ON, Email and Password are valid. If OFF, Email/Password are optional
-// 5. The Privacy Policy checkbox is checked
 window.validateOrderButton = function() {
+    console.log('[validateOrderButton] Starting validation...');
+    
     // Check both footer and confirm buttons
     var $footerButton = $('#button-confirm-footer');
     var $confirmButton = $('#button-confirm');
     
+    console.log('[validateOrderButton] Footer button found:', $footerButton.length > 0);
+    console.log('[validateOrderButton] Confirm button found:', $confirmButton.length > 0);
+    
     if (!$footerButton.length && !$confirmButton.length) {
+        console.warn('[validateOrderButton] No buttons found, exiting');
         return;
     }
     
     var isValid = true;
-    var validationErrors = [];
+    
+    // Clear all previous errors
+    clearFieldError('firstname');
+    clearFieldError('lastname');
+    clearFieldError('telephone');
+    clearFieldError('shipping-region');
+    clearFieldError('shipping-city-np');
+    clearFieldError('shipping-warehouse-np');
+    clearFieldError('email');
+    clearFieldError('password');
+    $('#error-privacy-agree-footer').text('').hide();
     
     // Rule 5: Check privacy agreement (check both checkboxes)
     var privacyChecked = $('#input-privacy-agree-footer').is(':checked') || $('#input-privacy-agree-confirm').is(':checked');
     if (!privacyChecked) {
         isValid = false;
-        validationErrors.push('Privacy Policy');
+        $('#error-privacy-agree-footer').text('Будь ласка, підтвердіть згоду з Політикою конфіденційності').show();
     }
     
     // Rule 1: First Name and Last Name are not empty
@@ -54,12 +109,12 @@ window.validateOrderButton = function() {
     
     if (!$firstname.length || !$firstname.val() || $firstname.val().trim() === '') {
         isValid = false;
-        validationErrors.push('First Name');
+        showFieldError('firstname', 'Будь ласка, введіть ваше ім\'я');
     }
     
     if (!$lastname.length || !$lastname.val() || $lastname.val().trim() === '') {
         isValid = false;
-        validationErrors.push('Last Name');
+        showFieldError('lastname', 'Будь ласка, введіть ваше прізвище');
     }
     
     // Rule 2: Phone Number is valid and not empty
@@ -68,18 +123,18 @@ window.validateOrderButton = function() {
         var phoneValue = $telephone.val();
         if (!phoneValue || phoneValue.trim() === '') {
             isValid = false;
-            validationErrors.push('Phone');
+            showFieldError('telephone', 'Будь ласка, введіть номер телефону');
         } else {
             // Basic phone validation: should contain at least 10 digits
             var phoneDigits = phoneValue.replace(/\D/g, '');
             if (phoneDigits.length < 10) {
                 isValid = false;
-                validationErrors.push('Phone (invalid)');
+                showFieldError('telephone', 'Телефон повинен містити мінімум 10 цифр');
             }
         }
     } else {
         isValid = false;
-        validationErrors.push('Phone (missing)');
+        showFieldError('telephone', 'Поле телефону обов\'язкове');
     }
     
     // Rule 3: Region, City, and Nova Poshta Department are selected
@@ -89,25 +144,22 @@ window.validateOrderButton = function() {
     
     if (!$region.length || !$region.val() || $region.val().trim() === '') {
         isValid = false;
-        validationErrors.push('Region');
-    } else {
-        // City is required if region is selected
-        if (!$city.length || !$city.val() || $city.val().trim() === '' || $city.val() === 'Оберіть місто') {
-            isValid = false;
-            validationErrors.push('City');
-        } else {
-            // Warehouse is required if city is selected
-            if (!$warehouse.length || !$warehouse.val() || $warehouse.val().trim() === '' || $warehouse.val() === 'Оберіть відділення') {
-                isValid = false;
-                validationErrors.push('Department');
-            }
-        }
+        showFieldError('shipping-region', 'Будь ласка, оберіть область');
     }
     
-    // Rule 4: If Створити обліковий запис is ON, Email and Password are valid. If OFF, Email/Password are optional
+    if ($region.val() && (!$city.length || !$city.val() || $city.val().trim() === '' || $city.val() === 'Оберіть місто')) {
+        isValid = false;
+        showFieldError('shipping-city-np', 'Будь ласка, оберіть місто');
+    }
+    
+    if ($city.val() && (!$warehouse.length || !$warehouse.val() || $warehouse.val().trim() === '' || $warehouse.val() === 'Оберіть відділення')) {
+        isValid = false;
+        showFieldError('shipping-warehouse-np', 'Будь ласка, оберіть відділення');
+    }
+    
+    // Rule 4: If Створити обліковий запис is ON, Email and Password are valid
     var createAccountChecked = $('#input-create-account').is(':checked');
     if (createAccountChecked) {
-        // If account creation is enabled, email and password become required
         var $emailField = $('#input-email');
         var $passwordField = $('#input-password');
         
@@ -116,18 +168,15 @@ window.validateOrderButton = function() {
             var emailValue = $emailField.val();
             if (!emailValue || emailValue.trim() === '') {
                 isValid = false;
-                validationErrors.push('Email (empty)');
+                showFieldError('email', 'Будь ласка, введіть email адресу');
             } else {
                 // Basic email validation
                 var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(emailValue)) {
                     isValid = false;
-                    validationErrors.push('Email (invalid)');
+                    showFieldError('email', 'Будь ласка, введіть коректну email адресу');
                 }
             }
-        } else {
-            isValid = false;
-            validationErrors.push('Email (missing)');
         }
         
         // Password validation
@@ -135,61 +184,54 @@ window.validateOrderButton = function() {
             var passwordValue = $passwordField.val();
             if (!passwordValue || passwordValue.trim() === '') {
                 isValid = false;
-                validationErrors.push('Password (empty)');
+                showFieldError('password', 'Будь ласка, введіть пароль');
             } else if (passwordValue.length < 4) {
-                // Minimum password length
                 isValid = false;
-                validationErrors.push('Password (too short)');
+                showFieldError('password', 'Пароль повинен містити мінімум 4 символи');
             }
-        } else {
-            isValid = false;
-            validationErrors.push('Password (missing)');
         }
     }
-    // If account creation is NOT checked, email/password are optional - no validation needed
     
-    // Enable/disable buttons (both footer and confirm)
+    // Enable/disable button based on validation (use data attribute instead of disabled prop to keep it clickable)
     if (isValid) {
-        $footerButton.prop('disabled', false).removeClass('btn-secondary').addClass('btn-primary');
+        $footerButton.removeProp('disabled').removeClass('btn-secondary').addClass('btn-primary').attr('data-valid', 'true').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '1'});
         if ($confirmButton.length) {
-            $confirmButton.prop('disabled', false).removeClass('btn-secondary').addClass('btn-primary');
+            $confirmButton.removeProp('disabled').removeClass('btn-secondary').addClass('btn-primary').attr('data-valid', 'true').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '1'});
         }
-        $('#error-privacy-agree-confirm, #error-privacy-agree-footer').removeClass('d-block').html('').hide();
     } else {
-        $footerButton.prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
+        $footerButton.removeProp('disabled').removeClass('btn-primary').addClass('btn-secondary').attr('data-valid', 'false').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '0.6'});
         if ($confirmButton.length) {
-            $confirmButton.prop('disabled', true).removeClass('btn-primary').addClass('btn-secondary');
+            $confirmButton.removeProp('disabled').removeClass('btn-primary').addClass('btn-secondary').attr('data-valid', 'false').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '0.6'});
         }
     }
     
-    // Debug logging - show what's failing
-    if (validationErrors.length > 0) {
-        console.log('Validation failed. Missing/Invalid fields:', validationErrors);
-        console.log('Field values:', {
-            firstname: $firstname.val(),
-            lastname: $lastname.val(),
-            telephone: $telephone.val(),
-            region: $region.val(),
-            city: $city.val(),
-            warehouse: $warehouse.val(),
-            privacyChecked: privacyChecked,
-            createAccountChecked: createAccountChecked
-        });
-    } else {
-        console.log('Validation passed - all fields valid');
-    }
+    // Store validation result for use in click handler
+    window.lastValidationResult = {
+        isValid: isValid
+    };
+    
+    console.log('[validateOrderButton] Validation complete. Is valid:', isValid);
+    console.log('[validateOrderButton] Button state - Footer disabled:', $footerButton.prop('disabled'), 'Footer classes:', $footerButton.attr('class'));
 };
 
 // Check button state on page load
 $(document).ready(function() {
-    validateOrderButton();
+    // Delay initial validation to allow form fields to load
+    setTimeout(function() {
+        // Run validation
+        if (typeof validateOrderButton === 'function') {
+            validateOrderButton();
+        }
+    }, 500);
     
     // Validate on privacy checkbox change (both checkboxes)
-    $('#input-privacy-agree-confirm, #input-privacy-agree-footer').on('change', function() {
+    $(document).on('change', '#input-privacy-agree-confirm, #input-privacy-agree-footer', function() {
         // Sync both checkboxes
         var isChecked = $(this).is(':checked');
         $('#input-privacy-agree-confirm, #input-privacy-agree-footer').prop('checked', isChecked);
-        validateOrderButton();
+        if (typeof validateOrderButton === 'function') {
+            validateOrderButton();
+        }
     });
     
     // Validate on required field changes (use event delegation for dynamically added fields)
@@ -198,19 +240,14 @@ $(document).ready(function() {
         setTimeout(validateOrderButton, 50);
     });
     
-    // Validate when account creation toggle changes (using event delegation since it moved)
+    // Validate when account creation toggle changes
     $(document).on('change', '#input-create-account', function() {
         setTimeout(validateOrderButton, 100);
     });
     
-    // Validate when privacy policy checkbox changes
-    $(document).on('change', '#input-privacy-agree-footer, #input-privacy-agree-confirm', function() {
-        setTimeout(validateOrderButton, 50);
-    });
-    
     // Re-validate after register form is submitted successfully
     $(document).on('ajaxSuccess', function(event, xhr, settings) {
-        if (settings.url && (settings.url.indexOf('register.save') !== -1 || settings.url.indexOf('novaposhta') !== -1 || settings.url.indexOf('confirm.confirm') !== -1)) {
+        if (settings.url && (settings.url.indexOf('register.save') !== -1 || settings.url.indexOf('novaposhta') !== -1)) {
             setTimeout(validateOrderButton, 200);
         }
     });
@@ -229,87 +266,108 @@ $(document).ready(function() {
     }, 10000);
 });
 
-// Handle both footer and confirm button clicks
-$('#button-confirm, #button-confirm-footer').on('click', function() {
+// Main click handler function
+window.handleConfirmClick = function(e) {
+    console.log('[handleConfirmClick] Button clicked, starting handler...');
+    
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('[handleConfirmClick] Event prevented and stopped');
+    }
+    
     var element = this;
     var $button = $(element);
     
+    console.log('[handleConfirmClick] Button element:', element.id || 'unknown', 'Button jQuery object:', $button.length > 0 ? 'found' : 'NOT FOUND');
+    
     // Prevent double-clicks
-    if ($button.prop('disabled') || $button.data('processing')) {
+    if ($button.data('processing')) {
+        console.warn('[handleConfirmClick] Button is already processing, ignoring click');
         return false;
     }
     
-    // Final validation before submitting
-    var privacyChecked = $('#input-privacy-agree-footer').is(':checked') || $('#input-privacy-agree-confirm').is(':checked');
-    if (!privacyChecked) {
-        $('#error-privacy-agree-footer').html('Будь ласка, підтвердіть згоду з Політикою конфіденційності').show().addClass('d-block');
-        $('#error-privacy-agree-confirm').html('Будь ласка, підтвердіть згоду з Політикою конфіденційності').addClass('d-block');
-        // Scroll to footer
-        $('html, body').animate({ scrollTop: $(document).height() }, 500);
-        return false;
+    console.log('[handleConfirmClick] Running validation...');
+    // Run validation first
+    if (typeof validateOrderButton === 'function') {
+        validateOrderButton();
+        console.log('[handleConfirmClick] Validation function called');
     } else {
-        $('#error-privacy-agree-confirm, #error-privacy-agree-footer').removeClass('d-block').html('').hide();
+        console.error('[handleConfirmClick] ERROR: validateOrderButton function not found!');
     }
     
-    // Validate all required fields
-    var requiredFields = {
-        'input-firstname': 'Ім\'я',
-        'input-lastname': 'Прізвище',
-        'input-telephone': 'Телефон',
-        'input-shipping-region': 'Область',
-        'input-shipping-city-np': 'Місто',
-        'input-shipping-warehouse-np': 'Відділення'
-    };
+    // Get validation result
+    var validationResult = window.lastValidationResult || { isValid: false };
+    console.log('[handleConfirmClick] Validation result:', validationResult);
     
-    var hasErrors = false;
-    for (var fieldId in requiredFields) {
-        var $field = $('#' + fieldId);
-        if ($field.length) {
-            var fieldValue = $field.val();
-            // Check for empty, placeholder, or default values
-            var isEmpty = !fieldValue || fieldValue.trim() === '';
-            var isPlaceholder = fieldValue === 'Оберіть місто' || fieldValue === 'Оберіть відділення' || fieldValue === '{{ text_select }}';
-            
-            if (isEmpty || isPlaceholder) {
-                hasErrors = true;
-                $field.addClass('is-invalid');
-                var errorId = 'error-' + fieldId.replace('input-', '').replace(/_/g, '-');
-                $('#' + errorId).html('Поле "' + requiredFields[fieldId] + '" обов\'язкове для заповнення').addClass('d-block').show();
-            } else {
-                // Remove error state if field is valid
-                $field.removeClass('is-invalid');
-                var errorId = 'error-' + fieldId.replace('input-', '').replace(/_/g, '-');
-                $('#' + errorId).removeClass('d-block').html('').hide();
-            }
-        } else {
-            hasErrors = true;
-        }
-    }
-    
-    if (hasErrors) {
-        // Scroll to first error
+    // If validation fails, scroll to first error and return
+    if (!validationResult.isValid) {
+        console.warn('[handleConfirmClick] Validation failed, showing errors and scrolling...');
+        // Find first error field and scroll to it
         var $firstError = $('.is-invalid').first();
         if ($firstError.length) {
+            console.log('[handleConfirmClick] Found first error field:', $firstError.attr('id'));
             $('html, body').animate({ scrollTop: $firstError.offset().top - 100 }, 500);
+            $firstError.focus();
+        } else if ($('#error-privacy-agree-footer').is(':visible')) {
+            console.log('[handleConfirmClick] Privacy policy error visible, scrolling to footer');
+            $('html, body').animate({ scrollTop: $(document).height() }, 500);
+            $('#input-privacy-agree-footer').focus();
+        } else {
+            console.warn('[handleConfirmClick] No error fields found, but validation failed');
         }
         return false;
     }
     
-    // Mark as processing to prevent double-clicks
-    $button.data('processing', true).prop('disabled', true);
+    console.log('[handleConfirmClick] Validation passed, proceeding with order confirmation...');
+    
+    // Clear any error messages if validation passed
+    $('#error-privacy-agree-confirm, #error-privacy-agree-footer').removeClass('d-block').html('').hide();
+    
+    // Mark as processing to prevent double-clicks (use data attribute instead of disabled)
+    console.log('[handleConfirmClick] Marking button as processing...');
+    $button.data('processing', true).attr('data-processing', 'true').css('opacity', '0.7');
     
     // First, ensure the order is created by refreshing the confirm section
-    // Loading the confirm section triggers order creation if all data is valid
-    $('#checkout-confirm').load('index.php?route=checkout/confirm&language={{ language }}', function() {
+    console.log('[handleConfirmClick] Loading confirm section...');
+    var confirmUrl = 'index.php?route=checkout/confirm&language={{ language }}';
+    console.log('[handleConfirmClick] Confirm URL:', confirmUrl);
+    
+    $('#checkout-confirm').load(confirmUrl, function(response, status, xhr) {
+        console.log('[handleConfirmClick] Confirm section load completed. Status:', status);
+        console.log('[handleConfirmClick] Response length:', response ? response.length : 0);
+        console.log('[handleConfirmClick] XHR status:', xhr ? xhr.status : 'N/A');
+        
+        if (status === 'error') {
+            console.error('[handleConfirmClick] ERROR loading confirm section:', xhr ? xhr.statusText : 'Unknown error');
+            $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка завантаження сторінки підтвердження. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            $button.data('processing', false).removeAttr('data-processing').css('opacity', '1');
+            if (typeof validateOrderButton === 'function') {
+                validateOrderButton();
+            }
+            return;
+        }
+        
         // After confirm section is loaded (order should be created), proceed with payment confirmation
+        console.log('[handleConfirmClick] Making payment confirmation AJAX request...');
+        var paymentUrl = 'index.php?route=extension/opencart/payment/cod.confirm&language={{ language }}';
+        console.log('[handleConfirmClick] Payment URL:', paymentUrl);
+        
         $.ajax({
-            url: 'index.php?route=extension/opencart/payment/cod.confirm&language={{ language }}',
+            url: paymentUrl,
             dataType: 'json',
             beforeSend: function() {
-                $button.button('loading');
+                console.log('[handleConfirmClick] AJAX request started');
+                try {
+                    $button.button('loading');
+                } catch(e) {
+                    console.warn('[handleConfirmClick] Button loading method not available:', e);
+                }
             },
             success: function(json) {
+                console.log('[handleConfirmClick] Payment confirmation response received:', json);
                 if (json['error']) {
+                    console.error('[handleConfirmClick] Payment confirmation error:', json['error']);
                     // Show error message
                     var errorMsg = json['error'];
                     if (errorMsg.indexOf('Order') !== -1 || errorMsg.indexOf('замовлення') !== -1) {
@@ -318,7 +376,7 @@ $('#button-confirm, #button-confirm-footer').on('click', function() {
                     $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + errorMsg + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
                     
                     // Re-enable button and re-validate
-                    $button.data('processing', false).button('reset');
+                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
                     if (typeof validateOrderButton === 'function') {
                         setTimeout(validateOrderButton, 100);
                     }
@@ -326,25 +384,133 @@ $('#button-confirm, #button-confirm-footer').on('click', function() {
                     // Scroll to top to show error
                     $('html, body').animate({ scrollTop: 0 }, 500);
                 } else if (json['redirect']) {
+                    console.log('[handleConfirmClick] Success! Redirecting to:', json['redirect']);
                     // Success - redirect to success page
                     location = json['redirect'];
                 } else {
+                    console.warn('[handleConfirmClick] Unknown response format:', json);
                     // Unknown response - re-enable button
-                    $button.data('processing', false).button('reset');
+                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
+                    if (typeof validateOrderButton === 'function') {
+                        setTimeout(validateOrderButton, 100);
+                    }
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                console.error('Payment confirmation error:', thrownError, xhr.statusText, xhr.responseText);
+                console.error('[handleConfirmClick] AJAX error:', thrownError);
+                console.error('[handleConfirmClick] XHR status:', xhr.status);
+                console.error('[handleConfirmClick] XHR statusText:', xhr.statusText);
+                console.error('[handleConfirmClick] XHR responseText:', xhr.responseText);
                 $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка підтвердження замовлення. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
-                $button.data('processing', false).button('reset');
+                $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
                 if (typeof validateOrderButton === 'function') {
                     setTimeout(validateOrderButton, 100);
                 }
             },
             complete: function() {
-                // This runs after success/error
+                console.log('[handleConfirmClick] AJAX request completed');
             }
         });
     });
+};
+
+// Attach event listener to call the handler - use event delegation on document to ensure it works
+console.log('[cod.twig] Attaching click event listener...');
+
+// Try multiple ways to attach the listener
+$(document).on('click', '#button-confirm, #button-confirm-footer', function(e) {
+    console.log('[Event Listener] Button click detected on:', this.id || 'unknown');
+    console.log('[Event Listener] Event target:', e.target);
+    console.log('[Event Listener] handleConfirmClick function exists:', typeof window.handleConfirmClick === 'function');
+    
+    // Allow click even if button appears disabled - we'll validate in the handler
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (typeof window.handleConfirmClick === 'function') {
+        console.log('[Event Listener] Calling handleConfirmClick...');
+        try {
+            window.handleConfirmClick.call(this, e);
+        } catch (error) {
+            console.error('[Event Listener] ERROR calling handleConfirmClick:', error);
+            console.error('[Event Listener] Error stack:', error.stack);
+        }
+    } else {
+        console.error('[Event Listener] ERROR: handleConfirmClick function not found!');
+    }
+});
+
+// Also try direct attachment as fallback
+$(document).ready(function() {
+    console.log('[cod.twig] Attempting direct button click attachment...');
+    $('#button-confirm-footer, #button-confirm').off('click').on('click', function(e) {
+        console.log('[Direct Handler] Button clicked directly!', this.id);
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.handleConfirmClick === 'function') {
+            console.log('[Direct Handler] Calling handleConfirmClick...');
+            window.handleConfirmClick.call(this, e);
+        } else {
+            console.error('[Direct Handler] handleConfirmClick not found!');
+        }
+    });
+    console.log('[cod.twig] Direct handlers attached');
+});
+
+// Also ensure button is clickable by removing any CSS that might block clicks
+$(document).ready(function() {
+    console.log('[cod.twig] Ensuring button is clickable...');
+    // Ensure footer button exists and is accessible
+    var $footerBtn = $('#button-confirm-footer');
+    if ($footerBtn.length) {
+        console.log('[cod.twig] Footer button found, applying styles...');
+        $footerBtn.css({
+            'pointer-events': 'auto',
+            'cursor': 'pointer',
+            'position': 'relative',
+            'z-index': '1051'
+        });
+        
+        // Test click programmatically to see if it works
+        console.log('[cod.twig] Testing button clickability...');
+        $footerBtn.on('mousedown', function() {
+            console.log('[cod.twig] Button mousedown event fired!');
+        });
+        $footerBtn.on('mouseup', function() {
+            console.log('[cod.twig] Button mouseup event fired!');
+        });
+        
+        // Add a simple test click handler directly on the button
+        $footerBtn.off('click.test').on('click.test', function(e) {
+            console.log('[TEST HANDLER] Direct click handler fired!', e);
+            e.preventDefault();
+            e.stopPropagation();
+        });
+        console.log('[cod.twig] Test click handler attached directly to button');
+    } else {
+        console.error('[cod.twig] Footer button NOT FOUND!');
+    }
+    
+    // Log all button-related elements
+    console.log('[cod.twig] All buttons with "confirm" in ID:', $('[id*="confirm"]').map(function() { return this.id; }).get());
+    console.log('[cod.twig] All buttons with "button" class:', $('.btn').map(function() { return this.id || this.className; }).get());
+    
+    // Try to find button after a delay (in case it loads dynamically)
+    setTimeout(function() {
+        console.log('[cod.twig] Delayed check - Footer button found:', $('#button-confirm-footer').length > 0);
+        var $btn = $('#button-confirm-footer');
+        if ($btn.length) {
+            console.log('[cod.twig] Attaching delayed click handler...');
+            $btn.off('click.delayed').on('click.delayed', function(e) {
+                console.log('[DELAYED HANDLER] Click detected!', e);
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof window.handleConfirmClick === 'function') {
+                    console.log('[DELAYED HANDLER] Calling handleConfirmClick...');
+                    window.handleConfirmClick.call(this, e);
+                }
+            });
+        }
+    }, 2000);
 });
 //--></script>

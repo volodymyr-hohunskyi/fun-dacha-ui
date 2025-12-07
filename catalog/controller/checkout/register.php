@@ -459,20 +459,61 @@ class Register extends \Opencart\System\Engine\Controller {
 					$json['error']['shipping_postcode'] = $this->language->get('error_postcode');
 				}
 
-				if (!$shipping_country_info) {
-					$json['error']['shipping_country'] = $this->language->get('error_country');
+			if (!$shipping_country_info) {
+				$json['error']['shipping_country'] = $this->language->get('error_country');
+			}
+
+			// Zone validation and setup - find zone_id by region name for Ukraine (country_id 220)
+			$this->load->model('localisation/zone');
+			
+			// If shipping to Ukraine (country_id 220) and zone_id is not set, try to find it by region name
+			if ((int)$post_info['shipping_country_id'] == 220 && (empty($post_info['shipping_zone_id']) || $post_info['shipping_zone_id'] == '0')) {
+				// Get all zones for Ukraine
+				$zones = $this->model_localisation_zone->getZonesByCountryId(220);
+				
+				if (!empty($zones)) {
+					$zone_id_found = false;
+					
+					// Try to find zone by exact match with shipping_region
+					if (!empty($post_info['shipping_region'])) {
+						$region_name = trim($post_info['shipping_region']);
+						
+						foreach ($zones as $zone) {
+							// Exact match
+							if (trim($zone['name']) === $region_name) {
+								$post_info['shipping_zone_id'] = (int)$zone['zone_id'];
+								$zone_id_found = true;
+								break;
+							}
+						}
+						
+						// If exact match not found, try case-insensitive match
+						if (!$zone_id_found) {
+							foreach ($zones as $zone) {
+								if (mb_strtolower(trim($zone['name']), 'UTF-8') === mb_strtolower($region_name, 'UTF-8')) {
+									$post_info['shipping_zone_id'] = (int)$zone['zone_id'];
+									$zone_id_found = true;
+									break;
+								}
+							}
+						}
+					}
+					
+					// If still not found, use first available zone as fallback
+					if (!$zone_id_found) {
+						$post_info['shipping_zone_id'] = (int)$zones[0]['zone_id'];
+					}
 				}
+			}
 
-				// Zone
-				$this->load->model('localisation/zone');
+			// Zone validation
+			$zone_total = $this->model_localisation_zone->getTotalZonesByCountryId((int)$post_info['shipping_country_id']);
 
-				$zone_total = $this->model_localisation_zone->getTotalZonesByCountryId((int)$post_info['shipping_country_id']);
+			if ($zone_total && empty($post_info['shipping_zone_id'])) {
+				$json['error']['shipping_zone'] = $this->language->get('error_zone');
+			}
 
-				if ($zone_total && !$post_info['shipping_zone_id']) {
-					$json['error']['shipping_zone'] = $this->language->get('error_zone');
-				}
-
-				// Custom field validation
+			// Custom field validation
 				foreach ($custom_fields as $custom_field) {
 					if ($custom_field['location'] == 'address') {
 						if ($custom_field['required'] && empty($post_info['shipping_custom_field'][$custom_field['location']][$custom_field['custom_field_id']])) {
@@ -704,6 +745,11 @@ class Register extends \Opencart\System\Engine\Controller {
 						$zone_code = '';
 					}
 
+					// For Nova Poshta: if zone is empty but shipping_region is provided, use it as zone name
+					if (empty($zone) && !empty($post_info['shipping_region'])) {
+						$zone = $post_info['shipping_region'];
+					}
+
 					$shipping_address_data = [
 						'address_id'     => $address_id,
 						'firstname'      => $firstname,
@@ -740,9 +786,13 @@ class Register extends \Opencart\System\Engine\Controller {
 
 					// Requires Approval
 					if (!$customer_group_info['approval']) {
-						// Add Ukraine region to shipping address
+						// Add Ukraine region to shipping address (keep for backward compatibility)
 						if (!empty($post_info['shipping_region'])) {
 							$shipping_address_data['region'] = $post_info['shipping_region'];
+							// Also ensure zone is set if it's still empty
+							if (empty($shipping_address_data['zone'])) {
+								$shipping_address_data['zone'] = $post_info['shipping_region'];
+							}
 						}
 						// Add Nova Poshta fields if present
 						if (isset($post_info['ocnp_novaposhta_area'])) {
@@ -761,9 +811,13 @@ class Register extends \Opencart\System\Engine\Controller {
 
 					// Remove the address id so if the customer changes their mind and requires changing a different shipping address it will create a new address.
 					$this->session->data['shipping_address']['address_id'] = 0;
-					// Copy region if set
+					// Copy region if set and ensure zone is set
 					if (!empty($post_info['shipping_region'])) {
 						$this->session->data['shipping_address']['region'] = $post_info['shipping_region'];
+						// If zone is empty, use shipping_region as zone name
+						if (empty($this->session->data['shipping_address']['zone'])) {
+							$this->session->data['shipping_address']['zone'] = $post_info['shipping_region'];
+						}
 					}
 				}
 			}

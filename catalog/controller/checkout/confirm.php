@@ -40,8 +40,8 @@ class Confirm extends \Opencart\System\Engine\Controller {
 
 		// Shipping
 		if ($this->cart->hasShipping()) {
-			// Validate shipping address
-			if (!isset($this->session->data['shipping_address']['address_id'])) {
+			// Validate shipping address exists (address_id is optional for Nova Poshta)
+			if (!isset($this->session->data['shipping_address'])) {
 				$status = false;
 			}
 
@@ -143,7 +143,7 @@ class Confirm extends \Opencart\System\Engine\Controller {
 
 			// Shipping Details
 			if ($this->cart->hasShipping()) {
-				$order_data['shipping_address_id'] = $this->session->data['shipping_address']['address_id'];
+				$order_data['shipping_address_id'] = isset($this->session->data['shipping_address']['address_id']) ? $this->session->data['shipping_address']['address_id'] : 0;
 				$order_data['shipping_firstname'] = $this->session->data['shipping_address']['firstname'];
 				$order_data['shipping_lastname'] = $this->session->data['shipping_address']['lastname'];
 				$order_data['shipping_company'] = $this->session->data['shipping_address']['company'];

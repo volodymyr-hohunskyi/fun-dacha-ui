@@ -322,6 +322,16 @@
       <input type="hidden" name="shipping_address_2" value=""/>
       <input type="hidden" name="shipping_city" value=""/>
       <input type="hidden" name="shipping_postcode" value=""/>
+      {# Shipping country ID - will be set to Ukraine if available #}
+      {% if shipping_country_id %}
+        <input type="hidden" name="shipping_country_id" value="{{ shipping_country_id }}" id="input-shipping-country-id"/>
+      {% else %}
+        <input type="hidden" name="shipping_country_id" value="{{ config_country_id }}" id="input-shipping-country-id"/>
+      {% endif %}
+      {# Shipping zone - will be set from selected region (Ukrainian oblast name) #}
+      <input type="hidden" name="shipping_zone" value="" id="input-shipping-zone"/>
+      {# Shipping zone ID - default to 0 for Ukraine regions #}
+      <input type="hidden" name="shipping_zone_id" value="0" id="input-shipping-zone-id"/>
       
       {# Область (Region) - First field #}
       <div class="col mb-3 required">
@@ -582,8 +592,21 @@ $('#input-address-match').on('change', function() {
 $(document).ready(function() {
     var language = '{{ language }}';
     
+    // Update hidden shipping_zone field when region changes
+    function updateShippingZone() {
+        var selectedRegion = $('#input-shipping-region').val();
+        if (selectedRegion) {
+            $('#input-shipping-zone').val(selectedRegion);
+            console.log('Updated shipping_zone to:', selectedRegion);
+        }
+    }
+    
+    // Update on page load if region is already selected
+    updateShippingZone();
+    
     // When region is selected, load cities (containers always visible)
     $('#input-shipping-region').on('change', function() {
+        updateShippingZone();
         var region = $(this).val();
         var citySelect = $('#input-shipping-city-np');
         var warehouseSelect = $('#input-shipping-warehouse-np');

@@ -34,14 +34,67 @@ class Cod extends \Opencart\System\Engine\Controller {
 			$json['error'] = $this->language->get('error_payment_method');
 		}
 
+		// AUTO-ASSIGN NOVA POSHTA SHIPPING METHOD
+		if (!isset($this->session->data['shipping_method'])) {
+			$this->session->data['shipping_method'] = [
+				'code'       => 'nova_poshta.nova_poshta',
+				'name'       => 'Доставка Новою Поштою',
+				'cost'       => 0,
+				'tax_class_id' => 0,
+				'text'       => 'Нова Пошта'
+			];
+
+			$this->session->data['shipping_methods'] = [
+				'nova_poshta' => [
+					'name'       => 'Нова Пошта',
+					'quote'      => [
+						'nova_poshta' => [
+							'code'       => 'nova_poshta.nova_poshta',
+							'name'       => 'Доставка Новою Поштою',
+							'cost'       => 0,
+							'tax_class_id' => 0,
+							'text'       => 'Нова Пошта'
+						]
+					],
+					'sort_order' => 1,
+					'error'      => false
+				]
+			];
+		}
+
 		// Validate order exists or create it
 		if (!isset($this->session->data['order_id'])) {
-			// Order doesn't exist - try to create it by loading confirm controller
-			$this->load->controller('checkout/confirm');
+			// Ensure confirm controller creates the order
+			// Directly create order by instantiating confirm controller
+			$confirm_controller = new \Opencart\Catalog\Controller\Checkout\Confirm($this->registry);
+			// Call index method which creates the order
+			$confirm_controller->index();
 			
-			// Check again if order was created
+			// Check if order was created
 			if (!isset($this->session->data['order_id'])) {
+				// Order still not created - check why
+				$missing_data = [];
+				
+				if (!isset($this->session->data['customer'])) {
+					$missing_data[] = 'customer';
+				}
+				if ($this->cart->hasShipping() && !isset($this->session->data['shipping_address'])) {
+					$missing_data[] = 'shipping_address';
+				}
+				if ($this->cart->hasShipping() && !isset($this->session->data['shipping_method'])) {
+					$missing_data[] = 'shipping_method';
+				}
+				if (!isset($this->session->data['payment_method'])) {
+					$missing_data[] = 'payment_method';
+				}
+				if (!$this->cart->hasProducts()) {
+					$missing_data[] = 'cart_empty';
+				}
+				
 				$json['error'] = $this->language->get('error_order') . ' (Order not created)';
+				if (!empty($missing_data)) {
+					$json['error'] .= ' - Missing: ' . implode(', ', $missing_data);
+				}
 			}
 		}
 
@@ -54,7 +107,9 @@ class Cod extends \Opencart\System\Engine\Controller {
 			if (!$order_info) {
 				// Order ID exists in session but not in database - try to create order again
 				unset($this->session->data['order_id']);
-				$this->load->controller('checkout/confirm');
+				// Directly create order by instantiating confirm controller
+				$confirm_controller = new \Opencart\Catalog\Controller\Checkout\Confirm($this->registry);
+				$confirm_controller->index();
 				
 				// Check if order was created this time
 				if (isset($this->session->data['order_id'])) {
