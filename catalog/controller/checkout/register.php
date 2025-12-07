@@ -104,6 +104,48 @@ class Register extends \Opencart\System\Engine\Controller {
 		$this->load->model('localisation/zone');
 
 		$data['payment_zones'] = $this->model_localisation_zone->getZonesByCountryId($data['payment_country_id']);
+		
+		// Ukraine Regions (26 oblasts + Kyiv city + Crimea)
+		$data['ukraine_regions'] = [
+			'Вінницька область',
+			'Волинська область',
+			'Дніпропетровська область',
+			'Донецька область',
+			'Житомирська область',
+			'Закарпатська область',
+			'Запорізька область',
+			'Івано-Франківська область',
+			'Київська область',
+			'Кіровоградська область',
+			'Луганська область',
+			'Львівська область',
+			'Миколаївська область',
+			'Одеська область',
+			'Полтавська область',
+			'Рівненська область',
+			'Сумська область',
+			'Тернопільська область',
+			'Харківська область',
+			'Херсонська область',
+			'Хмельницька область',
+			'Черкаська область',
+			'Чернівецька область',
+			'Чернігівська область',
+			'м. Київ',
+			'АР Крим'
+		];
+		
+		// Get Ukraine region from session or default
+		if (isset($this->session->data['shipping_address']['region'])) {
+			$data['shipping_region'] = $this->session->data['shipping_address']['region'];
+		} else {
+			$data['shipping_region'] = '';
+		}
+		
+		// Get additional fields from session
+		$data['create_account'] = isset($this->session->data['create_account']) ? $this->session->data['create_account'] : 0;
+		$data['call_me'] = isset($this->session->data['call_me']) ? $this->session->data['call_me'] : 0;
+		$data['privacy_agree'] = isset($this->session->data['privacy_agree']) ? $this->session->data['privacy_agree'] : 0;
 
 		if (isset($this->session->data['shipping_address']['address_id'])) {
 			$data['shipping_firstname'] = $this->session->data['shipping_address']['firstname'];
@@ -222,15 +264,25 @@ class Register extends \Opencart\System\Engine\Controller {
 			'shipping_postcode'     => '',
 			'shipping_country_id'   => 0,
 			'shipping_zone_id'      => 0,
+			'shipping_region'       => '',
 			'shipping_custom_field' => [],
 			'password'              => '',
-			'agree'                 => 0
+			'agree'                 => 0,
+			'create_account'        => 0,
+			'call_me'               => 0,
+			'privacy_agree'         => 0
 		];
 
 		$post_info = $this->request->post + $required;
 
 		// Force account requires subscript or is a downloadable product.
 		if ($this->cart->hasDownload() || $this->cart->hasSubscription() || !$this->config->get('config_checkout_guest')) {
+			$post_info['account'] = 1;
+			$post_info['create_account'] = 1; // Also set create_account flag
+		}
+		
+		// If create_account is checked, set account to 1
+		if ($post_info['create_account']) {
 			$post_info['account'] = 1;
 		}
 
@@ -268,8 +320,16 @@ class Register extends \Opencart\System\Engine\Controller {
 				$json['error']['lastname'] = $this->language->get('error_lastname');
 			}
 
-			if (!oc_validate_email($post_info['email'])) {
-				$json['error']['email'] = $this->language->get('error_email');
+			// Validate email if account creation is requested
+			if ($post_info['create_account'] || $post_info['account']) {
+				if (!oc_validate_email($post_info['email'])) {
+					$json['error']['email'] = $this->language->get('error_email');
+				}
+			} elseif ($post_info['create_account']) {
+				// If create_account checkbox is checked but email is empty
+				if (empty($post_info['email'])) {
+					$json['error']['email'] = $this->language->get('error_create_account_email');
+				}
 			}
 
 			// Customer
@@ -290,6 +350,21 @@ class Register extends \Opencart\System\Engine\Controller {
 
 			if ($this->config->get('config_telephone_required') && !oc_validate_length($post_info['telephone'], 3, 32)) {
 				$json['error']['telephone'] = $this->language->get('error_telephone');
+			}
+			
+			// Validate account creation requirements
+			if ($post_info['create_account']) {
+				if (empty($post_info['email'])) {
+					$json['error']['email'] = $this->language->get('error_create_account_email');
+				}
+				if (empty($post_info['password'])) {
+					$json['error']['password'] = $this->language->get('error_create_account_password');
+				}
+			}
+			
+			// Validate privacy agreement (required)
+			if (!$post_info['privacy_agree']) {
+				$json['error']['privacy_agree'] = $this->language->get('error_privacy_agree');
 			}
 
 			// Custom field validation
@@ -359,6 +434,11 @@ class Register extends \Opencart\System\Engine\Controller {
 
 					if (!oc_validate_length($post_info['shipping_lastname'], 1, 32)) {
 						$json['error']['shipping_lastname'] = $this->language->get('error_lastname');
+					}
+					
+					// Validate Ukraine region (required for shipping)
+					if (empty($post_info['shipping_region'])) {
+						$json['error']['shipping_region'] = $this->language->get('error_region');
 					}
 				}
 
@@ -660,6 +740,20 @@ class Register extends \Opencart\System\Engine\Controller {
 
 					// Requires Approval
 					if (!$customer_group_info['approval']) {
+						// Add Ukraine region to shipping address
+						if (!empty($post_info['shipping_region'])) {
+							$shipping_address_data['region'] = $post_info['shipping_region'];
+						}
+						// Add Nova Poshta fields if present
+						if (isset($post_info['ocnp_novaposhta_area'])) {
+							$shipping_address_data['ocnp_novaposhta_area'] = $post_info['ocnp_novaposhta_area'];
+						}
+						if (isset($post_info['ocnp_novaposhta_city'])) {
+							$shipping_address_data['ocnp_novaposhta_city'] = $post_info['ocnp_novaposhta_city'];
+						}
+						if (isset($post_info['ocnp_novaposhta_warehouse'])) {
+							$shipping_address_data['ocnp_novaposhta_warehouse'] = $post_info['ocnp_novaposhta_warehouse'];
+						}
 						$this->session->data['shipping_address'] = $shipping_address_data;
 					}
 				} elseif (!$customer_group_info['approval'] && $this->config->get('config_checkout_payment_address')) {
@@ -667,6 +761,10 @@ class Register extends \Opencart\System\Engine\Controller {
 
 					// Remove the address id so if the customer changes their mind and requires changing a different shipping address it will create a new address.
 					$this->session->data['shipping_address']['address_id'] = 0;
+					// Copy region if set
+					if (!empty($post_info['shipping_region'])) {
+						$this->session->data['shipping_address']['region'] = $post_info['shipping_region'];
+					}
 				}
 			}
 
@@ -689,6 +787,11 @@ class Register extends \Opencart\System\Engine\Controller {
 				$json['redirect'] = $this->url->link('account/success', 'language=' . $this->config->get('config_language'), true);
 			}
 
+			// Save additional fields to session
+			$this->session->data['create_account'] = $post_info['create_account'] ?? 0;
+			$this->session->data['call_me'] = $post_info['call_me'] ?? 0;
+			$this->session->data['privacy_agree'] = $post_info['privacy_agree'] ?? 0;
+			
 			unset($this->session->data['shipping_method']);
 			unset($this->session->data['shipping_methods']);
 			unset($this->session->data['payment_method']);

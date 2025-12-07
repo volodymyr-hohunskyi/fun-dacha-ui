@@ -183,6 +183,27 @@ class Confirm extends \Opencart\System\Engine\Controller {
 			} else {
 				$order_data['comment'] = '';
 			}
+			
+			// Additional fields
+			$order_data['call_me'] = isset($this->session->data['call_me']) ? (int)$this->session->data['call_me'] : 0;
+			$order_data['privacy_agree'] = isset($this->session->data['privacy_agree']) ? (int)$this->session->data['privacy_agree'] : 0;
+			
+			// Add Nova Poshta data to order comment if available
+			if (isset($this->session->data['shipping_address']['ocnp_novaposhta_warehouse'])) {
+				$np_info = [];
+				if (isset($this->session->data['shipping_address']['ocnp_novaposhta_area'])) {
+					$np_info[] = 'Область: ' . $this->session->data['shipping_address']['ocnp_novaposhta_area'];
+				}
+				if (isset($this->session->data['shipping_address']['ocnp_novaposhta_city'])) {
+					$np_info[] = 'Місто: ' . $this->session->data['shipping_address']['ocnp_novaposhta_city'];
+				}
+				if (isset($this->session->data['shipping_address']['ocnp_novaposhta_warehouse'])) {
+					$np_info[] = 'Відділення: ' . $this->session->data['shipping_address']['ocnp_novaposhta_warehouse'];
+				}
+				if (!empty($np_info)) {
+					$order_data['comment'] .= (!empty($order_data['comment']) ? "\n\n" : '') . 'Nova Poshta: ' . implode(', ', $np_info);
+				}
+			}
 
 			$total_data = [
 				'totals' => $totals,

@@ -99,11 +99,52 @@ class Novaposhta extends \Opencart\System\Engine\Model {
 		$this->updateDescriptions($query->rows);
 		return $query->rows;
 	}
+	
+	/**
+	 * Get cities by area description (Ukraine region name)
+	 * Matches Ukraine region names to Nova Poshta area descriptions
+	 */
+	public function getCitiesByAreaDescription(string $area_description): array {
+		// Normalize area description: remove " область" suffix and "м. " prefix if present
+		$normalized = trim(str_replace([' область', 'м. ', 'м.'], '', $area_description));
+		
+		// Try exact match first
+		$area_query = $this->db->query("SELECT Ref FROM " . DB_PREFIX . self::AREAS_TABLE . " WHERE Description = '" . $this->db->escape($area_description) . "' OR DescriptionRu = '" . $this->db->escape($area_description) . "' LIMIT 1");
+		
+		// If not found, try normalized match
+		if ($area_query->num_rows == 0) {
+			$area_query = $this->db->query("SELECT Ref FROM " . DB_PREFIX . self::AREAS_TABLE . " WHERE Description LIKE '%" . $this->db->escape($normalized) . "%' OR DescriptionRu LIKE '%" . $this->db->escape($normalized) . "%' LIMIT 1");
+		}
+		
+		// If still not found, try matching without "область" suffix in DB
+		if ($area_query->num_rows == 0) {
+			$area_query = $this->db->query("SELECT Ref FROM " . DB_PREFIX . self::AREAS_TABLE . " WHERE Description LIKE '%" . $this->db->escape($normalized) . "%' OR DescriptionRu LIKE '%" . $this->db->escape($normalized) . "%' LIMIT 1");
+		}
+		
+		if ($area_query->num_rows > 0) {
+			$area_ref = $area_query->row['Ref'];
+			// Get cities by area Ref
+			$query = $this->db->query("SELECT * FROM " . DB_PREFIX . self::CITIES_TABLE . " WHERE Area = '" . $this->db->escape($area_ref) . "'");
+			$this->updateDescriptions($query->rows);
+			return $query->rows;
+		}
+		
+		return [];
+	}
 
 	public function getWarehousesByCityID(string $city): array {
 		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . self::WAREHOUSES_TABLE . " WHERE CityRef = '" . $this->db->escape($city) . "'");
 		$this->updateDescriptions($query->rows);
 
+		return $query->rows;
+	}
+	
+	/**
+	 * Get warehouses by city Ref (by city description/name)
+	 */
+	public function getWarehousesByCityRef(string $city_ref): array {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . self::WAREHOUSES_TABLE . " WHERE CityRef = '" . $this->db->escape($city_ref) . "'");
+		$this->updateDescriptions($query->rows);
 		return $query->rows;
 	}
 

@@ -1,3 +1,4 @@
+<h3 class="mb-3">Деталі замовлення</h3>
 <div class="table-responsive">
   <table class="table table-bordered table-hover">
     <thead>
@@ -52,7 +53,5 @@
 <div id="checkout-payment">
   {% if payment %}
     {{ payment }}
-  {% else %}
-    <div class="text-end"><button type="button" class="btn btn-primary" disabled>{{ button_confirm }}</button></div>
   {% endif %}
 </div>

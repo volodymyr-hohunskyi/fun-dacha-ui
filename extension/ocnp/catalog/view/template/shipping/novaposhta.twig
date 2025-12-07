@@ -1,21 +1,21 @@
-<div id="ocnp_novaposhta_area" class="form-group">
-   <label for="ocnp_novaposhta_area">{{text_ocnp_area_label}}</label>
-   <select onchange="OCNP_ShowCity();" class="form-control" name='ocnp_novaposhta_area'>
+<div id="ocnp_novaposhta_area" class="form-group col mb-3 required">
+   <label for="ocnp_novaposhta_area" class="form-label">{{text_ocnp_area_label}}</label>
+   <select onchange="OCNP_ShowCity();" class="form-select" name='ocnp_novaposhta_area' id="select-ocnp-area">
       <option value="">{{text_ocnp_select_area_placeholder}}</option>
       {% for area in areas %}
          <option id="{{area.Ref}}" value="{{area.Description}}">{{area.Description}}</option>
       {% endfor %}
    </select>
  </div>
- <div id="ocnp_novaposhta_city" class="form-group" style="display: none;">
-   <label for="ocnp_novaposhta_city">{{text_ocnp_city_label}}</label>
-   <select onchange="OCNP_ShowWarehouse();" class="form-control" name="ocnp_novaposhta_city">
+ <div id="ocnp_novaposhta_city" class="form-group col mb-3 required" style="display: none;">
+   <label for="ocnp_novaposhta_city" class="form-label">{{text_ocnp_city_label}}</label>
+   <select onchange="OCNP_ShowWarehouse();" class="form-select" name="ocnp_novaposhta_city" id="select-ocnp-city">
       <option value="">{{text_ocnp_select_city_placeholder}}</option>
    </select>
  </div>
- <div id="ocnp_novaposhta_warehouse" class="form-group" style="display: none;">
-   <label for="ocnp_novaposhta_warehouse">{{text_ocnp_warehouse_label}}</label>
-   <select class="form-control" name="ocnp_novaposhta_warehouse">
+ <div id="ocnp_novaposhta_warehouse" class="form-group col mb-3 required" style="display: none;">
+   <label for="ocnp_novaposhta_warehouse" class="form-label">{{text_ocnp_warehouse_label}}</label>
+   <select class="form-select" name="ocnp_novaposhta_warehouse" id="select-ocnp-warehouse" onchange="if(typeof updateShippingFieldsFromNP === 'function') updateShippingFieldsFromNP();">
       <option value="">{{text_ocnp_select_warehouse_placeholder}}</option>
    </select>
  </div>

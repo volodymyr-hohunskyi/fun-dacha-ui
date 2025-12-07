@@ -11,12 +11,17 @@ class Novaposhta extends \Opencart\System\Engine\Controller {
 	public function getCities(): void {
 		$response_data = ['success' => false];
 
+		// Support both area_id (Ref) and area_description (Ukraine region name)
 		if (isset($this->request->post['area_id'])) {
 			$area_id = $this->request->post['area_id'];
-
 			$this->load->model(self::EXTENSION_PATH);
 			$cities = $this->model_extension_ocnp_shipping_novaposhta->getCitiesByAreaID($area_id);
-			
+			$response_data['success'] = true;
+			$response_data['cities'] = $cities;
+		} elseif (isset($this->request->post['area_description'])) {
+			$area_description = $this->request->post['area_description'];
+			$this->load->model(self::EXTENSION_PATH);
+			$cities = $this->model_extension_ocnp_shipping_novaposhta->getCitiesByAreaDescription($area_description);
 			$response_data['success'] = true;
 			$response_data['cities'] = $cities;
 		}
@@ -27,12 +32,22 @@ class Novaposhta extends \Opencart\System\Engine\Controller {
 	public function getWarehouses(): void {
 		$response_data = ['success' => false];
 
+		// Support both city_id (Ref) and city_ref
 		if (isset($this->request->post['city_id'])) {
 			$city_id = $this->request->post['city_id'];
-
 			$this->load->model(self::EXTENSION_PATH);
-			$warehouses = $this->model_extension_ocnp_shipping_novaposhta->getWarehousesByCityID($city_id);
-			
+			// Try by city ID first (Ref)
+			$warehouses = $this->model_extension_ocnp_shipping_novaposhta->getWarehousesByCityRef($city_id);
+			if (empty($warehouses)) {
+				// Fallback to old method
+				$warehouses = $this->model_extension_ocnp_shipping_novaposhta->getWarehousesByCityID($city_id);
+			}
+			$response_data['success'] = true;
+			$response_data['warehouses'] = $warehouses;
+		} elseif (isset($this->request->post['city_ref'])) {
+			$city_ref = $this->request->post['city_ref'];
+			$this->load->model(self::EXTENSION_PATH);
+			$warehouses = $this->model_extension_ocnp_shipping_novaposhta->getWarehousesByCityRef($city_ref);
 			$response_data['success'] = true;
 			$response_data['warehouses'] = $warehouses;
 		}

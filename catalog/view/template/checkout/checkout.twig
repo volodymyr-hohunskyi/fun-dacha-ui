@@ -1,5 +1,5 @@
 {{ header }}
-<div id="checkout-checkout" class="container">
+<div id="checkout-checkout" class="container" style="padding-bottom: 120px;">
   <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
       <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
@@ -23,10 +23,8 @@
           </div>
         {% endif %}
         <div class="col">
-          {% if shipping_method %}
-            <div id="checkout-shipping-method" class="mb-3">{{ shipping_method }}</div>
-          {% endif %}
-          <div id="checkout-payment-method" class="mb-4">{{ payment_method }}</div>
+          {# Shipping method section removed - using only Nova Poshta extension #}
+          <div id="checkout-payment-method" class="mb-4" style="display: none;">{{ payment_method }}</div>
           <div id="checkout-confirm">{{ confirm }}</div>
         </div>
       </div>
@@ -34,5 +32,22 @@
     {{ content_bottom }}
   </div>
   {{ column_right }}
+</div>
+{# Floating footer with confirm button - always visible, pinned to bottom #}
+<div id="checkout-floating-footer" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #dee2e6; padding: 15px 0; z-index: 1050; box-shadow: 0 -2px 10px rgba(0,0,0,0.1);">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-md-6">
+        <div class="form-check form-switch form-switch-lg mb-0">
+          <input type="checkbox" name="privacy_agree" value="1" id="input-privacy-agree-footer" class="form-check-input"/>
+          <label for="input-privacy-agree-footer" class="form-check-label"><strong>Я ознайомився(-лась) та згоден(-на) з Політикою конфіденційності</strong></label>
+        </div>
+        <div id="error-privacy-agree-footer" class="invalid-feedback" style="display: none;"></div>
+      </div>
+      <div class="col-md-6 text-end">
+        <button type="button" id="button-confirm-footer" class="btn btn-primary btn-lg" disabled>Підтвердити замовлення</button>
+      </div>
+    </div>
+  </div>
 </div>
 {{ footer }}

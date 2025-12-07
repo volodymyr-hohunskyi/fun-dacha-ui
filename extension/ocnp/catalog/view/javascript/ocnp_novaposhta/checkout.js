@@ -195,4 +195,39 @@ function OCNP_ShowWarehouse(){
    var warehouse = new OCNP_Warehouse();
 
    warehouse.show(city.getSelectedID());
+   
+   // Update hidden shipping fields when warehouse is selected
+   if (typeof updateShippingFieldsFromNP === 'function') {
+       updateShippingFieldsFromNP();
+   }
 }
+
+// Function to update shipping address fields from Nova Poshta selection
+function updateShippingFieldsFromNP() {
+   var area = document.getElementById('ocnp_novaposhta_area');
+   var city = document.getElementById('ocnp_novaposhta_city');
+   var warehouse = document.getElementById('ocnp_novaposhta_warehouse');
+   
+   if (area && city && warehouse) {
+       var areaSelect = area.getElementsByTagName('select')[0];
+       var citySelect = city.getElementsByTagName('select')[0];
+       var warehouseSelect = warehouse.getElementsByTagName('select')[0];
+       
+       if (areaSelect && citySelect && warehouseSelect) {
+           var selectedArea = areaSelect.options[areaSelect.selectedIndex];
+           var selectedCity = citySelect.options[citySelect.selectedIndex];
+           var selectedWarehouse = warehouseSelect.options[warehouseSelect.selectedIndex];
+           
+           // Update hidden fields
+           if (selectedCity) {
+               $('input[name="shipping_city"]').val(selectedCity.value || selectedCity.text);
+           }
+           if (selectedWarehouse) {
+               $('input[name="shipping_address_1"]').val(selectedWarehouse.value || selectedWarehouse.text);
+           }
+       }
+   }
+}
+
+// Make function available globally
+window.updateShippingFieldsFromNP = updateShippingFieldsFromNP;

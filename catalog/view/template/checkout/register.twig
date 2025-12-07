@@ -1,18 +1,7 @@
 <form id="form-register">
-  <p>{{ text_login }}</p>
   <fieldset>
-    <legend>{{ heading_title }}</legend>
+    <legend>Особисті дані</legend>
     <div class="row">
-      {% if config_checkout_guest %}
-        <div class="col mb-3 required">
-          <div class="form-check form-check-inline">
-            <input type="radio" name="account" value="1" id="input-register" class="form-check-input"{% if account %} checked{% endif %}/> <label for="input-register" class="form-check-label">{{ text_register }}</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input type="radio" name="account" value="0" id="input-guest" class="form-check-input"{% if not account %} checked{% endif %}/> <label for="input-guest" class="form-check-label">{{ text_guest }}</label>
-          </div>
-        </div>
-      {% endif %}
       <div class="col mb-3{% if customer_groups|length <= 1 %} d-none{% endif %}">
         <label class="form-label">{{ entry_customer_group }}</label>
         <select name="customer_group_id" id="input-customer-group" class="form-select">
@@ -33,18 +22,37 @@
         <input type="text" name="lastname" value="{{ lastname }}" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control"/>
         <div id="error-lastname" class="invalid-feedback"></div>
       </div>
+      {# Phone Number field - always visible, required for checkout, goes to the left #}
       <div class="col mb-3 required">
-        <label for="input-email" class="form-label">{{ entry_email }}</label>
-        <input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
-        <div id="error-email" class="invalid-feedback"></div>
+        <label for="input-telephone" class="form-label">{{ entry_telephone }}</label>
+        <input type="text" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control"/>
+        <div id="error-telephone" class="invalid-feedback"></div>
       </div>
-      {% if config_telephone_display %}
-        <div class="col mb-3{% if config_telephone_required %} required{% endif %}">
-          <label for="input-telephone" class="form-label">{{ entry_telephone }}</label>
-          <input type="text" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control"/>
-          <div id="error-telephone" class="invalid-feedback"></div>
+    </div>
+    {# Створити обліковий запис toggle - below телефон, full width, aligned left #}
+    <div class="row">
+      <div class="col-12 mb-3">
+        <div class="form-check form-switch">
+          <input type="checkbox" name="create_account" value="1" id="input-create-account" class="form-check-input"/>
+          <label for="input-create-account" class="form-check-label"><strong>{{ text_create_account }}</strong></label>
         </div>
-      {% endif %}
+      </div>
+      {# Email and Password fields - aligned with Створити обліковий запис, stacked vertically, no required asterisks #}
+      <div id="password-container" class="col-12" style="display: none;">
+        <div class="mb-3" id="email-container">
+          <label for="input-email" class="form-label">{{ entry_email }}</label>
+          <input type="email" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
+          <div id="error-email" class="invalid-feedback"></div>
+        </div>
+        <div class="mb-3" id="password">
+          <label for="input-password" class="form-label">{{ entry_password }}</label>
+          <input type="password" name="password" value="" placeholder="{{ entry_password }}" id="input-password" class="form-control"/>
+          <div id="error-password" class="invalid-feedback"></div>
+        </div>
+        <div class="mb-3">{{ captcha }}</div>
+      </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-2">
       {% for custom_field in custom_fields %}
 
         {% if custom_field.location == 'account' %}
@@ -294,7 +302,7 @@
     </fieldset>
   {% endif %}
   <fieldset id="shipping-address" style="display: {% if not config_checkout_payment_address %}block{% else %}none{% endif %};">
-    <legend>{{ text_shipping_address }}</legend>
+    <legend>Оплата та Доставка</legend>
     <div class="row row-cols-1 row-cols-md-2">
       {% if config_checkout_payment_address %}
         <div class="col mb-3 required">
@@ -308,49 +316,43 @@
           <div id="error-shipping-lastname" class="invalid-feedback"></div>
         </div>
       {% endif %}
-      <div class="col mb-3">
-        <label for="input-shipping-company" class="form-label">{{ entry_company }}</label>
-        <input type="text" name="shipping_company" value="{{ shipping_company }}" placeholder="{{ entry_company }}" id="input-shipping-company" class="form-control"/>
-      </div>
+      {# Hidden fields for compatibility - values will be set from Nova Poshta selection #}
+      <input type="hidden" name="shipping_company" value=""/>
+      <input type="hidden" name="shipping_address_1" value=""/>
+      <input type="hidden" name="shipping_address_2" value=""/>
+      <input type="hidden" name="shipping_city" value=""/>
+      <input type="hidden" name="shipping_postcode" value=""/>
+      
+      {# Область (Region) - First field #}
       <div class="col mb-3 required">
-        <label for="input-shipping-address-1" class="form-label">{{ entry_address_1 }}</label>
-        <input type="text" name="shipping_address_1" value="{{ shipping_address_1 }}" placeholder="{{ entry_address_1 }}" id="input-shipping-address-1" class="form-control"/>
-        <div id="error-shipping-address-1" class="invalid-feedback"></div>
-      </div>
-      <div class="col mb-3">
-        <label for="input-shipping-address-2" class="form-label">{{ entry_address_2 }}</label>
-        <input type="text" name="shipping_address_2" value="{{ shipping_address_2 }}" placeholder="{{ entry_address_2 }}" id="input-shipping-address-2" class="form-control"/>
-      </div>
-      <div class="col mb-3 required">
-        <label for="input-shipping-city" class="form-label">{{ entry_city }}</label>
-        <input type="text" name="shipping_city" value="{{ shipping_city }}" placeholder="{{ entry_city }}" id="input-shipping-city" class="form-control"/>
-        <div id="error-shipping-city" class="invalid-feedback"></div>
-      </div>
-      <div class="col mb-3 required">
-        <label for="input-shipping-postcode" class="form-label">{{ entry_postcode }}</label>
-        <input type="text" name="shipping_postcode" value="{{ shipping_postcode }}" placeholder="{{ entry_postcode }}" id="input-shipping-postcode" class="form-control"/>
-        <div id="error-shipping-postcode" class="invalid-feedback"></div>
-      </div>
-      <div class="col mb-3 required">
-        <label for="input-shipping-country" class="form-label">{{ entry_country }}</label>
-        <select name="shipping_country_id" id="input-shipping-country" class="form-select">
+        <label for="input-shipping-region" class="form-label">{{ entry_region }}</label>
+        <select name="shipping_region" id="input-shipping-region" class="form-select">
           <option value="">{{ text_select }}</option>
-          {% for country in countries %}
-            <option value="{{ country.country_id }}"{% if country.country_id == shipping_country_id %} selected{% endif %}>{{ country.name }}</option>
+          {% for region in ukraine_regions %}
+            <option value="{{ region }}"{% if region == shipping_region %} selected{% endif %}>{{ region }}</option>
           {% endfor %}
         </select>
-        <div id="error-shipping-country" class="invalid-feedback"></div>
+        <div id="error-shipping-region" class="invalid-feedback"></div>
       </div>
-      <div class="col mb-3 required">
-        <label for="input-shipping-zone" class="form-label">{{ entry_zone }}</label>
-        <select name="shipping_zone_id" id="input-shipping-zone" class="form-select" data-oc-value="{{ shipping_zone_id }}">
-          <option value="">{{ text_select }}</option>
-          {% for zone in shipping_zones %}
-            <option value="{{ zone.zone_id }}"{% if zone.zone_id == shipping_zone_id %} selected{% endif %}>{{ zone.name }}</option>
-          {% endfor %}
+      
+      {# Місто (City) - Second field, populated via AJAX - always visible #}
+      <div class="col mb-3 required" id="shipping-city-container" style="display: block;">
+        <label for="input-shipping-city-np" class="form-label">Місто</label>
+        <select name="ocnp_novaposhta_city" id="input-shipping-city-np" class="form-select">
+          <option value="">Оберіть місто</option>
         </select>
-        <div id="error-shipping-zone" class="invalid-feedback"></div>
+        <div id="error-shipping-city-np" class="invalid-feedback"></div>
       </div>
+      
+      {# Відділення (Warehouse) - Third field, populated via AJAX - always visible #}
+      <div class="col mb-3 required" id="shipping-warehouse-container" style="display: block;">
+        <label for="input-shipping-warehouse-np" class="form-label">Відділення</label>
+        <select name="ocnp_novaposhta_warehouse" id="input-shipping-warehouse-np" class="form-select">
+          <option value="">Оберіть відділення</option>
+        </select>
+        <div id="error-shipping-warehouse-np" class="invalid-feedback"></div>
+      </div>
+      
       {% for custom_field in custom_fields %}
         {% if custom_field.location == 'address' %}
 
@@ -450,55 +452,86 @@
       {% endfor %}
     </div>
   </fieldset>
-  <div id class="row row-cols-1 row-cols-md-2">
-    <div id="password" class="col mb-3 required">
-      <fieldset>
-        <legend>{{ text_your_password }}</legend>
-        <div class="row">
-          <div class="col mb-3 required">
-            <label for="input-password" class="form-label">{{ entry_password }}</label> <input type="password" name="password" value="" placeholder="{{ entry_password }}" id="input-password" class="form-control"/>
-            <div id="error-password" class="invalid-feedback"></div>
-          </div>
-        </div>
-      </fieldset>
-    </div>
-    <div class="col mb-3 required">{{ captcha }}</div>
-  </div>
-  <div id class="row">
-    <div class="col">
-      <div class="form-check form-switch form-switch-lg">
-        <label for="input-newsletter" class="form-check-label">{{ entry_newsletter }}</label>
-        <input type="checkbox" name="newsletter" value="1" id="input-newsletter" class="form-check-input"/>
+  
+  {# Payment disclaimer - same alignment and width as comment section #}
+  <div class="row mt-3">
+    <div class="col-12 mb-3">
+      <div class="alert alert-warning" style="margin-bottom: 0;">
+        <i class="fa-solid fa-circle-exclamation"></i> <strong>Оплата при отриманні (післяплата) здійснюється за тарифами Нової Пошти. Комісія складає 2% від суми замовлення + 20 грн за оформлення переказу.</strong>
       </div>
-      {% if text_agree %}
-        <div id="register-agree" class="form-check form-switch form-switch-lg">
-          <label for="input-register-agree" class="form-check-label">{{ text_agree }}</label>
-          <input type="checkbox" name="agree" value="1" id="input-register-agree" class="form-check-input"{% if agree %} checked{% endif %}/>
-        </div>
-      {% endif %}
-      <button type="submit" id="button-register" class="btn btn-primary mt-2">{{ button_continue }}</button>
+    </div>
+  </div>
+  
+  {# Передзвоніть мені - above comment #}
+  <div class="row mt-3">
+    <div class="col-12 mb-3">
+      <div class="form-check form-switch">
+        <input type="checkbox" name="call_me" value="1" id="input-call-me" class="form-check-input"{% if call_me %} checked{% endif %}/>
+        <label for="input-call-me" class="form-check-label">{{ text_call_me }}</label>
+      </div>
+    </div>
+  </div>
+  
+  {# Order comment - full width, under Передзвоніть мені #}
+  <div class="row mt-3">
+    <div class="col-12 mb-3">
+      <label for="input-comment-register" class="form-label"><strong>Додайте коментар до вашого замовлення</strong></label>
+      <textarea name="comment" rows="4" id="input-comment-register" class="form-control" placeholder="Додайте коментар до вашого замовлення"></textarea>
     </div>
   </div>
 </form>
 <script type="text/javascript"><!--
-// Account
+// Account creation toggle - email/password optional when OFF, no required asterisks
+$('#input-create-account').on('change', function() {
+    if ($(this).is(':checked')) {
+        // Show email/password fields when account creation is enabled
+        $('#password-container').show();
+        // Fields are required for validation but no asterisks shown
+        $('#input-email').prop('required', true);
+        $('#input-password').prop('required', true);
+    } else {
+        // Hide email/password fields when account creation is disabled
+        $('#password-container').hide();
+        // Remove required attribute when account creation is unchecked (fields are optional)
+        $('#input-email').prop('required', false);
+        $('#input-password').prop('required', false);
+        // Clear values when hiding
+        $('#input-email').val('');
+        $('#input-password').val('');
+    }
+    // Re-validate button state after toggle change
+    if (typeof validateOrderButton === 'function') {
+        setTimeout(validateOrderButton, 100);
+    }
+});
+
+// Account (original radio buttons - keep for compatibility)
 $('input[name=\'account\']').on('click', function() {
     if ($(this).val() == 1) {
-        $('#password').removeClass('d-none');
+        $('#password-container').show();
+        $('#password').addClass('required');
+        $('#email-field-container').show().addClass('required');
+        $('#input-create-account').prop('checked', true);
     } else {
-        // If guest hide password field
-        $('#password').addClass('d-none');
+        $('#password-container').hide();
+        $('#password').removeClass('required');
+        $('#email-field-container').removeClass('required').hide();
+        $('#input-create-account').prop('checked', false);
     }
 
     if ($(this).val() == 1) {
         $('#register-agree').removeClass('d-none');
     } else {
-        // If guest hide register agree field
         $('#register-agree').addClass('d-none');
     }
 });
 
-$('input[name=\'account\']:checked').trigger('click');
+// Initialize on page load
+if ($('input[name=\'account\']').length) {
+    $('input[name=\'account\']:checked').trigger('click');
+} else {
+    $('#input-create-account').trigger('change');
+}
 
 // Customer Group
 $('#input-customer-group').on('change', function() {
@@ -545,6 +578,156 @@ $('#input-address-match').on('change', function() {
     }
 });
 
+// Nova Poshta AJAX loading: Region → City → Warehouse
+$(document).ready(function() {
+    var language = '{{ language }}';
+    
+    // When region is selected, load cities (containers always visible)
+    $('#input-shipping-region').on('change', function() {
+        var region = $(this).val();
+        var citySelect = $('#input-shipping-city-np');
+        var warehouseSelect = $('#input-shipping-warehouse-np');
+        var cityContainer = $('#shipping-city-container');
+        var warehouseContainer = $('#shipping-warehouse-container');
+        
+        // Always keep containers visible - no hiding
+        cityContainer.show();
+        warehouseContainer.show();
+        
+        // Reset city and warehouse
+        citySelect.empty().append('<option value="">Оберіть місто</option>');
+        warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+        
+        if (region) {
+            // Load cities via AJAX
+            $.ajax({
+                url: 'index.php?route=extension/ocnp/shipping/novaposhta.getCities&language=' + language,
+                type: 'POST',
+                dataType: 'json',
+                data: { area_description: region },
+                success: function(response) {
+                    if (response.success && response.cities && response.cities.length > 0) {
+                        citySelect.empty().append('<option value="">Оберіть місто</option>');
+                        $.each(response.cities, function(index, city) {
+                            var option = $('<option></option>')
+                                .attr('value', city.Description)
+                                .attr('data-ref', city.Ref)
+                                .text(city.Description);
+                            citySelect.append(option);
+                        });
+                    } else {
+                        citySelect.empty().append('<option value="">Міста не знайдено</option>');
+                    }
+                    // Re-validate button after cities load
+                    if (typeof validateOrderButton === 'function') {
+                        setTimeout(validateOrderButton, 100);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Помилка завантаження міст:', error);
+                    citySelect.empty().append('<option value="">Помилка завантаження</option>');
+                }
+            });
+        }
+    });
+    
+    // When city is selected, load warehouses (container always visible)
+    $('#input-shipping-city-np').on('change', function() {
+        var selectedOption = $(this).find('option:selected');
+        var cityRef = selectedOption.data('ref');
+        var cityDescription = $(this).val();
+        var warehouseSelect = $('#input-shipping-warehouse-np');
+        var warehouseContainer = $('#shipping-warehouse-container');
+        
+        // Always keep warehouse container visible
+        warehouseContainer.show();
+        warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+        
+        if (cityRef) {
+            $.ajax({
+                url: 'index.php?route=extension/ocnp/shipping/novaposhta.getWarehouses&language=' + language,
+                type: 'POST',
+                dataType: 'json',
+                data: { city_ref: cityRef },
+                success: function(response) {
+                    if (response.success && response.warehouses && response.warehouses.length > 0) {
+                        warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+                        $.each(response.warehouses, function(index, warehouse) {
+                            var option = $('<option></option>')
+                                .attr('value', warehouse.Description)
+                                .attr('data-ref', warehouse.Ref)
+                                .text(warehouse.Description);
+                            warehouseSelect.append(option);
+                        });
+                        
+                        // Update hidden shipping fields
+                        $('input[name="shipping_city"]').val(cityDescription);
+                    } else {
+                        warehouseSelect.empty().append('<option value="">Відділення не знайдено</option>');
+                    }
+                    // Re-validate button after warehouses load
+                    if (typeof validateOrderButton === 'function') {
+                        setTimeout(validateOrderButton, 100);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Помилка завантаження відділень:', error);
+                    warehouseSelect.empty().append('<option value="">Помилка завантаження</option>');
+                }
+            });
+        }
+    });
+    
+    // When warehouse is selected, update hidden address field and validate
+    $('#input-shipping-warehouse-np').on('change', function() {
+        var warehouseDescription = $(this).val();
+        if (warehouseDescription) {
+            $('input[name="shipping_address_1"]').val(warehouseDescription);
+        }
+        // Re-validate button after warehouse selection
+        if (typeof validateOrderButton === 'function') {
+            setTimeout(validateOrderButton, 50);
+        }
+    });
+    
+    // Ensure containers are always visible on page load
+    $('#shipping-city-container, #shipping-warehouse-container').show();
+    
+    // Trigger change if region is already selected on page load
+    if ($('#input-shipping-region').val()) {
+        $('#input-shipping-region').trigger('change');
+    }
+    
+    // Comment saving - moved from payment_method section
+    var commentTimer = '';
+    $('#input-comment-register').on('keydown', function() {
+        $('#button-confirm').prop('disabled', true);
+        clearTimeout(commentTimer);
+        
+        commentTimer = setTimeout(function() {
+            chain.attach(function() {
+                return $.ajax({
+                    url: 'index.php?route=checkout/payment_method.comment&language=' + language,
+                    type: 'post',
+                    data: { comment: $('#input-comment-register').val() },
+                    dataType: 'json',
+                    contentType: 'application/x-www-form-urlencoded',
+                    success: function(json) {
+                        if (json['error']) {
+                            $('#button-confirm').prop('disabled', false);
+                        } else if (json['success']) {
+                            $('#button-confirm').prop('disabled', false);
+                        }
+                    },
+                    error: function() {
+                        $('#button-confirm').prop('disabled', false);
+                    }
+                });
+            });
+        }, 1000);
+    });
+});
+
 $('#form-register').on('submit', function(e) {
     e.preventDefault();
 
@@ -558,10 +741,10 @@ $('#form-register').on('submit', function(e) {
             data: $('#form-register').serialize(),
             contentType: 'application/x-www-form-urlencoded',
             beforeSend: function() {
-                $('#button-register').button('loading');
+                // No button to disable (button removed)
             },
             complete: function() {
-                $('#button-register').button('reset');
+                // No button to reset (button removed)
             },
             success: function(json) {
                 console.log(json);
@@ -587,20 +770,53 @@ $('#form-register').on('submit', function(e) {
                 if (json['success']) {
                     $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
 
-                    if ($('#input-register').prop('checked')) {
+                    if ($('#input-create-account').prop('checked') || $('#input-register').prop('checked')) {
                         $('input[name=\'account\']').prop('disabled', true);
                         $('#input-customer-group').prop('disabled', true);
                         $('#input-password').prop('disabled', true);
                         $('#input-captcha').prop('disabled', true);
                         $('#input-register-agree').prop('disabled', true);
+                        $('#input-create-account').prop('disabled', true);
                     }
 
                     $('#input-shipping-method').val('');
                     $('#input-payment-method').val('');
 
-                    $('#checkout-confirm').load('index.php?route=checkout/confirm.confirm&language={{ language }}');
+                    // Auto-save COD payment method if not already saved
+                    var paymentCode = $('#input-payment-code').val();
+                    if (paymentCode) {
+                        $.ajax({
+                            url: 'index.php?route=checkout/payment_method.save&language={{ language }}',
+                            type: 'post',
+                            data: { payment_method: paymentCode },
+                            dataType: 'json',
+                            success: function() {
+                                $('#checkout-confirm').load('index.php?route=checkout/confirm.confirm&language={{ language }}', function() {
+                                    // Re-validate button after confirm section loads
+                                    if (typeof validateOrderButton === 'function') {
+                                        setTimeout(validateOrderButton, 200);
+                                    }
+                                });
+                            },
+                            error: function() {
+                                $('#checkout-confirm').load('index.php?route=checkout/confirm.confirm&language={{ language }}', function() {
+                                    // Re-validate button after confirm section loads
+                                    if (typeof validateOrderButton === 'function') {
+                                        setTimeout(validateOrderButton, 200);
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        $('#checkout-confirm').load('index.php?route=checkout/confirm.confirm&language={{ language }}', function() {
+                            // Re-validate button after confirm section loads
+                            if (typeof validateOrderButton === 'function') {
+                                setTimeout(validateOrderButton, 200);
+                            }
+                        });
+                    }
                 }
-            },
+                },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
             }
