@@ -257,6 +257,11 @@ class PaymentMethod extends \Opencart\System\Engine\Controller {
 			$comment = '';
 		}
 
+		// Save callback preference
+		if (isset($this->request->post['call_me'])) {
+			$this->session->data['call_me'] = (int)$this->request->post['call_me'];
+		}
+
 		// Save comment to session first
 		$this->session->data['comment'] = $comment;
 

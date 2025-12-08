@@ -47,8 +47,72 @@
     </tfoot>
   </table>
 </div>
+
+{# Comment and callback section - for all users (guests and logged in) #}
+<div class="mt-4 mb-4">
+  <h4>Додаткова інформація</h4>
+  
+  {# Callback checkbox #}
+  <div class="mb-3">
+    <div class="form-check form-switch">
+      <input type="checkbox" name="call_me" value="1" id="input-call-me-confirm" class="form-check-input"{% if call_me %} checked{% endif %}/>
+      <label for="input-call-me-confirm" class="form-check-label"><strong>Передзвоніть мені для уточнення деталей</strong></label>
+    </div>
+  </div>
+  
+  {# Order comment #}
+  <div class="mb-3">
+    <label for="input-comment-confirm" class="form-label"><strong>Додайте коментар до вашого замовлення</strong></label>
+    <textarea name="comment" rows="4" id="input-comment-confirm" class="form-control" placeholder="Додайте коментар до вашого замовлення">{{ comment }}</textarea>
+  </div>
+</div>
+
 <div id="checkout-payment">
   {% if payment %}
     {{ payment }}
   {% endif %}
 </div>
+
+<script type="text/javascript"><!--
+// Save comment and callback when changed
+$(document).ready(function() {
+    var language = '{{ language }}';
+    var commentTimer = '';
+    
+    // Save comment
+    $('#input-comment-confirm').on('keydown', function() {
+        clearTimeout(commentTimer);
+        
+        commentTimer = setTimeout(function() {
+            $.ajax({
+                url: 'index.php?route=checkout/payment_method.comment&language=' + language,
+                type: 'post',
+                dataType: 'json',
+                data: { comment: $('#input-comment-confirm').val() },
+                success: function(json) {
+                    // Comment saved silently
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    console.log('Error saving comment:', thrownError);
+                }
+            });
+        }, 500);
+    });
+    
+    // Save callback preference
+    $('#input-call-me-confirm').on('change', function() {
+        $.ajax({
+            url: 'index.php?route=checkout/payment_method.comment&language=' + language,
+            type: 'post',
+            dataType: 'json',
+            data: { call_me: $(this).is(':checked') ? 1 : 0 },
+            success: function(json) {
+                // Callback preference saved silently
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.log('Error saving callback preference:', thrownError);
+            }
+        });
+    });
+});
+//--></script>

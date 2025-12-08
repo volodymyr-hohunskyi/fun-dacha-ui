@@ -34,6 +34,17 @@
   {{ column_right }}
 </div>
 {# Floating footer with confirm button - always visible, pinned to bottom #}
+<style>
+#button-confirm-footer {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    opacity: 1 !important;
+}
+#button-confirm-footer:not([disabled]) {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+</style>
 <div id="checkout-floating-footer" style="position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 2px solid #dee2e6; padding: 15px 0; z-index: 1050; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); pointer-events: auto;">
   <div class="container">
     <div class="row align-items-center">
@@ -45,7 +56,7 @@
         <div id="error-privacy-agree-footer" class="invalid-feedback" style="display: none;"></div>
       </div>
       <div class="col-md-6 text-end">
-        <button type="button" id="button-confirm-footer" class="btn btn-primary btn-lg" style="pointer-events: auto; cursor: pointer;">Підтвердити замовлення</button>
+        <button type="button" id="button-confirm-footer" class="btn btn-primary btn-lg" style="pointer-events: auto !important; cursor: pointer !important; opacity: 1 !important;">Підтвердити замовлення</button>
       </div>
     </div>
   </div>
@@ -122,38 +133,68 @@ window.validateOrderButton = function() {
         $('#error-privacy-agree-footer').text('Будь ласка, підтвердіть згоду з Політикою конфіденційності').show();
     }
     
-    // Rule 1: First Name and Last Name are not empty
-    var $firstname = $('#input-firstname');
-    var $lastname = $('#input-lastname');
+    // Rule 1: First Name and Last Name are not empty (check both register form and shipping address form)
+    // For logged-in users, these fields might be hidden - check if they exist and are visible
+    var $firstname = $('#input-firstname').filter(':visible, [type="hidden"]').first();
+    var $lastname = $('#input-lastname').filter(':visible, [type="hidden"]').first();
     
-    if (!$firstname.length || !$firstname.val() || $firstname.val().trim() === '') {
-        isValid = false;
-        showFieldError('firstname', 'Будь ласка, введіть ваше ім\'я');
+    // If register form exists, use those fields; otherwise check shipping address form
+    if (!$firstname.length || $firstname.attr('type') === 'hidden') {
+        $firstname = $('#input-shipping-firstname-hidden').first();
+    }
+    if (!$lastname.length || $lastname.attr('type') === 'hidden') {
+        $lastname = $('#input-shipping-lastname-hidden').first();
     }
     
-    if (!$lastname.length || !$lastname.val() || $lastname.val().trim() === '') {
-        isValid = false;
-        showFieldError('lastname', 'Будь ласка, введіть ваше прізвище');
+    // Only validate firstname/lastname if register form is visible (for guests)
+    // For logged-in users, these are pre-filled from account
+    if ($('#form-register').length && $('#form-register').is(':visible')) {
+        $firstname = $('#input-firstname').first();
+        $lastname = $('#input-lastname').first();
+        
+        if (!$firstname.length || !$firstname.val() || $firstname.val().trim() === '') {
+            isValid = false;
+            showFieldError('firstname', 'Будь ласка, введіть ваше ім\'я');
+        }
+        
+        if (!$lastname.length || !$lastname.val() || $lastname.val().trim() === '') {
+            isValid = false;
+            showFieldError('lastname', 'Будь ласка, введіть ваше прізвище');
+        }
     }
     
-    // Rule 2: Phone Number is valid and not empty
-    var $telephone = $('#input-telephone');
-    if ($telephone.length) {
+    // Rule 2: Phone Number is valid and not empty (check both register form and shipping address form)
+    var $telephone = $('#input-telephone').first();
+    if (!$telephone.length || !$telephone.is(':visible')) {
+        // Check shipping address form for logged-in users
+        $telephone = $('#input-shipping-telephone').first();
+    }
+    
+    if ($telephone.length && $telephone.is(':visible')) {
         var phoneValue = $telephone.val();
         if (!phoneValue || phoneValue.trim() === '') {
             isValid = false;
-            showFieldError('telephone', 'Будь ласка, введіть номер телефону');
+            var fieldId = $telephone.attr('id') ? $telephone.attr('id').replace('input-', '') : 'telephone';
+            showFieldError(fieldId, 'Будь ласка, введіть номер телефону');
         } else {
             // Basic phone validation: should contain at least 10 digits
             var phoneDigits = phoneValue.replace(/\D/g, '');
             if (phoneDigits.length < 10) {
                 isValid = false;
-                showFieldError('telephone', 'Телефон повинен містити мінімум 10 цифр');
+                var fieldId = $telephone.attr('id') ? $telephone.attr('id').replace('input-', '') : 'telephone';
+                showFieldError(fieldId, 'Телефон повинен містити мінімум 10 цифр');
             }
         }
     } else {
-        isValid = false;
-        showFieldError('telephone', 'Поле телефону обов\'язкове');
+        // Phone field not found or not visible - check if we're in checkout (might be in session)
+        // For logged-in users, phone might be in account already
+        if (!$('#form-register').length || !$('#form-register').is(':visible')) {
+            // Logged-in user - phone might be in account, skip validation
+        } else {
+            // Guest user - phone is required
+            isValid = false;
+            showFieldError('telephone', 'Поле телефону обов\'язкове');
+        }
     }
     
     // Rule 3: Region, City, and Nova Poshta Department are selected
@@ -211,16 +252,17 @@ window.validateOrderButton = function() {
         }
     }
     
-    // Enable/disable button based on validation (use data attribute instead of disabled prop to keep it clickable)
+    // Enable/disable button based on validation (button is always clickable, but visual state changes)
     if (isValid) {
         $footerButton.removeProp('disabled').removeClass('btn-secondary').addClass('btn-primary').attr('data-valid', 'true').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '1'});
         if ($confirmButton.length) {
             $confirmButton.removeProp('disabled').removeClass('btn-secondary').addClass('btn-primary').attr('data-valid', 'true').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '1'});
         }
     } else {
-        $footerButton.removeProp('disabled').removeClass('btn-primary').addClass('btn-secondary').attr('data-valid', 'false').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '0.6'});
+        // Button is still clickable, but visually indicates validation needs to pass
+        $footerButton.removeProp('disabled').removeClass('btn-primary').addClass('btn-secondary').attr('data-valid', 'false').css({'pointer-events': 'auto !important', 'cursor': 'pointer !important', 'opacity': '0.8'});
         if ($confirmButton.length) {
-            $confirmButton.removeProp('disabled').removeClass('btn-primary').addClass('btn-secondary').attr('data-valid', 'false').css({'pointer-events': 'auto', 'cursor': 'pointer', 'opacity': '0.6'});
+            $confirmButton.removeProp('disabled').removeClass('btn-primary').addClass('btn-secondary').attr('data-valid', 'false').css({'pointer-events': 'auto !important', 'cursor': 'pointer !important', 'opacity': '0.8'});
         }
     }
     
@@ -582,6 +624,25 @@ if (typeof window.handleConfirmClick !== 'function') {
 $(document).ready(function() {
     console.log('[checkout.twig] Document ready, initializing...');
     
+    // Ensure button is always clickable on page load
+    var $footerButton = $('#button-confirm-footer');
+    var $confirmButton = $('#button-confirm');
+    
+    // Remove disabled attribute and ensure clickability
+    $footerButton.removeProp('disabled').removeAttr('disabled').css({
+        'pointer-events': 'auto !important',
+        'cursor': 'pointer !important',
+        'opacity': '1 !important'
+    });
+    
+    if ($confirmButton.length) {
+        $confirmButton.removeProp('disabled').removeAttr('disabled').css({
+            'pointer-events': 'auto !important',
+            'cursor': 'pointer !important',
+            'opacity': '1 !important'
+        });
+    }
+    
     // Delay initial validation to allow form fields to load
     setTimeout(function() {
         // Run validation
@@ -601,8 +662,8 @@ $(document).ready(function() {
     });
     
     // Validate on required field changes (use event delegation for dynamically added fields)
-    // Real-time validation as user types or selects
-    $(document).on('change keyup input blur', '#input-firstname, #input-lastname, #input-telephone, #input-shipping-region, #input-shipping-city-np, #input-shipping-warehouse-np, #input-email, #input-password', function() {
+    // Real-time validation as user types or selects - for both guest and logged-in users
+    $(document).on('change keyup input blur', '#input-firstname, #input-lastname, #input-telephone, #input-shipping-firstname, #input-shipping-lastname, #input-shipping-telephone, #input-shipping-region, #input-shipping-city-np, #input-shipping-warehouse-np, #input-email, #input-password', function() {
         setTimeout(validateOrderButton, 50);
     });
     

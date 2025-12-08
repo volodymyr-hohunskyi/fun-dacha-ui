@@ -1,4 +1,4 @@
-<fieldset id="shipping-address" style="display: {% if payment_address_required and not addresses %}none{% else %}block{% endif %};">
+<fieldset id="shipping-address">
   <legend>{{ heading_title }}</legend>
   <div id="shipping-addresses" style="display: {% if addresses %}block{% else %}none{% endif %};">
     <div class="form-check">
@@ -23,58 +23,58 @@
   <div id="shipping-new" style="display: {% if not addresses %}block{% else %}none{% endif %};">
     <form id="form-shipping-address">
       <div class="row row-cols-1 row-cols-md-2">
+        {# Hidden fields for compatibility - values will be set from Nova Poshta selection #}
+        {# Customer name - get from session for logged in users #}
+        {% if customer.firstname %}
+          <input type="hidden" name="firstname" value="{{ customer.firstname }}" id="input-shipping-firstname-hidden"/>
+        {% else %}
+          <input type="hidden" name="firstname" value="" id="input-shipping-firstname-hidden"/>
+        {% endif %}
+        {% if customer.lastname %}
+          <input type="hidden" name="lastname" value="{{ customer.lastname }}" id="input-shipping-lastname-hidden"/>
+        {% else %}
+          <input type="hidden" name="lastname" value="" id="input-shipping-lastname-hidden"/>
+        {% endif %}
+        <input type="hidden" name="company" value=""/>
+        <input type="hidden" name="address_1" value=""/>
+        <input type="hidden" name="address_2" value=""/>
+        <input type="hidden" name="city" value=""/>
+        <input type="hidden" name="postcode" value=""/>
+        {# Shipping country ID - will be set to Ukraine (220) #}
+        <input type="hidden" name="country_id" value="{{ shipping_country_id|default(220) }}" id="input-shipping-country-id"/>
+        {# Shipping zone - will be set from selected region (Ukrainian oblast name) #}
+        <input type="hidden" name="zone" value="" id="input-shipping-zone"/>
+        {# Shipping zone ID - default to 0 for Ukraine regions #}
+        <input type="hidden" name="zone_id" value="0" id="input-shipping-zone-id"/>
+        
+        {# Область (Region) - First field #}
         <div class="col mb-3 required">
-          <label for="input-shipping-firstname" class="form-label">{{ entry_firstname }}</label >
-          <input type="text" name="firstname" value="" placeholder="{{ entry_firstname }}" id="input-shipping-firstname" class="form-control"/>
-          <div id="error-shipping-firstname" class="invalid-feedback"></div>
-        </div>
-        <div class="col mb-3 required">
-          <label for="input-shipping-lastname" class="form-label">{{ entry_lastname }}</label>
-          <input type="text" name="lastname" value="" placeholder="{{ entry_lastname }}" id="input-shipping-lastname" class="form-control"/>
-          <div id="error-shipping-lastname" class="invalid-feedback"></div>
-        </div>
-        <div class="col mb-3">
-          <label for="input-shipping-company" class="form-label">{{ entry_company }}</label>
-          <input type="text" name="company" value="" placeholder="{{ entry_company }}" id="input-shipping-company" class="form-control"/>
-        </div>
-        <div class="col mb-3 required">
-          <label for="input-shipping-address-1" class="form-label">{{ entry_address_1 }}</label>
-          <input type="text" name="address_1" value="" placeholder="{{ entry_address_1 }}" id="input-shipping-address-1" class="form-control"/>
-          <div id="error-shipping-address-1" class="invalid-feedback"></div>
-        </div>
-        <div class="col mb-3">
-          <label for="input-shipping-address-2" class="form-label">{{ entry_address_2 }}</label>
-          <input type="text" name="address_2" value="" placeholder="{{ entry_address_2 }}" id="input-shipping-address-2" class="form-control"/>
-        </div>
-        <div class="col mb-3 required">
-          <label for="input-shipping-city" class="form-label">{{ entry_city }}</label>
-          <input type="text" name="city" value="" placeholder="{{ entry_city }}" id="input-shipping-city" class="form-control"/>
-          <div id="error-shipping-city" class="invalid-feedback"></div>
-        </div>
-        <div class="col mb-3 required">
-          <label for="input-shipping-postcode" class="form-label">{{ entry_postcode }}</label>
-          <input type="text" name="postcode" value="{{ postcode }}" placeholder="{{ entry_postcode }}" id="input-shipping-postcode" class="form-control"/>
-          <div id="error-shipping-postcode" class="invalid-feedback"></div>
-        </div>
-        <div class="col mb-3 required">
-          <label for="input-shipping-country" class="form-label">{{ entry_country }}</label>
-          <select name="country_id" id="input-shipping-country" class="form-select">
-            <option value="0">{{ text_select }}</option>
-            {% for country in countries %}
-              <option value="{{ country.country_id }}"{% if country.country_id == country_id %} selected{% endif %}>{{ country.name }}</option>
-            {% endfor %}
-          </select>
-          <div id="error-shipping-country" class="invalid-feedback"></div>
-        </div>
-        <div class="col mb-3 required">
-          <label for="input-shipping-zone" class="form-label">{{ entry_zone }}</label>
-          <select name="zone_id" id="input-shipping-zone" class="form-select">
+          <label for="input-shipping-region" class="form-label">Область</label>
+          <select name="shipping_region" id="input-shipping-region" class="form-select">
             <option value="">{{ text_select }}</option>
-            {% for zone in zones %}
-              <option value="{{ zone.zone_id }}">{{ zone.name }}</option>
+            {% for region in ukraine_regions %}
+              <option value="{{ region }}"{% if region == shipping_region %} selected{% endif %}>{{ region }}</option>
             {% endfor %}
           </select>
-          <div id="error-shipping-zone" class="invalid-feedback"></div>
+          <div id="error-shipping-region" class="invalid-feedback"></div>
+        </div>
+        
+        {# Місто (City) - Second field, populated via AJAX - always visible #}
+        <div class="col mb-3 required" id="shipping-city-container" style="display: block;">
+          <label for="input-shipping-city-np" class="form-label">Місто</label>
+          <select name="ocnp_novaposhta_city" id="input-shipping-city-np" class="form-select">
+            <option value="">Оберіть місто</option>
+          </select>
+          <div id="error-shipping-city-np" class="invalid-feedback"></div>
+        </div>
+        
+        {# Відділення (Warehouse) - Third field, populated via AJAX - always visible #}
+        <div class="col mb-3 required" id="shipping-warehouse-container" style="display: block;">
+          <label for="input-shipping-warehouse-np" class="form-label">Відділення</label>
+          <select name="ocnp_novaposhta_warehouse" id="input-shipping-warehouse-np" class="form-select">
+            <option value="">Оберіть відділення</option>
+          </select>
+          <div id="error-shipping-warehouse-np" class="invalid-feedback"></div>
         </div>
 
         {% for custom_field in custom_fields %}
@@ -98,8 +98,7 @@
               <div id="input-shipping-custom-field-{{ custom_field.custom_field_id }}">
                 {% for custom_field_value in custom_field.custom_field_value %}
                   <div class="form-check">
-                    <input type="radio" name="custom_field[{{ custom_field.custom_field_id }}]" value="{{ custom_field_value.custom_field_value_id }}" id="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-input"/>
-                    <label for="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-label">{{ custom_field_value.name }}</label>
+                    <input type="radio" name="custom_field[{{ custom_field.custom_field_id }}]" value="{{ custom_field_value.custom_field_value_id }}" id="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-input"/> <label for="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-label">{{ custom_field_value.name }}</label>
                   </div>
                 {% endfor %}
               </div>
@@ -113,8 +112,7 @@
               <div id="input-shipping-custom-field-{{ custom_field.custom_field_id }}">
                 {% for custom_field_value in custom_field.custom_field_value %}
                   <div class="form-check">
-                    <input type="checkbox" name="custom_field[{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" id="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-input"/>
-                    <label for="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-label">{{ custom_field_value.name }}</label>
+                    <input type="checkbox" name="custom_field[{{ custom_field.custom_field_id }}][]" value="{{ custom_field_value.custom_field_value_id }}" id="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-input"/> <label for="input-shipping-custom-value-{{ custom_field_value.custom_field_value_id }}" class="form-check-label">{{ custom_field_value.name }}</label>
                   </div>
                 {% endfor %}
               </div>
@@ -176,6 +174,16 @@
         {% endfor %}
 
       </div>
+      
+      {# Payment disclaimer - 20 UAH #}
+      <div class="row mt-3">
+        <div class="col-12 mb-3">
+          <div class="alert alert-warning" style="margin-bottom: 0;">
+            <i class="fa-solid fa-circle-exclamation"></i> <strong>Оплата при отриманні (післяплата) здійснюється за тарифами Нової Пошти. Комісія складає 2% від суми замовлення + 20 грн за оформлення переказу.</strong>
+          </div>
+        </div>
+      </div>
+      
       <div class="text-end mb-3">
         <button type="submit" id="button-shipping-address" class="btn btn-primary">{{ button_continue }}</button>
       </div>
@@ -190,6 +198,133 @@ $('input[name=\'shipping_existing\']').on('change', function() {
     } else {
         $('#shipping-existing').hide();
         $('#shipping-new').show();
+    }
+});
+
+// Nova Poshta AJAX loading: Region → City → Warehouse
+// When region is selected, load cities
+$('#input-shipping-region').on('change', function() {
+    var selectedRegion = $(this).val();
+    var citySelect = $('#input-shipping-city-np');
+    var cityContainer = $('#shipping-city-container');
+    var warehouseContainer = $('#shipping-warehouse-container');
+    var warehouseSelect = $('#input-shipping-warehouse-np');
+    
+    if (!selectedRegion) {
+        citySelect.empty().append('<option value="">Оберіть місто</option>');
+        warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+        cityContainer.hide();
+        warehouseContainer.hide();
+        return;
+    }
+    
+    // Update shipping_zone
+    $('#input-shipping-zone').val(selectedRegion);
+    
+    cityContainer.show();
+    
+    // Reset city and warehouse
+    citySelect.empty().append('<option value="">Завантаження...</option>');
+    warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+    warehouseContainer.hide();
+    
+    // Find region Ref by name
+    $.ajax({
+        url: 'index.php?route=extension/ocnp/shipping/novaposhta.getCities&language={{ language }}',
+        type: 'post',
+        data: { area_description: selectedRegion },
+        dataType: 'json',
+        success: function(response) {
+            if (response.success && response.cities && response.cities.length > 0) {
+                citySelect.empty().append('<option value="">Оберіть місто</option>');
+                $.each(response.cities, function(index, city) {
+                    var option = $('<option>')
+                        .attr('value', city.Description)
+                        .attr('data-ref', city.Ref)
+                        .text(city.Description);
+                    citySelect.append(option);
+                });
+            } else {
+                citySelect.empty().append('<option value="">Міста не знайдено</option>');
+            }
+        },
+        error: function() {
+            citySelect.empty().append('<option value="">Помилка завантаження</option>');
+        }
+    });
+});
+
+// When city is selected, load warehouses
+$('#input-shipping-city-np').on('change', function() {
+    var selectedOption = $(this).find('option:selected');
+    var cityRef = selectedOption.data('ref');
+    var cityDescription = $(this).val();
+    var warehouseSelect = $('#input-shipping-warehouse-np');
+    var warehouseContainer = $('#shipping-warehouse-container');
+    
+    if (!cityRef || !cityDescription) {
+        warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+        warehouseContainer.hide();
+        return;
+    }
+    
+    // Update hidden city field
+    $('input[name="city"]').val(cityDescription);
+    
+    if (cityRef) {
+        warehouseContainer.show();
+        warehouseSelect.empty().append('<option value="">Завантаження...</option>');
+        
+        $.ajax({
+            url: 'index.php?route=extension/ocnp/shipping/novaposhta.getWarehouses&language={{ language }}',
+            type: 'post',
+            data: { city_ref: cityRef },
+            dataType: 'json',
+            success: function(response) {
+                if (response.success && response.warehouses && response.warehouses.length > 0) {
+                    warehouseSelect.empty().append('<option value="">Оберіть відділення</option>');
+                    $.each(response.warehouses, function(index, warehouse) {
+                        var option = $('<option>')
+                            .attr('value', warehouse.Description)
+                            .attr('data-ref', warehouse.Ref)
+                            .text(warehouse.Description);
+                        warehouseSelect.append(option);
+                    });
+                } else {
+                    warehouseSelect.empty().append('<option value="">Відділення не знайдено</option>');
+                }
+            },
+            error: function() {
+                warehouseSelect.empty().append('<option value="">Помилка завантаження</option>');
+            }
+        });
+    }
+});
+
+// When warehouse is selected, update hidden address fields
+$('#input-shipping-warehouse-np').on('change', function() {
+    var warehouseDescription = $(this).val();
+    var selectedOption = $(this).find('option:selected');
+    var warehouseRef = selectedOption.data('ref');
+    
+    if (warehouseDescription) {
+        // Update hidden address_1 field with warehouse info
+        $('input[name="address_1"]').val(warehouseDescription);
+        
+        // Update shipping zone_id lookup if needed
+        var regionName = $('#input-shipping-region').val();
+        if (regionName) {
+            $('#input-shipping-zone').val(regionName);
+        }
+    }
+});
+
+// Show Nova Poshta fields on page load if region is already selected
+$(document).ready(function() {
+    var selectedRegion = $('#input-shipping-region').val();
+    if (selectedRegion) {
+        $('#shipping-city-container, #shipping-warehouse-container').show();
+        $('#input-shipping-region').trigger('change');
     }
 });
 
@@ -238,11 +373,40 @@ $('#input-shipping-address').on('change', function() {
     });
 });
 
-// New Shipping Address
+// New Shipping Address - Modified for Nova Poshta
 $('#form-shipping-address').on('submit', function(e) {
     e.preventDefault();
 
     chain.attach(function() {
+        // Get customer name from session or form
+        var firstname = '';
+        var lastname = '';
+        
+        // Try to get from customer session data or other sources
+        if (typeof window.customerData !== 'undefined') {
+            firstname = window.customerData.firstname || '';
+            lastname = window.customerData.lastname || '';
+        }
+        
+        // Set hidden fields
+        $('#input-shipping-firstname-hidden').val(firstname);
+        $('#input-shipping-lastname-hidden').val(lastname);
+        
+        // Ensure region, city, warehouse are set
+        var region = $('#input-shipping-region').val();
+        var city = $('#input-shipping-city-np').val();
+        var warehouse = $('#input-shipping-warehouse-np').val();
+        
+        if (region) {
+            $('#input-shipping-zone').val(region);
+        }
+        if (city) {
+            $('input[name="city"]').val(city);
+        }
+        if (warehouse) {
+            $('input[name="address_1"]').val(warehouse);
+        }
+        
         return $.ajax({
             url: 'index.php?route=checkout/shipping_address.save&language={{ language }}',
             type: 'post',
@@ -318,53 +482,6 @@ $('#form-shipping-address').on('submit', function(e) {
 
                     $('#checkout-confirm').load('index.php?route=checkout/confirm.confirm&language={{ language }}');
                 }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
-            }
-        });
-    });
-});
-
-$('#input-shipping-country').on('change', function() {
-    var element = this;
-
-    chain.attach(function() {
-        return $.ajax({
-            url: 'index.php?route=localisation/country&language={{ language }}&country_id=' + $('#input-shipping-country').val(),
-            dataType: 'json',
-            beforeSend: function() {
-                $(element).prop('disabled', true);
-                $('#input-shipping-zone').prop('disabled', true);
-            },
-            complete: function() {
-                $(element).prop('disabled', false);
-                $('#input-shipping-zone').prop('disabled', false);
-            },
-            success: function(json) {
-                if (json['postcode_required'] == '1') {
-                    $('#input-shipping-postcode').parent().addClass('required');
-                } else {
-                    $('#input-shipping-postcode').parent().removeClass('required');
-                }
-
-                html = '<option value="">{{ text_select|escape('js') }}</option>';
-
-                if (json['zone'] && json['zone'] != '') {
-                    for (i = 0; i < json['zone'].length; i++) {
-                        html += '<option value="' + json['zone'][i]['zone_id'] + '"';
-
-                        if (json['zone'][i]['zone_id'] == '{{ zone_id }}') {
-                            html += ' selected';
-                        }
-
-                        html += '>' + json['zone'][i]['name'] + '</option>';
-                    }
-                } else {
-                    html += '<option value="0" selected>{{ text_none|escape('js') }}</option>';
-                }
-
-                $('#input-shipping-zone').html(html);
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);

@@ -365,6 +365,10 @@ class Confirm extends \Opencart\System\Engine\Controller {
 			$data['payment'] = '';
 		}
 
+		// Comment and callback data
+		$data['comment'] = isset($this->session->data['comment']) ? $this->session->data['comment'] : '';
+		$data['call_me'] = isset($this->session->data['call_me']) ? $this->session->data['call_me'] : 0;
+
 		// Validate if payment method has been set.
 		return $this->load->view('checkout/confirm', $data);
 	}
