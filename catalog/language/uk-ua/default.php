@@ -52,6 +52,7 @@ $_['button_edit']           = 'Редагувати';
 $_['button_filter']         = 'Уточнити';
 $_['button_shopping']       = 'Продовжити Покупки';
 $_['button_shipping']       = 'Розрахувати Доставку та Податки';
+$_['button_remove']         = 'Видалити';
 $_['button_login']          = 'Увійти';
 $_['button_continue']       = 'Продовжити';
 

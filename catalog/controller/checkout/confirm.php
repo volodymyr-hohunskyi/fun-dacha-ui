@@ -72,7 +72,7 @@ class Confirm extends \Opencart\System\Engine\Controller {
 
 		// Order
 		if (isset($this->session->data['order_id'])) {
-			$order_id = $this->session->data['order_id'];
+			$order_id = (int)$this->session->data['order_id'];
 		} else {
 			$order_id = 0;
 		}

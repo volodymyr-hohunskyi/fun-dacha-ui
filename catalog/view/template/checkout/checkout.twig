@@ -45,13 +45,18 @@
         <div id="error-privacy-agree-footer" class="invalid-feedback" style="display: none;"></div>
       </div>
       <div class="col-md-6 text-end">
-        <button type="button" id="button-confirm-footer" class="btn btn-primary btn-lg" style="pointer-events: auto; cursor: pointer;" onclick="console.log('[INLINE ONCLICK] Button clicked!'); if(typeof window.handleConfirmClick === 'function') { window.handleConfirmClick.call(this, event); } else { console.error('[INLINE ONCLICK] handleConfirmClick not found!'); } return false;">Підтвердити замовлення</button>
+        <button type="button" id="button-confirm-footer" class="btn btn-primary btn-lg" style="pointer-events: auto; cursor: pointer;">Підтвердити замовлення</button>
       </div>
     </div>
   </div>
 </div>
 <script type="text/javascript"><!--
 console.log('[checkout.twig] Loading checkout script...');
+
+// Initialize handleConfirmClick early to prevent errors - but don't set to null if it's already a function
+if (typeof window.handleConfirmClick !== 'function') {
+    window.handleConfirmClick = null;
+}
 
 // Function to show inline error message for a field
 function showFieldError(fieldId, message) {
@@ -227,8 +232,130 @@ window.validateOrderButton = function() {
     console.log('[validateOrderButton] Validation complete. Is valid:', isValid);
 };
 
-// Main click handler function
-window.handleConfirmClick = function(e) {
+// Extract order confirmation logic to separate function (must be defined before handleConfirmClick)
+function proceedWithOrderConfirmation($button) {
+    console.log('[proceedWithOrderConfirmation] Starting order confirmation process...');
+    
+    // Mark as processing to prevent double-clicks (use data attribute instead of disabled)
+    console.log('[proceedWithOrderConfirmation] Marking button as processing...');
+    $button.data('processing', true).attr('data-processing', 'true').css('opacity', '0.7');
+    
+    // First, ensure the order is created by refreshing the confirm section
+    console.log('[proceedWithOrderConfirmation] Loading confirm section...');
+    var confirmUrl = 'index.php?route=checkout/confirm&language={{ language }}';
+    console.log('[proceedWithOrderConfirmation] Confirm URL:', confirmUrl);
+    
+    $('#checkout-confirm').load(confirmUrl, function(response, status, xhr) {
+        console.log('[proceedWithOrderConfirmation] Confirm section load completed. Status:', status);
+        console.log('[proceedWithOrderConfirmation] Response length:', response ? response.length : 0);
+        console.log('[proceedWithOrderConfirmation] XHR status:', xhr ? xhr.status : 'N/A');
+        
+        if (status === 'error') {
+            console.error('[proceedWithOrderConfirmation] ERROR loading confirm section:', xhr ? xhr.statusText : 'Unknown error');
+            $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка завантаження сторінки підтвердження. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            $button.data('processing', false).removeAttr('data-processing').css('opacity', '1');
+            if (typeof validateOrderButton === 'function') {
+                validateOrderButton();
+            }
+            return;
+        }
+        
+        // After confirm section is loaded (order should be created), proceed with payment confirmation
+        console.log('[proceedWithOrderConfirmation] Making payment confirmation AJAX request...');
+        var paymentUrl = 'index.php?route=extension/opencart/payment/cod.confirm&language={{ language }}';
+        console.log('[proceedWithOrderConfirmation] Payment URL:', paymentUrl);
+        
+        $.ajax({
+            url: paymentUrl,
+            dataType: 'json',
+            beforeSend: function() {
+                console.log('[proceedWithOrderConfirmation] AJAX request started');
+                try {
+                    $button.button('loading');
+                } catch(e) {
+                    console.warn('[proceedWithOrderConfirmation] Button loading method not available:', e);
+                }
+            },
+            success: function(json) {
+                console.log('[proceedWithOrderConfirmation] Payment confirmation response received:', json);
+                if (json['error']) {
+                    console.error('[proceedWithOrderConfirmation] Payment confirmation error:', json['error']);
+                    console.error('[proceedWithOrderConfirmation] Error details:', json['error_details'] || 'No details');
+                    
+                    // Show error message
+                    var errorMsg = json['error'];
+                    var errorDetails = json['error_details'] || '';
+                    
+                    // Check if error is about missing customer/shipping_address
+                    if (errorMsg.indexOf('Missing: customer') !== -1 || errorMsg.indexOf('Missing: shipping_address') !== -1 || 
+                        errorDetails.indexOf('customer') !== -1 || errorDetails.indexOf('shipping_address') !== -1) {
+                        errorMsg = 'Будь ласка, спочатку заповніть та відправте форму реєстрації/доставки перед підтвердженням замовлення.';
+                        if (errorDetails) {
+                            errorMsg += '<br><small>' + errorDetails + '</small>';
+                        }
+                        // Scroll to registration form
+                        var $registerForm = $('#form-register, #checkout-register');
+                        if ($registerForm.length) {
+                            $('html, body').animate({ scrollTop: $registerForm.offset().top - 100 }, 500);
+                        }
+                    } else if (errorMsg.indexOf('Order') !== -1 || errorMsg.indexOf('замовлення') !== -1) {
+                        errorMsg = 'Помилка: Замовлення не знайдено.';
+                        if (errorDetails) {
+                            errorMsg += '<br><small>' + errorDetails + '</small>';
+                        } else {
+                            errorMsg += ' Будь ласка, спробуйте ще раз.';
+                        }
+                    }
+                    
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + errorMsg + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    
+                    // Re-enable button and re-validate
+                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
+                    if (typeof validateOrderButton === 'function') {
+                        setTimeout(validateOrderButton, 100);
+                    }
+                    
+                    // Scroll to top to show error if not already scrolled to form
+                    var $registerForm = $('#form-register, #checkout-register');
+                    if (!$registerForm || !$registerForm.length) {
+                        $('html, body').animate({ scrollTop: 0 }, 500);
+                    }
+                } else if (json['redirect']) {
+                    console.log('[proceedWithOrderConfirmation] Success! Redirecting to:', json['redirect']);
+                    // Success - redirect to success page
+                    location = json['redirect'];
+                } else {
+                    console.warn('[proceedWithOrderConfirmation] Unknown response format:', json);
+                    // Unknown response - re-enable button
+                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
+                    if (typeof validateOrderButton === 'function') {
+                        setTimeout(validateOrderButton, 100);
+                    }
+                }
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+                console.error('[proceedWithOrderConfirmation] AJAX error:', thrownError);
+                console.error('[proceedWithOrderConfirmation] XHR status:', xhr.status);
+                console.error('[proceedWithOrderConfirmation] XHR statusText:', xhr.statusText);
+                console.error('[proceedWithOrderConfirmation] XHR responseText:', xhr.responseText);
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка підтвердження замовлення. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
+                if (typeof validateOrderButton === 'function') {
+                    setTimeout(validateOrderButton, 100);
+                }
+            },
+            complete: function() {
+                console.log('[proceedWithOrderConfirmation] AJAX request completed');
+            }
+        });
+    });
+}
+
+// Main click handler function - define immediately to ensure it's available
+// Check if it's not a function (could be null or undefined) and define it
+if (typeof window.handleConfirmClick !== 'function') {
+    console.log('[checkout.twig] Defining handleConfirmClick function...');
+    window.handleConfirmClick = function(e) {
     console.log('[handleConfirmClick] Button clicked, starting handler...');
     
     if (e) {
@@ -285,95 +412,171 @@ window.handleConfirmClick = function(e) {
     // Clear any error messages if validation passed
     $('#error-privacy-agree-confirm, #error-privacy-agree-footer').removeClass('d-block').html('').hide();
     
-    // Mark as processing to prevent double-clicks (use data attribute instead of disabled)
-    console.log('[handleConfirmClick] Marking button as processing...');
-    $button.data('processing', true).attr('data-processing', 'true').css('opacity', '0.7');
+    // Check if registration form exists and hasn't been submitted yet
+    var $registerForm = $('#form-register');
+    var formSubmitted = $registerForm.data('submitted') || false;
     
-    // First, ensure the order is created by refreshing the confirm section
-    console.log('[handleConfirmClick] Loading confirm section...');
-    var confirmUrl = 'index.php?route=checkout/confirm&language={{ language }}';
-    console.log('[handleConfirmClick] Confirm URL:', confirmUrl);
-    
-    $('#checkout-confirm').load(confirmUrl, function(response, status, xhr) {
-        console.log('[handleConfirmClick] Confirm section load completed. Status:', status);
-        console.log('[handleConfirmClick] Response length:', response ? response.length : 0);
-        console.log('[handleConfirmClick] XHR status:', xhr ? xhr.status : 'N/A');
+    // If form exists and hasn't been submitted, submit it first
+    if ($registerForm.length && !formSubmitted) {
+        console.log('[handleConfirmClick] Registration form found but not submitted, submitting now...');
         
-        if (status === 'error') {
-            console.error('[handleConfirmClick] ERROR loading confirm section:', xhr ? xhr.statusText : 'Unknown error');
-            $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка завантаження сторінки підтвердження. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
-            $button.data('processing', false).removeAttr('data-processing').css('opacity', '1');
-            if (typeof validateOrderButton === 'function') {
-                validateOrderButton();
-            }
-            return;
+        // Ensure privacy_agree is included in form data - check footer checkbox
+        // Define privacyChecked at the start of this block to ensure it's available
+        var privacyChecked = $('#input-privacy-agree-footer').is(':checked') || $('#input-privacy-agree-confirm').is(':checked');
+        
+        if (!privacyChecked) {
+            console.error('[handleConfirmClick] Privacy agreement not checked!');
+            $('#error-privacy-agree-footer').text('Будь ласка, підтвердіть згоду з Політикою конфіденційності').show();
+            $('html, body').animate({ scrollTop: $('#input-privacy-agree-footer').offset().top - 100 }, 500);
+            $('#input-privacy-agree-footer').focus();
+            return false;
         }
         
-        // After confirm section is loaded (order should be created), proceed with payment confirmation
-        console.log('[handleConfirmClick] Making payment confirmation AJAX request...');
-        var paymentUrl = 'index.php?route=extension/opencart/payment/cod.confirm&language={{ language }}';
-        console.log('[handleConfirmClick] Payment URL:', paymentUrl);
+        // Ensure privacyChecked is defined (safety check)
+        if (typeof privacyChecked === 'undefined') {
+            console.error('[handleConfirmClick] ERROR: privacyChecked is undefined!');
+            privacyChecked = $('#input-privacy-agree-footer').is(':checked') || $('#input-privacy-agree-confirm').is(':checked');
+        }
         
+        // Ensure shipping_zone and shipping_zone_id are set if shipping_region is selected
+        var shippingRegion = $('#input-shipping-region').val();
+        var currentShippingZoneId = $('#input-shipping-zone-id').val();
+        
+        if (shippingRegion) {
+            // Update shipping_zone to match selected region
+            $('#input-shipping-zone').val(shippingRegion);
+            
+            // shipping_zone_id will be found by server based on shipping_region name
+            // But we need to ensure it's empty/0 so server will try to find it
+            if (!currentShippingZoneId || currentShippingZoneId === '0' || currentShippingZoneId === 0) {
+                $('#input-shipping-zone-id').val('0');
+            }
+            console.log('[handleConfirmClick] Shipping region selected:', shippingRegion);
+            console.log('[handleConfirmClick] Shipping zone_id set to:', $('#input-shipping-zone-id').val());
+        }
+        
+        // Prepare form data and add privacy_agree from footer checkbox
+        var formData = $registerForm.serialize();
+        
+        // Ensure privacy_agree is included - add it to formData (checkbox is outside form)
+        // privacyChecked is already checked above and is available in this scope
+        if (typeof privacyChecked !== 'undefined' && privacyChecked && formData.indexOf('privacy_agree') === -1) {
+            formData += '&privacy_agree=1';
+        }
+        
+        console.log('[handleConfirmClick] Form data before submission:', formData);
+        console.log('[handleConfirmClick] Privacy agreed:', typeof privacyChecked !== 'undefined' ? privacyChecked : 'undefined');
+        console.log('[handleConfirmClick] Shipping region:', shippingRegion);
+        console.log('[handleConfirmClick] Shipping zone:', $('#input-shipping-zone').val());
+        console.log('[handleConfirmClick] Shipping zone_id:', $('#input-shipping-zone-id').val());
+        
+        // Mark button as processing
+        $button.data('processing', true).attr('data-processing', 'true').css('opacity', '0.7');
+        
+        // Submit the registration form
         $.ajax({
-            url: paymentUrl,
+            url: 'index.php?route=checkout/register.save&language={{ language }}',
+            type: 'post',
+            data: formData,
             dataType: 'json',
+            contentType: 'application/x-www-form-urlencoded',
             beforeSend: function() {
-                console.log('[handleConfirmClick] AJAX request started');
-                try {
-                    $button.button('loading');
-                } catch(e) {
-                    console.warn('[handleConfirmClick] Button loading method not available:', e);
-                }
+                console.log('[handleConfirmClick] Submitting registration form...');
             },
             success: function(json) {
-                console.log('[handleConfirmClick] Payment confirmation response received:', json);
+                console.log('[handleConfirmClick] Registration form response:', json);
+                
                 if (json['error']) {
-                    console.error('[handleConfirmClick] Payment confirmation error:', json['error']);
-                    // Show error message
-                    var errorMsg = json['error'];
-                    if (errorMsg.indexOf('Order') !== -1 || errorMsg.indexOf('замовлення') !== -1) {
-                        errorMsg = 'Помилка: Замовлення не знайдено. Будь ласка, спробуйте ще раз.';
-                    }
-                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + errorMsg + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    console.error('[handleConfirmClick] Form validation errors:', json['error']);
                     
-                    // Re-enable button and re-validate
-                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
+                    // Show validation errors
+                    $registerForm.find('.is-invalid').removeClass('is-invalid');
+                    $registerForm.find('.invalid-feedback').removeClass('d-block').html('');
+                    $('#error-privacy-agree-footer, #error-privacy-agree-confirm').removeClass('d-block').html('').hide();
+                    
+                    if (json['error']['warning']) {
+                        $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error']['warning'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    }
+                    
+                    // Handle privacy_agree error (checkbox is in footer, not in form)
+                    if (json['error']['privacy_agree']) {
+                        $('#error-privacy-agree-footer').text(json['error']['privacy_agree']).show();
+                        $('#input-privacy-agree-footer').addClass('is-invalid');
+                    }
+                    
+                    // Handle other errors
+                    for (var key in json['error']) {
+                        if (key !== 'warning' && key !== 'privacy_agree') {
+                            var fieldId = 'input-' + key.replaceAll('_', '-');
+                            var errorId = 'error-' + key.replaceAll('_', '-');
+                            
+                            var $field = $('#' + fieldId);
+                            var $error = $('#' + errorId);
+                            
+                            if ($field.length) {
+                                $field.addClass('is-invalid');
+                            }
+                            if ($error.length) {
+                                $error.html(json['error'][key]).addClass('d-block').show();
+                            } else {
+                                // Try to find error div by field parent
+                                $field.closest('.mb-3, .form-group').find('.invalid-feedback').first()
+                                    .html(json['error'][key]).addClass('d-block').show();
+                            }
+                        }
+                    }
+                    
+                    // Scroll to first error
+                    var $firstError = $('.is-invalid').first();
+                    if ($firstError.length) {
+                        $('html, body').animate({ scrollTop: $firstError.offset().top - 100 }, 500);
+                        $firstError.focus();
+                    } else if ($('#error-privacy-agree-footer').is(':visible')) {
+                        $('html, body').animate({ scrollTop: $('#input-privacy-agree-footer').offset().top - 100 }, 500);
+                        $('#input-privacy-agree-footer').focus();
+                    }
+                    
+                    // Re-enable button
+                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1');
+                    
+                    // Re-run validation to update button state
                     if (typeof validateOrderButton === 'function') {
-                        setTimeout(validateOrderButton, 100);
+                        validateOrderButton();
                     }
                     
-                    // Scroll to top to show error
-                    $('html, body').animate({ scrollTop: 0 }, 500);
-                } else if (json['redirect']) {
-                    console.log('[handleConfirmClick] Success! Redirecting to:', json['redirect']);
-                    // Success - redirect to success page
-                    location = json['redirect'];
+                    return;
+                }
+                
+                if (json['success']) {
+                    console.log('[handleConfirmClick] Registration form submitted successfully');
+                    // Mark form as submitted
+                    $registerForm.data('submitted', true);
+                    
+                    // Reload confirm section and proceed with order confirmation
+                    proceedWithOrderConfirmation($button);
                 } else {
-                    console.warn('[handleConfirmClick] Unknown response format:', json);
-                    // Unknown response - re-enable button
-                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
-                    if (typeof validateOrderButton === 'function') {
-                        setTimeout(validateOrderButton, 100);
-                    }
+                    // Unknown response
+                    $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка відправки форми. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                    $button.data('processing', false).removeAttr('data-processing').css('opacity', '1');
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                console.error('[handleConfirmClick] AJAX error:', thrownError);
-                console.error('[handleConfirmClick] XHR status:', xhr.status);
-                console.error('[handleConfirmClick] XHR statusText:', xhr.statusText);
-                console.error('[handleConfirmClick] XHR responseText:', xhr.responseText);
-                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка підтвердження замовлення. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
-                $button.data('processing', false).removeAttr('data-processing').css('opacity', '1').button('reset');
-                if (typeof validateOrderButton === 'function') {
-                    setTimeout(validateOrderButton, 100);
-                }
-            },
-            complete: function() {
-                console.log('[handleConfirmClick] AJAX request completed');
+                console.error('[handleConfirmClick] Registration form submission error:', thrownError);
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> Помилка відправки форми. Будь ласка, спробуйте ще раз. <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+                $button.data('processing', false).removeAttr('data-processing').css('opacity', '1');
             }
         });
-    });
-};
+        
+        return; // Exit early, will continue after form submission
+    }
+    
+    // Form already submitted or doesn't exist, proceed with order confirmation
+    proceedWithOrderConfirmation($button);
+    };
+    console.log('[checkout.twig] handleConfirmClick function defined:', typeof window.handleConfirmClick === 'function');
+} else {
+    console.log('[checkout.twig] handleConfirmClick already defined');
+}
 
 // Initialize on page load
 $(document).ready(function() {
@@ -408,16 +611,20 @@ $(document).ready(function() {
         setTimeout(validateOrderButton, 100);
     });
     
-    // Attach click handler
+    // Attach click handler - use event delegation and ensure function exists
     $(document).on('click', '#button-confirm, #button-confirm-footer', function(e) {
         console.log('[checkout.twig] Button click detected on:', this.id || 'unknown');
         e.preventDefault();
         e.stopPropagation();
+        
+        // Ensure function is defined before calling
         if (typeof window.handleConfirmClick === 'function') {
             console.log('[checkout.twig] Calling handleConfirmClick...');
             window.handleConfirmClick.call(this, e);
         } else {
             console.error('[checkout.twig] ERROR: handleConfirmClick function not found!');
+            console.error('[checkout.twig] Available on window:', Object.keys(window).filter(function(k) { return k.includes('handle'); }));
+            alert('Помилка: функція підтвердження не знайдена. Будь ласка, оновіть сторінку.');
         }
     });
     

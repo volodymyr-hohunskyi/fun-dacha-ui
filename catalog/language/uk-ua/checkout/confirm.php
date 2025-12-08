@@ -1,6 +1,6 @@
 <?php
 // Text
-$_['text_model']        = 'Модель';
+$_['text_model']        = 'ID';
 $_['text_subscription'] = 'Підписка';
 $_['text_points']       = 'Бонусні бали';
 

@@ -463,11 +463,14 @@ class Register extends \Opencart\System\Engine\Controller {
 				$json['error']['shipping_country'] = $this->language->get('error_country');
 			}
 
-			// Zone validation and setup - find zone_id by region name for Ukraine (country_id 220)
-			$this->load->model('localisation/zone');
+		// Zone validation and setup - find zone_id by region name for Ukraine (country_id 220)
+		$this->load->model('localisation/zone');
+		
+		// If shipping to Ukraine (country_id 220) and zone_id is not set, try to find it by region name
+		if ((int)$post_info['shipping_country_id'] == 220) {
+			$current_zone_id = isset($post_info['shipping_zone_id']) ? (int)$post_info['shipping_zone_id'] : 0;
 			
-			// If shipping to Ukraine (country_id 220) and zone_id is not set, try to find it by region name
-			if ((int)$post_info['shipping_country_id'] == 220 && (empty($post_info['shipping_zone_id']) || $post_info['shipping_zone_id'] == '0')) {
+			if ($current_zone_id <= 0) {
 				// Get all zones for Ukraine
 				$zones = $this->model_localisation_zone->getZonesByCountryId(220);
 				
@@ -478,8 +481,8 @@ class Register extends \Opencart\System\Engine\Controller {
 					if (!empty($post_info['shipping_region'])) {
 						$region_name = trim($post_info['shipping_region']);
 						
+						// First try: exact match
 						foreach ($zones as $zone) {
-							// Exact match
 							if (trim($zone['name']) === $region_name) {
 								$post_info['shipping_zone_id'] = (int)$zone['zone_id'];
 								$zone_id_found = true;
@@ -487,7 +490,7 @@ class Register extends \Opencart\System\Engine\Controller {
 							}
 						}
 						
-						// If exact match not found, try case-insensitive match
+						// Second try: case-insensitive match
 						if (!$zone_id_found) {
 							foreach ($zones as $zone) {
 								if (mb_strtolower(trim($zone['name']), 'UTF-8') === mb_strtolower($region_name, 'UTF-8')) {
@@ -497,21 +500,67 @@ class Register extends \Opencart\System\Engine\Controller {
 								}
 							}
 						}
+						
+						// Third try: partial match (check if zone name starts with region name or vice versa)
+						if (!$zone_id_found) {
+							$region_name_lower = mb_strtolower($region_name, 'UTF-8');
+							// Remove " область" or " обл" from end for matching
+							$region_name_clean = preg_replace('/\s+(область|обл)\.?$/iu', '', $region_name_lower);
+							
+							foreach ($zones as $zone) {
+								$zone_name_lower = mb_strtolower(trim($zone['name']), 'UTF-8');
+								$zone_name_clean = preg_replace('/\s+(область|обл)\.?$/iu', '', $zone_name_lower);
+								
+								// Check if cleaned names match
+								if ($zone_name_clean === $region_name_clean) {
+									$post_info['shipping_zone_id'] = (int)$zone['zone_id'];
+									$zone_id_found = true;
+									break;
+								}
+								
+								// Also check if one contains the other
+								if (strpos($zone_name_lower, $region_name_clean) !== false || strpos($region_name_clean, $zone_name_clean) !== false) {
+									$post_info['shipping_zone_id'] = (int)$zone['zone_id'];
+									$zone_id_found = true;
+									break;
+								}
+							}
+						}
 					}
 					
 					// If still not found, use first available zone as fallback
-					if (!$zone_id_found) {
+					if (!$zone_id_found && !empty($zones)) {
 						$post_info['shipping_zone_id'] = (int)$zones[0]['zone_id'];
 					}
 				}
 			}
+		}
 
-			// Zone validation
-			$zone_total = $this->model_localisation_zone->getTotalZonesByCountryId((int)$post_info['shipping_country_id']);
+		// Zone validation - check after zone_id lookup
+		$zone_total = $this->model_localisation_zone->getTotalZonesByCountryId((int)$post_info['shipping_country_id']);
 
-			if ($zone_total && empty($post_info['shipping_zone_id'])) {
+		// Check if zone_id is valid (not empty, not 0, not '0')
+		$shipping_zone_id = isset($post_info['shipping_zone_id']) ? (int)$post_info['shipping_zone_id'] : 0;
+		
+		// For Ukraine (country_id 220), skip validation if zone_id is 0 but region is provided
+		// The zone_id lookup above should have found it, but if it didn't, we still allow it to proceed
+		// because Nova Poshta shipping doesn't require traditional zone_id
+		if ($zone_total && $shipping_zone_id <= 0) {
+			// Skip zone validation for Ukraine if shipping_region is provided (Nova Poshta)
+			if ((int)$post_info['shipping_country_id'] == 220 && !empty($post_info['shipping_region'])) {
+				// For Ukraine with region specified, zone_id lookup should have worked
+				// But if it didn't, we'll use fallback: set zone_id to first available zone
+				if (!isset($post_info['shipping_zone_id']) || $post_info['shipping_zone_id'] == '0' || (int)$post_info['shipping_zone_id'] == 0) {
+					$zones = $this->model_localisation_zone->getZonesByCountryId(220);
+					if (!empty($zones)) {
+						$post_info['shipping_zone_id'] = (int)$zones[0]['zone_id'];
+					}
+				}
+			} else {
+				// For other countries or missing region, require zone_id
 				$json['error']['shipping_zone'] = $this->language->get('error_zone');
 			}
+		}
 
 			// Custom field validation
 				foreach ($custom_fields as $custom_field) {

@@ -11,7 +11,7 @@ $_['text_semi_month']            = 'півмісяця';
 $_['text_month']                 = 'місяць';
 $_['text_year']                  = 'рік';
 $_['text_no_results']            = 'Ваш кошик порожній!';
-$_['text_model']                 = 'Модель';
+$_['text_model']                 = 'ID';
 $_['text_cart']                  = 'Переглянути Кошик';
 $_['text_checkout']              = 'Оформити Замовлення';
 

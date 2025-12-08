@@ -13,9 +13,6 @@
           <td>{{ product.quantity }}x <a href="{{ product.href }}">{{ product.name }}</a>
 
             <ul class="list-unstyled mb-0">
-              <li>
-                <small> - {{ text_model }}: {{ product.model }}</small>
-              </li>
               {% for option in product.option %}
                 <li>
                   <small> - {{ option.name }}: {{ option.value }}</small>

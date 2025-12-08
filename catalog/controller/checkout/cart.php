@@ -179,12 +179,17 @@ class Cart extends \Opencart\System\Engine\Controller {
 
 		$data['modules'] = [];
 
-		// Extension
+		// Extension - load only coupon and reward modules, exclude shipping
 		$this->load->model('setting/extension');
 
 		$extensions = $this->model_setting_extension->getExtensionsByType('total');
 
 		foreach ($extensions as $extension) {
+			// Skip shipping extension (Estimate Shipping & Taxes)
+			if ($extension['code'] === 'shipping') {
+				continue;
+			}
+			
 			$result = $this->load->controller('extension/' . $extension['extension'] . '/checkout/' . $extension['code']);
 
 			if (!$result instanceof \Exception) {
