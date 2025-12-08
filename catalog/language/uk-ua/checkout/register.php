@@ -4,7 +4,7 @@ $_['heading_title']            = 'Особисті дані';
 
 // Text
 $_['text_login']               = 'Якщо у вас вже є обліковий запис, будь ласка, <a href="%s"><strong>увійдіть</strong></a>.';
-$_['text_register']            = 'Зареєструвати обліковий запис';
+$_['text_register']            = 'Зареєструвати Кабінет';
 $_['text_guest']               = 'Покупка без реєстрації';
 $_['text_payment_address']     = 'Адреса оплати';
 $_['text_shipping_address']    = 'Адреса доставки';
