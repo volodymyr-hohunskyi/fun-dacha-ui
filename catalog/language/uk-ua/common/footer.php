@@ -9,11 +9,9 @@ $_['text_return']       = 'Повернення';
 $_['text_sitemap']      = 'Мапа Сайту';
 $_['text_gdpr']         = 'GDPR';
 $_['text_manufacturer'] = 'Бренди';
-$_['text_affiliate']    = 'Партнерська Програма';
 $_['text_special']      = 'Акції';
-$_['text_account']      = 'Мій Кабінет';
-$_['text_order']        = 'Історія Замовлень';
-$_['text_wishlist']     = 'Список Бажань';
-$_['text_newsletter']   = 'Розсилка';
+$_['text_account']      = 'Мій кабінет';
+$_['text_order']        = 'Історія замовлень';
+$_['text_wishlist']     = 'Список бажань';
 $_['text_powered']      = 'Powered By <a href="https://www.opencart.com">OpenCart</a><br/> %s &copy; %s';
 

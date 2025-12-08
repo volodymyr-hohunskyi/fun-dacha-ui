@@ -642,9 +642,22 @@ class Register extends \Opencart\System\Engine\Controller {
 				'custom_field'      => $post_info['custom_field'] ?? []
 			];
 
-			// Register
-			if ($post_info['account']) {
-				$customer_data['customer_id'] = $this->model_account_customer->addCustomer($post_info);
+			// Register - create account if requested
+			// Account creation should happen if account flag is set OR create_account is checked
+			if ($post_info['account'] || $post_info['create_account']) {
+				// Ensure account flag is set when create_account is checked
+				if ($post_info['create_account']) {
+					$post_info['account'] = 1;
+				}
+				
+				// Create the customer account
+				try {
+					$customer_data['customer_id'] = $this->model_account_customer->addCustomer($post_info);
+				} catch (\Exception $e) {
+					// Log error but don't break the checkout process
+					error_log('Error creating customer account: ' . $e->getMessage());
+					$json['error']['warning'] = 'Помилка створення облікового запису. Будь ласка, спробуйте ще раз.';
+				}
 			}
 
 			// Logged in, so edit customer details

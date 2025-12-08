@@ -7,7 +7,6 @@ $_['text_account']             = 'Кабінет';
 $_['text_register']            = 'Реєстрація';
 $_['text_account_already']     = 'Якщо ви вже маєте обліковий запис у нас, будь ласка, увійдіть на <a href="%s">сторінці входу</a>.';
 $_['text_your_details']        = 'Ваші Особисті Дані';
-$_['text_newsletter']          = 'Розсилка';
 $_['text_your_password']       = 'Ваш Пароль';
 $_['text_agree']               = 'Я прочитав(-ла) та погоджуюся з <a href="%s" class="modal-link"><b>%s</b></a>';
 
@@ -17,7 +16,6 @@ $_['entry_firstname']          = 'Ім\'я';
 $_['entry_lastname']           = 'Прізвище';
 $_['entry_email']              = 'E-Mail';
 $_['entry_telephone']          = 'Телефон';
-$_['entry_newsletter']         = 'Підписатися';
 $_['entry_password']           = 'Пароль';
 
 // Error
