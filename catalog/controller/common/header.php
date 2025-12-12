@@ -80,15 +80,31 @@ class Header extends \Opencart\System\Engine\Controller {
 		$data['wishlist'] = $this->url->link('account/wishlist', 'language=' . $this->config->get('config_language') . (isset($this->session->data['customer_token']) ? '&customer_token=' . $this->session->data['customer_token'] : ''));
 		$data['logged'] = $this->customer->isLogged();
 
-		if (!$this->customer->isLogged()) {
-			$data['register'] = $this->url->link('account/register', 'language=' . $this->config->get('config_language'));
-			$data['login'] = $this->url->link('account/login', 'language=' . $this->config->get('config_language'));
+		// Check if account authentication is enabled (default to disabled/guest-only mode)
+		// Set config_account_enabled to 1 in admin to enable sign in/sign up
+		$data['account_enabled'] = (bool)$this->config->get('config_account_enabled');
+
+		if ($data['account_enabled']) {
+			// Account features enabled - show login/register or account menu
+			if (!$this->customer->isLogged()) {
+				$data['register'] = $this->url->link('account/register', 'language=' . $this->config->get('config_language'));
+				$data['login'] = $this->url->link('account/login', 'language=' . $this->config->get('config_language'));
+			} else {
+				$data['account'] = $this->url->link('account/account', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
+				$data['order'] = $this->url->link('account/order', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
+				$data['transaction'] = $this->url->link('account/transaction', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
+				$data['download'] = $this->url->link('account/download', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
+				$data['logout'] = $this->url->link('account/logout', 'language=' . $this->config->get('config_language'));
+			}
 		} else {
-			$data['account'] = $this->url->link('account/account', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
-			$data['order'] = $this->url->link('account/order', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
-			$data['transaction'] = $this->url->link('account/transaction', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
-			$data['download'] = $this->url->link('account/download', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token']);
-			$data['logout'] = $this->url->link('account/logout', 'language=' . $this->config->get('config_language'));
+			// Guest-only mode - hide all account links
+			$data['register'] = '';
+			$data['login'] = '';
+			$data['account'] = '';
+			$data['order'] = '';
+			$data['transaction'] = '';
+			$data['download'] = '';
+			$data['logout'] = '';
 		}
 
 		$data['shopping_cart'] = $this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'));

@@ -37,3 +37,4 @@ $_['tab_description']            = 'Опис';
 $_['tab_attribute']              = 'Характеристики';
 $_['tab_review']                 = 'Відгуки (%s)';
 
+
