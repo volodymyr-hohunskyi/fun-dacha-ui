@@ -1,0 +1,53 @@
+{% if manufacturers %}
+  <div class="mb-5">
+    <h3 class="mb-4">{{ heading_title }}</h3>
+    <div id="carousel-manufacturers" class="carousel slide" data-bs-ride="carousel">
+      {% if manufacturers|length > 6 %}
+        <div class="carousel-indicators">
+          {% set manufacturer_row = 0 %}
+          {% for carousel_group in manufacturers|batch(6) %}
+            <button type="button" data-bs-target="#carousel-manufacturers" data-bs-slide-to="{{ manufacturer_row }}"{% if manufacturer_row == 0 %} class="active"{% endif %}></button>
+            {% set manufacturer_row = manufacturer_row + 1 %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="carousel-inner">
+        {% set manufacturer_row = 0 %}
+        {% for carousel_group in manufacturers|batch(6) %}
+          <div class="carousel-item{% if manufacturer_row == 0 %} active{% endif %}">
+            <div class="row justify-content-center">
+              {% for manufacturer in carousel_group %}
+                <div class="col-4 col-sm-2 text-center mb-3">
+                  <a href="{{ manufacturer.href }}">
+                    {% if manufacturer.image %}
+                      <img src="{{ manufacturer.image }}" alt="{{ manufacturer.name }}" title="{{ manufacturer.name }}" class="img-fluid mb-2"/>
+                    {% endif %}
+                    <div class="small">{{ manufacturer.name }}</div>
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% set manufacturer_row = manufacturer_row + 1 %}
+        {% endfor %}
+      </div>
+      {% if manufacturers|length > 6 %}
+        <button type="button" class="carousel-control-prev" data-bs-target="#carousel-manufacturers" data-bs-slide="prev">
+          <span class="fa-solid fa-chevron-left"></span>
+        </button>
+        <button type="button" class="carousel-control-next" data-bs-target="#carousel-manufacturers" data-bs-slide="next">
+          <span class="fa-solid fa-chevron-right"></span>
+        </button>
+      {% endif %}
+    </div>
+    <script type="text/javascript"><!--
+    $(document).ready(function() {
+        new bootstrap.Carousel(document.querySelector('#carousel-manufacturers'), {
+            interval: 5000,
+            wrap: true
+        });
+    });
+    //--></script>
+  </div>
+{% endif %}
+
