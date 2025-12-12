@@ -217,10 +217,13 @@
                 </div>
               {% endif %}
               <div class="mb-3">
-                <div class="input-group">
-                  <div class="input-group-text">{{ entry_qty }}</div>
-                  <input type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control"/>
-                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg btn-block">{{ button_cart }}</button>
+                <div class="d-flex flex-column gap-2">
+                  <div class="input-group" style="max-width: 200px;">
+                    <button type="button" class="btn btn-outline-secondary" id="button-quantity-minus" onclick="changeQuantity(-1)"><i class="fa-solid fa-minus"></i></button>
+                    <input type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control text-center" style="max-width: 80px;"/>
+                    <button type="button" class="btn btn-outline-secondary" id="button-quantity-plus" onclick="changeQuantity(1)"><i class="fa-solid fa-plus"></i></button>
+                  </div>
+                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg">{{ button_cart }}</button>
                 </div>
                 <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
                 <div id="error-quantity" class="form-text"></div>
@@ -335,12 +338,35 @@ $('#form-product').on('submit', function(e) {
     });
 });
 
+// Quantity change function
+function changeQuantity(delta) {
+    var $input = $('#input-quantity');
+    var currentValue = parseInt($input.val()) || {{ minimum }};
+    var newValue = currentValue + delta;
+    var minimum = {{ minimum }};
+    
+    if (newValue < minimum) {
+        newValue = minimum;
+    }
+    
+    $input.val(newValue);
+}
+
 $(document).ready(function() {
     $('.magnific-popup').magnificPopup({
         type: 'image',
         delegate: 'a',
         gallery: {
             enabled: true
+        }
+    });
+    
+    // Ensure quantity doesn't go below minimum
+    $('#input-quantity').on('change blur', function() {
+        var value = parseInt($(this).val()) || {{ minimum }};
+        var minimum = {{ minimum }};
+        if (value < minimum) {
+            $(this).val(minimum);
         }
     });
 });

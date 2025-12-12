@@ -16,6 +16,69 @@
   </div>
 </div>
 <script type="text/javascript"><!--
+// Cart quantity change functions
+function changeCartQuantity(cartId, delta) {
+    var $form = $('#form-quantity-' + cartId);
+    var $input = $form.find('input[name="quantity"]');
+    var currentValue = parseInt($input.val()) || 1;
+    var newValue = currentValue + delta;
+    
+    if (newValue < 1) {
+        newValue = 1;
+    }
+    
+    $input.val(newValue);
+    updateCartQuantity(cartId);
+}
+
+function updateCartQuantity(cartId) {
+    var $form = $('#form-quantity-' + cartId);
+    var $input = $form.find('input[name="quantity"]');
+    var quantity = parseInt($input.val()) || 1;
+    
+    if (quantity < 1) {
+        quantity = 1;
+        $input.val(quantity);
+    }
+    
+    // Auto-submit form to update cart
+    $.ajax({
+        url: 'index.php?route=checkout/cart.edit&language={{ language }}',
+        type: 'post',
+        data: $form.serialize(),
+        dataType: 'json',
+        beforeSend: function() {
+            $input.prop('disabled', true);
+            $form.find('button').prop('disabled', true);
+        },
+        complete: function() {
+            $input.prop('disabled', false);
+            $form.find('button').prop('disabled', false);
+        },
+        success: function(json) {
+            if (json['redirect']) {
+                location = json['redirect'];
+                return;
+            }
+            
+            if (json['error']) {
+                $('#alert').prepend('<div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> ' + json['error'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
+            }
+            
+            if (json['success']) {
+                $('#shopping-cart').load('index.php?route=checkout/cart.list&language={{ language }}', {}, function() {
+                    $('#cart').load('index.php?route=common/cart.info&language={{ language }}');
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+            $input.prop('disabled', false);
+            $form.find('button').prop('disabled', false);
+        }
+    });
+}
+
 $('#shopping-cart').on('submit', '#output-cart form', function(e) {
     e.preventDefault();
 
