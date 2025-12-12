@@ -13,5 +13,5 @@ $_['text_special']      = 'Акції';
 $_['text_account']      = 'Мій кабінет';
 $_['text_order']        = 'Історія замовлень';
 $_['text_wishlist']     = 'Список бажань';
-$_['text_powered']      = 'Powered By <a href="https://www.opencart.com">OpenCart</a><br/> %s &copy; %s';
+$_['text_powered']      = 'Fun Dacha &copy; 2025';
 
