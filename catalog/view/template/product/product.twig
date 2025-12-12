@@ -75,13 +75,6 @@
               {% endif %}
             </ul>
           {% endif %}
-          <form method="post" data-oc-toggle="ajax">
-            <div class="btn-group">
-              <button type="submit" formaction="{{ compare_add }}" data-bs-toggle="tooltip" class="btn btn-light btn-lg" title="{{ button_compare }}"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
-            </div>
-            <input type="hidden" name="product_id" value="{{ product_id }}"/>
-          </form>
-          <br/>
           <div id="product">
             <form id="form-product">
               {% if options %}
@@ -217,13 +210,17 @@
                 </div>
               {% endif %}
               <div class="mb-3">
-                <div class="d-flex flex-column gap-2">
+                <div class="d-flex flex-row align-items-center" style="gap: 20px;">
                   <div class="input-group" style="max-width: 200px;">
-                    <button type="button" class="btn btn-outline-secondary" id="button-quantity-minus" onclick="changeQuantity(-1)"><i class="fa-solid fa-minus"></i></button>
+                    <button type="button" class="btn btn-primary text-white" id="button-quantity-minus" onclick="changeQuantity(-1)"><i class="fa-solid fa-minus"></i></button>
                     <input type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control text-center" style="max-width: 80px;"/>
-                    <button type="button" class="btn btn-outline-secondary" id="button-quantity-plus" onclick="changeQuantity(1)"><i class="fa-solid fa-plus"></i></button>
+                    <button type="button" class="btn btn-primary text-white" id="button-quantity-plus" onclick="changeQuantity(1)"><i class="fa-solid fa-plus"></i></button>
                   </div>
-                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg">{{ button_cart }}</button>
+                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg text-white">{{ button_cart }}</button>
+                  <form method="post" data-oc-toggle="ajax" style="display: contents;">
+                    <button type="submit" formaction="{{ compare_add }}" data-bs-toggle="tooltip" class="btn btn-light btn-lg" title="{{ button_compare }}"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
+                    <input type="hidden" name="product_id" value="{{ product_id }}"/>
+                  </form>
                 </div>
                 <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
                 <div id="error-quantity" class="form-text"></div>

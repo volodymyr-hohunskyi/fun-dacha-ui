@@ -217,40 +217,6 @@ window.validateOrderButton = function() {
         showFieldError('shipping-warehouse-np', 'Будь ласка, оберіть відділення');
     }
     
-    // Rule 4: If Створити обліковий запис is ON, Email and Password are valid
-    var createAccountChecked = $('#input-create-account').is(':checked');
-    if (createAccountChecked) {
-        var $emailField = $('#input-email');
-        var $passwordField = $('#input-password');
-        
-        // Email validation
-        if ($emailField.length && $emailField.is(':visible')) {
-            var emailValue = $emailField.val();
-            if (!emailValue || emailValue.trim() === '') {
-                isValid = false;
-                showFieldError('email', 'Будь ласка, введіть email адресу');
-            } else {
-                // Basic email validation
-                var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailValue)) {
-                    isValid = false;
-                    showFieldError('email', 'Будь ласка, введіть коректну email адресу');
-                }
-            }
-        }
-        
-        // Password validation
-        if ($passwordField.length && $passwordField.is(':visible')) {
-            var passwordValue = $passwordField.val();
-            if (!passwordValue || passwordValue.trim() === '') {
-                isValid = false;
-                showFieldError('password', 'Будь ласка, введіть пароль');
-            } else if (passwordValue.length < 4) {
-                isValid = false;
-                showFieldError('password', 'Пароль повинен містити мінімум 4 символи');
-            }
-        }
-    }
     
     // Enable/disable button based on validation (button is always clickable, but visual state changes)
     if (isValid) {
@@ -663,14 +629,10 @@ $(document).ready(function() {
     
     // Validate on required field changes (use event delegation for dynamically added fields)
     // Real-time validation as user types or selects - for both guest and logged-in users
-    $(document).on('change keyup input blur', '#input-firstname, #input-lastname, #input-telephone, #input-shipping-firstname, #input-shipping-lastname, #input-shipping-telephone, #input-shipping-region, #input-shipping-city-np, #input-shipping-warehouse-np, #input-email, #input-password', function() {
+    $(document).on('change keyup input blur', '#input-firstname, #input-lastname, #input-telephone, #input-shipping-firstname, #input-shipping-lastname, #input-shipping-telephone, #input-shipping-region, #input-shipping-city-np, #input-shipping-warehouse-np', function() {
         setTimeout(validateOrderButton, 50);
     });
     
-    // Validate when account creation toggle changes
-    $(document).on('change', '#input-create-account', function() {
-        setTimeout(validateOrderButton, 100);
-    });
     
     // Attach click handler - use event delegation and ensure function exists
     $(document).on('click', '#button-confirm, #button-confirm-footer', function(e) {

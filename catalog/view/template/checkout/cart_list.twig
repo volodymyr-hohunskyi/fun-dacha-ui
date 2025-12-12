@@ -18,7 +18,8 @@
         <tr>
           <th class="text-center">{{ column_image }}</th>
           <th>{{ column_name }}</th>
-          <th>{{ column_quantity }}</th>
+          <th class="text-center">{{ column_quantity }}</th>
+          <th class="text-center"></th>
           <th class="text-end">{{ column_price }}</th>
           <th class="text-end">{{ column_total }}</th>
         </tr>
@@ -27,14 +28,11 @@
         {% for product in products %}
           <tr>
             <td class="text-center">
-              <div class="d-flex align-items-center justify-content-center gap-2">
-                <a href="{{ product.remove }}" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm" style="flex-shrink: 0;"><i class="fa-solid fa-circle-xmark"></i></a>
-                {% if product.thumb %}
-                  <a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-thumbnail"/></a>
-                {% else %}
-                  <span class="text-muted" style="min-width: 50px; min-height: 50px; display: inline-block;"></span>
-                {% endif %}
-              </div>
+              {% if product.thumb %}
+                <a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-thumbnail"/></a>
+              {% else %}
+                <span class="text-muted" style="min-width: 50px; min-height: 50px; display: inline-block;"></span>
+              {% endif %}
             </td>
             <td class="text-start text-wrap"><a href="{{ product.href }}">{{ product.name }}</a>{% if not product.stock %} <span class="text-danger">***</span>{% endif %}
               <ul class="list-unstyled mb-0">
@@ -55,18 +53,21 @@
                 {% endif %}
               </ul>
             </td>
-            <td>
+            <td class="text-center">
               <form method="post" data-oc-target="#shopping-cart" id="form-quantity-{{ product.cart_id }}">
-                <div class="input-group" style="max-width: 150px;">
-                  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeCartQuantity({{ product.cart_id }}, -1)"><i class="fa-solid fa-minus"></i></button>
+                <div class="input-group d-inline-flex justify-content-center" style="max-width: 150px;">
+                  <button type="button" class="btn btn-primary btn-sm text-white" onclick="changeCartQuantity({{ product.cart_id }}, -1)"><i class="fa-solid fa-minus"></i></button>
                   <input type="text" name="quantity" value="{{ product.quantity }}" size="1" class="form-control text-center{% if product.minimum %} is-invalid{% endif %}" style="max-width: 60px;" onchange="updateCartQuantity({{ product.cart_id }})"/>
-                  <button type="button" class="btn btn-outline-secondary btn-sm" onclick="changeCartQuantity({{ product.cart_id }}, 1)"><i class="fa-solid fa-plus"></i></button>
+                  <button type="button" class="btn btn-primary btn-sm text-white" onclick="changeCartQuantity({{ product.cart_id }}, 1)"><i class="fa-solid fa-plus"></i></button>
                 </div>
                 <input type="hidden" name="key" value="{{ product.cart_id }}"/>
               </form>
               {% if product.minimum %}
                 <small class="invalid-feedback d-block">{{ product.minimum }}</small>
               {% endif %}</td>
+            <td class="text-center" style="padding-left: 20px; padding-right: 20px;">
+              <a href="{{ product.remove }}" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i class="fa-solid fa-circle-xmark"></i></a>
+            </td>
             <td class="text-end">{{ product.price }}</td>
             <td class="text-end">{{ product.total }}</td>
           </tr>
@@ -75,7 +76,7 @@
       <tfoot id="checkout-total">
         {% for total in totals %}
           <tr>
-            <td colspan="4" class="text-end"><strong>{{ total.title }}</strong></td>
+            <td colspan="5" class="text-end"><strong>{{ total.title }}</strong></td>
             <td class="text-end">{{ total.text }}</td>
           </tr>
         {% endfor %}

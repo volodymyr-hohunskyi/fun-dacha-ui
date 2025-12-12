@@ -29,29 +29,6 @@
         <div id="error-telephone" class="invalid-feedback"></div>
       </div>
     </div>
-    {# Створити обліковий запис toggle - below телефон, full width, aligned left #}
-    <div class="row">
-      <div class="col-12 mb-3">
-        <div class="form-check form-switch">
-          <input type="checkbox" name="create_account" value="1" id="input-create-account" class="form-check-input"/>
-          <label for="input-create-account" class="form-check-label"><strong>{{ text_create_account }}</strong></label>
-        </div>
-      </div>
-      {# Email and Password fields - aligned with Створити обліковий запис, stacked vertically, no required asterisks #}
-      <div id="password-container" class="col-12" style="display: none;">
-        <div class="mb-3" id="email-container">
-          <label for="input-email" class="form-label">{{ entry_email }}</label>
-          <input type="email" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
-          <div id="error-email" class="invalid-feedback"></div>
-        </div>
-        <div class="mb-3" id="password">
-          <label for="input-password" class="form-label">{{ entry_password }}</label>
-          <input type="password" name="password" value="" placeholder="{{ entry_password }}" id="input-password" class="form-control"/>
-          <div id="error-password" class="invalid-feedback"></div>
-        </div>
-        <div class="mb-3">{{ captcha }}</div>
-      </div>
-    </div>
     <div class="row row-cols-1 row-cols-md-2">
       {% for custom_field in custom_fields %}
 
@@ -491,57 +468,6 @@
   </div>
 </form>
 <script type="text/javascript"><!--
-// Account creation toggle - email/password optional when OFF, no required asterisks
-$('#input-create-account').on('change', function() {
-    if ($(this).is(':checked')) {
-        // Show email/password fields when account creation is enabled
-        $('#password-container').show();
-        // Fields are required for validation but no asterisks shown
-        $('#input-email').prop('required', true);
-        $('#input-password').prop('required', true);
-    } else {
-        // Hide email/password fields when account creation is disabled
-        $('#password-container').hide();
-        // Remove required attribute when account creation is unchecked (fields are optional)
-        $('#input-email').prop('required', false);
-        $('#input-password').prop('required', false);
-        // Clear values when hiding
-        $('#input-email').val('');
-        $('#input-password').val('');
-    }
-    // Re-validate button state after toggle change
-    if (typeof validateOrderButton === 'function') {
-        setTimeout(validateOrderButton, 100);
-    }
-});
-
-// Account (original radio buttons - keep for compatibility)
-$('input[name=\'account\']').on('click', function() {
-    if ($(this).val() == 1) {
-        $('#password-container').show();
-        $('#password').addClass('required');
-        $('#email-field-container').show().addClass('required');
-        $('#input-create-account').prop('checked', true);
-    } else {
-        $('#password-container').hide();
-        $('#password').removeClass('required');
-        $('#email-field-container').removeClass('required').hide();
-        $('#input-create-account').prop('checked', false);
-    }
-
-    if ($(this).val() == 1) {
-        $('#register-agree').removeClass('d-none');
-    } else {
-        $('#register-agree').addClass('d-none');
-    }
-});
-
-// Initialize on page load
-if ($('input[name=\'account\']').length) {
-    $('input[name=\'account\']:checked').trigger('click');
-} else {
-    $('#input-create-account').trigger('change');
-}
 
 // Customer Group
 $('#input-customer-group').on('change', function() {
@@ -796,14 +722,6 @@ $('#form-register').on('submit', function(e) {
                     
                     $('#alert').prepend('<div class="alert alert-success alert-dismissible"><i class="fa-solid fa-circle-check"></i> ' + json['success'] + ' <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>');
 
-                    if ($('#input-create-account').prop('checked') || $('#input-register').prop('checked')) {
-                        $('input[name=\'account\']').prop('disabled', true);
-                        $('#input-customer-group').prop('disabled', true);
-                        $('#input-password').prop('disabled', true);
-                        $('#input-captcha').prop('disabled', true);
-                        $('#input-register-agree').prop('disabled', true);
-                        $('#input-create-account').prop('disabled', true);
-                    }
 
                     $('#input-shipping-method').val('');
                     $('#input-payment-method').val('');
