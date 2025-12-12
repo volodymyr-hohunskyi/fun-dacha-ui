@@ -14,12 +14,6 @@ class Login extends \Opencart\System\Engine\Controller {
 	 * @return void
 	 */
 	public function index(): void {
-		// Check if account authentication is enabled (guest-only mode)
-		// If disabled, redirect to home page
-		if (!(bool)$this->config->get('config_account_enabled')) {
-			$this->response->redirect($this->url->link('common/home', 'language=' . $this->config->get('config_language'), true));
-		}
-
 		$this->load->language('account/login');
 
 		$this->document->setTitle($this->language->get('heading_title'));

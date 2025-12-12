@@ -12,12 +12,6 @@ class Register extends \Opencart\System\Engine\Controller {
 	 * @return void
 	 */
 	public function index(): void {
-		// Check if account authentication is enabled (guest-only mode)
-		// If disabled, redirect to home page
-		if (!(bool)$this->config->get('config_account_enabled')) {
-			$this->response->redirect($this->url->link('common/home', 'language=' . $this->config->get('config_language'), true));
-		}
-
 		if ($this->customer->isLogged()) {
 			$this->response->redirect($this->url->link('account/account', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token'], true));
 		}
