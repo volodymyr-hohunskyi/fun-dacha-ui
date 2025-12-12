@@ -5,7 +5,7 @@ $_['heading_title']          = 'Shipping Method';
 // Text
 $_['text_shipping_method']   = 'Shipping method options';
 $_['text_shipping']          = 'Please select the preferred shipping method to use for this order.';
-$_['text_success']           = 'Success: You have changed shipping method!';
+$_['text_success']           = 'You have changed shipping method!';
 
 // Entry
 $_['entry_shipping_method']  = 'Choose shipping method...';

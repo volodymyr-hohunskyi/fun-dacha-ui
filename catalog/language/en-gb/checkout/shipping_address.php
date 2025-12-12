@@ -5,7 +5,7 @@ $_['heading_title']         = 'Shipping Address';
 // Text
 $_['text_address_new']      = 'I want to use a new address';
 $_['text_address_existing'] = 'I want to use an existing address';
-$_['text_success']          = 'Success: You have changed shipping address!';
+$_['text_success']          = 'You have changed shipping address!';
 
 // Entry
 $_['entry_address']         = 'Choose Address';

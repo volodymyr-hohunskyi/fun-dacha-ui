@@ -3,9 +3,9 @@
 $_['heading_title']              = 'Shopping Cart';
 
 // Text
-$_['text_success']               = 'Success: You have added <a href="%s">%s</a> to your <a href="%s">shopping cart</a>!';
-$_['text_edit']                  = 'Success: You have modified your shopping cart!';
-$_['text_remove']                = 'Success: You have removed an item from your shopping cart!';
+$_['text_success']               = 'You have added <a href="%s">%s</a> to your <a href="%s">shopping cart</a>!';
+$_['text_edit']                  = 'You have modified your shopping cart!';
+$_['text_remove']                = 'You have removed an item from your shopping cart!';
 $_['text_login']                 = 'Attention: You must <a href="%s">login</a> or <a href="%s">create an account</a> to view prices!';
 $_['text_no_results']            = 'Your shopping cart is empty!';
 $_['text_model']                 = 'Model';

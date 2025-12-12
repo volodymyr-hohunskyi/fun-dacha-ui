@@ -31,10 +31,6 @@
             {% if manufacturer %}
               <li>{{ text_manufacturer }} <a href="{{ manufacturers }}">{{ manufacturer }}</a></li>
             {% endif %}
-            <li>{{ text_model }} {{ model }}</li>
-            {% for product_code in product_codes %}
-              <li>{{ product_code.code }}: {{ product_code.value }}</li>
-            {% endfor %}
             {% if reward %}
               <li>{{ text_reward }} {{ reward }}</li>
             {% endif %}
@@ -51,6 +47,11 @@
                   {% endif %}
                 {% endfor %}
                 <a href="#" onclick="$('a[href=\'#tab-review\']').tab('show'); return false;">{{ text_reviews }}</a> / <a href="#" onclick="$('a[href=\'#tab-review\']').tab('show'); return false;">{{ text_write }}</a></p>
+            </div>
+          {% endif %}
+          {% if description %}
+            <div class="product-description mb-3">
+              {{ description }}
             </div>
           {% endif %}
           {% if price %}

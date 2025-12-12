@@ -1,6 +1,6 @@
 <?php
 // Text
-$_['text_items']                 = '%s товар(и) - %s';
+$_['text_items']                 = 'Кошик (%s товарів)';
 $_['text_points']                = 'Бонусні Бали';
 $_['text_subscription']          = 'Підписка';
 $_['text_subscription_duration'] = '%s кожні %d %s(ів) на %d платіж(ів)';

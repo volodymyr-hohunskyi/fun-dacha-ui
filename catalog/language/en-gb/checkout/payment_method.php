@@ -7,8 +7,8 @@ $_['text_payment_method']    = 'Payment method options';
 $_['text_payment']           = 'Please select the preferred payment method to use for this order.';
 $_['text_comments']          = 'Add Comments About Your Order';
 $_['text_agree']             = 'I have read and agree to the <a href="%s" class="modal-link"><b>%s</b></a>';
-$_['text_success']           = 'Success: You have changed payment method!';
-$_['text_comment']           = 'Success: Comment added!';
+$_['text_success']           = 'You have changed payment method!';
+$_['text_comment']           = 'Comment added!';
 
 // Entry
 $_['entry_payment_method']   = 'Choose payment method...';
