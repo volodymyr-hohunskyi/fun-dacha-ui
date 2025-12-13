@@ -116,6 +116,11 @@ class Cart extends \Opencart\System\Engine\Controller {
 		$this->load->model('checkout/cart');
 
 		$products = $this->model_checkout_cart->getProducts();
+		
+		// Set heading title with product count
+		$this->load->language('common/cart');
+		$product_count = count($products);
+		$data['heading_title'] = sprintf($this->language->get('text_items'), $product_count);
 
 		foreach ($products as $product) {
 			if ($product['option']) {
