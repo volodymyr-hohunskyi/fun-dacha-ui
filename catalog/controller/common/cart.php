@@ -35,7 +35,9 @@ class Cart extends \Opencart\System\Engine\Controller {
 			$price_status = false;
 		}
 
-		$data['text_items'] = sprintf($this->language->get('text_items'), $this->cart->countProducts());
+		// Count unique products (not total quantity)
+		$product_count = count($this->cart->getProducts());
+		$data['text_items'] = sprintf($this->language->get('text_items'), $product_count);
 
 		// Products
 		$data['products'] = [];

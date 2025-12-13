@@ -172,5 +172,111 @@ $('#cart').on('submit', 'form', function(e) {
         $('#shopping-cart').load('index.php?route=checkout/cart.list&language={{ language }}');
     }, 3000);
 });
+
+// Check for unavailable products before proceeding to checkout
+$(document).on('click', '#checkout-button', function(e) {
+    e.preventDefault();
+    
+    var checkoutUrl = $(this).attr('href');
+    
+    // Check for unavailable products
+    $.ajax({
+        url: 'index.php?route=checkout/cart.checkUnavailable&language={{ language }}',
+        type: 'get',
+        dataType: 'json',
+        success: function(json) {
+            if (json['has_unavailable']) {
+                // Check if all products are unavailable
+                if (json['available_count'] === 0) {
+                    // All products unavailable - show alert and prevent checkout
+                    var alertHtml = '<div class="alert alert-danger alert-dismissible fade show" role="alert">' +
+                        '<i class="fa-solid fa-circle-exclamation"></i> ' +
+                        '{{ text_all_unavailable|default("Жоден з товарів у вашому кошику не доступний. Будь ласка, видаліть їх та продовжіть покупки.") }}' +
+                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                        '</div>';
+                    $('#alert').prepend(alertHtml);
+                    
+                    // Scroll to top to show alert
+                    $('html, body').animate({ scrollTop: 0 }, 300);
+                } else {
+                    // Some products unavailable - show modal with options
+                    var modalHtml = '<div class="modal fade" id="unavailableProductsModal" tabindex="-1" aria-labelledby="unavailableProductsModalLabel" aria-hidden="true">' +
+                        '<div class="modal-dialog">' +
+                        '<div class="modal-content">' +
+                        '<div class="modal-header">' +
+                        '<h5 class="modal-title" id="unavailableProductsModalLabel"><i class="fa-solid fa-triangle-exclamation text-warning"></i> Увага</h5>' +
+                        '<button type="button" class="btn-close" data-bs-dismiss="modal"></button>' +
+                        '</div>' +
+                        '<div class="modal-body">' +
+                        '<p>{{ text_unavailable_warning|default("У вашому кошику є товари, які недоступні в потрібній кількості або відсутні на складі. Вони будуть видалені з кошика перед оформленням замовлення.") }}</p>' +
+                        '</div>' +
+                        '<div class="modal-footer">' +
+                        '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ button_return_cart|default("Повернутися до кошика") }}</button>' +
+                        '<button type="button" class="btn btn-primary" id="proceed-anyway-btn">{{ button_proceed_anyway|default("Продовжити все одно") }}</button>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                    
+                    // Remove existing modal if any
+                    $('#unavailableProductsModal').remove();
+                    $('body').append(modalHtml);
+                    
+                    var modal = new bootstrap.Modal(document.getElementById('unavailableProductsModal'));
+                    modal.show();
+                    
+                    // Handle proceed anyway
+                    $('#proceed-anyway-btn').off('click').on('click', function() {
+                        modal.hide();
+                        
+                        // Remove unavailable products
+                        $.ajax({
+                            url: 'index.php?route=checkout/cart.removeUnavailable&language={{ language }}',
+                            type: 'post',
+                            dataType: 'json',
+                            success: function(removeJson) {
+                                if (removeJson['success']) {
+                                    // Show success message
+                                    var successHtml = '<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+                                        '<i class="fa-solid fa-circle-check"></i> ' + removeJson['success'] +
+                                        '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                                        '</div>';
+                                    $('#alert').prepend(successHtml);
+                                }
+                                
+                                // Reload cart to reflect changes
+                                $('#shopping-cart').load('index.php?route=checkout/cart.list&language={{ language }}', {}, function() {
+                                    $('#cart').load('index.php?route=common/cart.info&language={{ language }}');
+                                    
+                                    // If cart still has products, proceed to checkout
+                                    if (removeJson['has_products']) {
+                                        window.location.href = checkoutUrl;
+                                    } else {
+                                        // Cart is empty after removal
+                                        var emptyHtml = '<div class="alert alert-warning alert-dismissible fade show" role="alert">' +
+                                            '<i class="fa-solid fa-circle-exclamation"></i> {{ text_all_unavailable|default("Жоден з товарів у вашому кошику не доступний. Будь ласка, видаліть їх та продовжіть покупки.") }}' +
+                                            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                                            '</div>';
+                                        $('#alert').prepend(emptyHtml);
+                                    }
+                                });
+                            },
+                            error: function() {
+                                alert('Помилка при видаленні недоступних товарів');
+                            }
+                        });
+                    });
+                }
+            } else {
+                // No unavailable products - proceed normally
+                window.location.href = checkoutUrl;
+            }
+        },
+        error: function() {
+            // On error, proceed normally
+            window.location.href = checkoutUrl;
+        }
+    });
+});
 //--></script>
 {{ footer }}

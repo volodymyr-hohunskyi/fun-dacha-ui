@@ -380,4 +380,81 @@ class Cart extends \Opencart\System\Engine\Controller {
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
 	}
+
+	/**
+	 * Check Unavailable Products
+	 *
+	 * @return void
+	 */
+	public function checkUnavailable(): void {
+		$this->load->language('checkout/cart');
+
+		$json = [];
+
+		// Get all products in cart
+		$products = $this->cart->getProducts();
+		$unavailable_products = [];
+		$available_products = [];
+
+		// Check stock status for each product
+		foreach ($products as $product) {
+			// Check if product has stock
+			// stock_status is false if product is out of stock or quantity is insufficient
+			if (!$product['stock_status']) {
+				$unavailable_products[] = [
+					'cart_id' => $product['cart_id'],
+					'name'    => $product['name']
+				];
+			} else {
+				$available_products[] = $product['cart_id'];
+			}
+		}
+
+		$json['has_unavailable'] = !empty($unavailable_products);
+		$json['unavailable_count'] = count($unavailable_products);
+		$json['available_count'] = count($available_products);
+		$json['unavailable_products'] = $unavailable_products;
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Remove Unavailable Products
+	 *
+	 * @return void
+	 */
+	public function removeUnavailable(): void {
+		$this->load->language('checkout/cart');
+
+		$json = [];
+
+		// Get all products in cart
+		$products = $this->cart->getProducts();
+		$removed_count = 0;
+
+		// Remove products without stock
+		foreach ($products as $product) {
+			if (!$product['stock_status']) {
+				$this->cart->remove($product['cart_id']);
+				$removed_count++;
+			}
+		}
+
+		// Clear session data
+		unset($this->session->data['shipping_method']);
+		unset($this->session->data['shipping_methods']);
+		unset($this->session->data['payment_method']);
+		unset($this->session->data['payment_methods']);
+		unset($this->session->data['reward']);
+
+		if ($removed_count > 0) {
+			$json['success'] = sprintf($this->language->get('text_unavailable_removed'), $removed_count);
+		}
+		$json['removed_count'] = $removed_count;
+		$json['has_products'] = $this->cart->hasProducts();
+
+		$this->response->addHeader('Content-Type: application/json');
+		$this->response->setOutput(json_encode($json));
+	}
 }
