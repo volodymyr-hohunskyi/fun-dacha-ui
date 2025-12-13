@@ -107,6 +107,15 @@ class Order extends \Opencart\System\Engine\Model {
 				$this->model_checkout_order->addTotal($order_id, $total);
 			}
 		}
+        
+        // --- Telegram notification ---
+        try {
+            $this->load->controller('event/telegram/sendOrder', $order_id);
+        } catch (\Throwable $e) {
+            // Never break checkout
+            $log = new Log('telegram.log');
+            $log->write('[Telegram] addOrder() call failed: ' . $e->getMessage());
+        }
 
 		return $order_id;
 	}
