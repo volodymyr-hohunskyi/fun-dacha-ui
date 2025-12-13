@@ -217,10 +217,6 @@
                     <button type="button" class="btn btn-primary text-white" id="button-quantity-plus" onclick="changeQuantity(1)"><i class="fa-solid fa-plus"></i></button>
                   </div>
                   <button type="submit" id="button-cart" class="btn btn-primary btn-lg text-white">{{ button_cart }}</button>
-                  <form method="post" data-oc-toggle="ajax" style="display: contents;">
-                    <button type="submit" formaction="{{ compare_add }}" data-bs-toggle="tooltip" class="btn btn-light btn-lg" title="{{ button_compare }}"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
-                    <input type="hidden" name="product_id" value="{{ product_id }}"/>
-                  </form>
                 </div>
                 <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
                 <div id="error-quantity" class="form-text"></div>
