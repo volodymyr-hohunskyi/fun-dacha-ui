@@ -449,23 +449,7 @@
     </div>
   </div>
   
-  {# Передзвоніть мені - above comment #}
-  <div class="row mt-3">
-    <div class="col-12 mb-3">
-      <div class="form-check form-switch">
-        <input type="checkbox" name="call_me" value="1" id="input-call-me" class="form-check-input"{% if call_me %} checked{% endif %}/>
-        <label for="input-call-me" class="form-check-label">{{ text_call_me }}</label>
-      </div>
-    </div>
-  </div>
-  
-  {# Order comment - full width, under Передзвоніть мені #}
-  <div class="row mt-3">
-    <div class="col-12 mb-3">
-      <label for="input-comment-register" class="form-label"><strong>Додайте коментар до вашого замовлення</strong></label>
-      <textarea name="comment" rows="4" id="input-comment-register" class="form-control" placeholder="Додайте коментар до вашого замовлення"></textarea>
-    </div>
-  </div>
+  {# Comment and callback section removed from here - it's displayed in confirm.twig for all users #}
 </form>
 <script type="text/javascript"><!--
 

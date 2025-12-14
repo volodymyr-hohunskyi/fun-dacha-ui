@@ -182,6 +182,19 @@ class Cart extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		// Check minimum order amount (500 UAH)
+		$min_order_amount = 500;
+		$data['min_order_amount'] = $min_order_amount;
+		$data['min_order_amount_formatted'] = $this->currency->format($min_order_amount, $this->session->data['currency']);
+		$data['min_order_error'] = '';
+		$data['can_proceed_to_checkout'] = true;
+		
+		if ($price_status && $total > 0 && $total < $min_order_amount) {
+			$data['min_order_error'] = sprintf($this->language->get('error_minimum_order'), $this->currency->format($min_order_amount, $this->session->data['currency']), $this->currency->format($min_order_amount, $this->session->data['currency']));
+			$data['can_proceed_to_checkout'] = false;
+			// Don't set error_warning to avoid duplication - min_order_error will be displayed separately
+		}
+
 		$data['modules'] = [];
 
 		// Extension - load only coupon and reward modules, exclude shipping
@@ -204,7 +217,12 @@ class Cart extends \Opencart\System\Engine\Controller {
 
 		if ($products) {
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
-			$data['checkout'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
+			// Only allow checkout if minimum order amount is met
+			if ($data['can_proceed_to_checkout']) {
+				$data['checkout'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
+			} else {
+				$data['checkout'] = '';
+			}
 		} else {
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
 		}
