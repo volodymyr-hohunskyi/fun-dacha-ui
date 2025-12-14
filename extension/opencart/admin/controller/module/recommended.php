@@ -145,3 +145,4 @@ class Recommended extends \Opencart\System\Engine\Controller {
 	}
 }
 
+
