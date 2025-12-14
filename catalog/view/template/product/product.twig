@@ -209,18 +209,43 @@
                   <div id="error-subscription" class="invalid-feedback"></div>
                 </div>
               {% endif %}
-              <div class="mb-3">
-                <div class="d-flex flex-row align-items-center flex-nowrap" style="gap: 10px;">
-                  <div class="input-group flex-nowrap" style="flex-shrink: 0;">
-                    <button type="button" class="btn btn-primary text-white" id="button-quantity-minus" onclick="changeQuantity(-1)"><i class="fa-solid fa-minus"></i></button>
-                    <input type="text" name="quantity" value="{{ minimum }}" size="2" id="input-quantity" class="form-control text-center" style="width: 60px; min-width: 60px;"/>
-                    <button type="button" class="btn btn-primary text-white" id="button-quantity-plus" onclick="changeQuantity(1)"><i class="fa-solid fa-plus"></i></button>
-                  </div>
-                  <button type="submit" id="button-cart" class="btn btn-primary btn-lg text-white" style="flex: 1 1 auto; min-width: 0;">{{ button_cart }}</button>
-                </div>
-                <input type="hidden" name="product_id" value="{{ product_id }}" id="input-product-id"/>
-                <div id="error-quantity" class="form-text"></div>
-              </div>
+<div class="mb-3">
+  <div class="d-flex flex-column gap-2">
+
+    <!-- Quantity -->
+    <div class="input-group quantity-group">
+      <button type="button"
+              class="btn btn-primary text-white"
+              onclick="changeQuantity(-1)">
+        <i class="fa-solid fa-minus"></i>
+      </button>
+
+      <input type="text"
+             name="quantity"
+             value="{{ minimum }}"
+             id="input-quantity"
+             class="form-control text-center quantity-input" />
+
+      <button type="button"
+              class="btn btn-primary text-white"
+              onclick="changeQuantity(1)">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+    </div>
+
+    <!-- Add to cart -->
+    <button type="submit"
+            id="button-cart"
+            class="btn btn-primary btn-lg text-white add-to-cart-btn">
+      {{ button_cart }}
+    </button>
+
+  </div>
+
+  <input type="hidden" name="product_id" value="{{ product_id }}" />
+  <div id="error-quantity" class="form-text"></div>
+</div>
+
               {% if minimum > 1 %}
                 <div class="alert alert-warning"><i class="fa-solid fa-circle-info"></i> {{ text_minimum }}</div>
               {% endif %}
@@ -280,6 +305,11 @@
     {{ column_right }}
   </div>
 </div>
+<style>
+.quantity-group {
+  max-width: 200px;
+}
+</style>
 <script type="text/javascript"><!--
 $('#input-subscription').on('change', function(e) {
     var element = this;
