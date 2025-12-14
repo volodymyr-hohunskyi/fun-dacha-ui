@@ -1,4 +1,10 @@
 user-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /adminpage/
+Disallow: /system/
+Disallow: /extension/
+Disallow: /catalog/
 Disallow: /*?page=$
 Disallow: /*&page=$
 Disallow: /*?sort=
@@ -15,3 +21,9 @@ Disallow: /*?filter_description=
 Disallow: /*&filter_description=
 Disallow: /*?filter_group=
 Disallow: /*&filter_group=
+Disallow: /index.php?route=checkout/
+Disallow: /index.php?route=account/
+Disallow: /index.php?route=product/search
+Disallow: /index.php?route=information/search
+
+Sitemap: https://fun-dacha.com.ua/index.php?route=information/sitemap

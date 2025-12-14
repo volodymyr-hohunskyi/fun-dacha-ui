@@ -32,6 +32,26 @@
   {% for analytic in analytics %}
     {{ analytic }}
   {% endfor %}
+  {% if schema_organization %}
+  <script type="application/ld+json">
+  {{ schema_organization }}
+  </script>
+  {% endif %}
+  {% if schema_website %}
+  <script type="application/ld+json">
+  {{ schema_website }}
+  </script>
+  {% endif %}
+  {% if og_tags %}
+  {% for key, value in og_tags %}
+  <meta property="{{ key }}" content="{{ value }}" />
+  {% endfor %}
+  {% endif %}
+  {% if twitter_tags %}
+  {% for key, value in twitter_tags %}
+  <meta name="{{ key }}" content="{{ value }}" />
+  {% endfor %}
+  {% endif %}
 </head>
 <body>
 <div id="container">

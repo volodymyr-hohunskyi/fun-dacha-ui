@@ -13,6 +13,9 @@ class Search extends \Opencart\System\Engine\Controller {
 	 */
 	public function index(): void {
 		$this->load->language('product/search');
+		
+		// Add meta robots noindex for search pages
+		$this->document->setRobots('noindex, follow');
 
 		if (isset($this->request->get['search'])) {
 			$filter_search = $this->request->get['search'];

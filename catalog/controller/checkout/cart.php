@@ -217,12 +217,7 @@ class Cart extends \Opencart\System\Engine\Controller {
 
 		if ($products) {
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
-			// Only allow checkout if minimum order amount is met
-			if ($data['can_proceed_to_checkout']) {
-				$data['checkout'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
-			} else {
-				$data['checkout'] = '';
-			}
+			$data['checkout'] = $this->url->link('checkout/checkout', 'language=' . $this->config->get('config_language'));
 		} else {
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
 		}

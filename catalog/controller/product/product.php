@@ -480,6 +480,19 @@ class Product extends \Opencart\System\Engine\Controller {
 			if ($this->config->get('config_product_report_status')) {
 				$this->model_catalog_product->addReport($this->request->get['product_id'], oc_get_ip());
 			}
+			
+			// Generate Schema.org markup for Product and BreadcrumbList (after all data is prepared)
+			$data['schema_product'] = $this->generateProductSchema($product_info, $product_id, $data);
+			$data['schema_breadcrumb'] = $this->generateBreadcrumbSchema($data['breadcrumbs']);
+			
+			// Generate FAQPage Schema if FAQ data exists (optional - for future FAQ blocks)
+			if (!empty($data['faq_items'])) {
+				$data['schema_faq'] = $this->generateFAQPageSchema($data['faq_items']);
+			}
+			
+			// Generate OpenGraph and Twitter Cards meta tags
+			$data['og_tags'] = $this->generateOpenGraphTags($product_info, $product_id, $data);
+			$data['twitter_tags'] = $this->generateTwitterTags($product_info, $product_id, $data);
 
 			$data['language'] = $this->config->get('config_language');
 
@@ -496,5 +509,257 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Generate Product Schema.org JSON-LD
+	 *
+	 * @param array $product_info
+	 * @param int   $product_id
+	 * @param array $data
+	 *
+	 * @return string
+	 */
+	private function generateProductSchema(array $product_info, int $product_id, array $data): string {
+		$base_url = $this->config->get('config_url');
+		$product_url = $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id, true);
+		
+		// Get price (use special if available, otherwise regular price)
+		$price_value = (float)($product_info['special'] ?: $product_info['price']);
+		$currency_code = $this->session->data['currency'] ?? $this->config->get('config_currency');
+		
+		// Get availability
+		$availability = 'https://schema.org/InStock';
+		if ($product_info['quantity'] <= 0) {
+			$availability = 'https://schema.org/OutOfStock';
+		}
+		
+		// Get image with ImageObject structure
+		$image_data = [];
+		if (!empty($data['popup'])) {
+			$image_url = $data['popup'];
+			// Try to get image dimensions if available
+			$image_width = $this->config->get('config_image_popup_width') ?: 800;
+			$image_height = $this->config->get('config_image_popup_height') ?: 800;
+			$image_data[] = [
+				'@type' => 'ImageObject',
+				'url' => $image_url,
+				'width' => (int)$image_width,
+				'height' => (int)$image_height
+			];
+		} elseif (!empty($product_info['image'])) {
+			$this->load->model('tool/image');
+			$image_url = $this->model_tool_image->resize($product_info['image'], $this->config->get('config_image_popup_width'), $this->config->get('config_image_popup_height'));
+			$image_width = $this->config->get('config_image_popup_width') ?: 800;
+			$image_height = $this->config->get('config_image_popup_height') ?: 800;
+			$image_data[] = [
+				'@type' => 'ImageObject',
+				'url' => $image_url,
+				'width' => (int)$image_width,
+				'height' => (int)$image_height
+			];
+		}
+		
+		// Get brand/manufacturer
+		$brand = '';
+		if (!empty($data['manufacturer'])) {
+			$brand = $data['manufacturer'];
+		}
+		
+		// Get SKU
+		$sku = $product_info['model'] ?? '';
+		
+		// Get rating - ONLY if reviews exist
+		$rating_value = (float)$product_info['rating'];
+		$review_count = (int)$product_info['reviews'];
+		
+		$schema = [
+			'@context' => 'https://schema.org',
+			'@type' => 'Product',
+			'name' => $product_info['name'],
+			'description' => strip_tags(html_entity_decode($product_info['description'] ?? '', ENT_QUOTES, 'UTF-8')),
+			'image' => $image_data ?: [],
+			'sku' => $sku,
+			'brand' => $brand ? ['@type' => 'Brand', 'name' => $brand] : null,
+			'offers' => [
+				'@type' => 'Offer',
+				'url' => $product_url,
+				'priceCurrency' => $currency_code,
+				'price' => number_format($price_value, 2, '.', ''),
+				'availability' => $availability,
+				'priceValidUntil' => date('Y-m-d', strtotime('+1 year')),
+				'seller' => [
+					'@type' => 'Organization',
+					'name' => $this->config->get('config_name')
+				]
+			]
+		];
+		
+		// Add rating ONLY if reviews exist (Google requirement)
+		// Do not add AggregateRating if review_count is 0 to avoid schema rejection
+		if ($review_count > 0 && $rating_value > 0) {
+			$schema['aggregateRating'] = [
+				'@type' => 'AggregateRating',
+				'ratingValue' => number_format($rating_value, 1),
+				'reviewCount' => $review_count
+			];
+		}
+		
+		// Remove null values
+		$schema = array_filter($schema, function($value) {
+			return $value !== null;
+		});
+		
+		return json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+	}
+	
+	/**
+	 * Generate BreadcrumbList Schema.org JSON-LD
+	 *
+	 * @param array $breadcrumbs
+	 *
+	 * @return string
+	 */
+	private function generateBreadcrumbSchema(array $breadcrumbs): string {
+		$items = [];
+		$position = 1;
+		
+		foreach ($breadcrumbs as $breadcrumb) {
+			$items[] = [
+				'@type' => 'ListItem',
+				'position' => $position++,
+				'name' => $breadcrumb['text'],
+				'item' => $breadcrumb['href']
+			];
+		}
+		
+		$schema = [
+			'@context' => 'https://schema.org',
+			'@type' => 'BreadcrumbList',
+			'itemListElement' => $items
+		];
+		
+		return json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+	}
+	
+	/**
+	 * Generate FAQPage Schema.org JSON-LD
+	 * For FAQ blocks on product pages (when FAQ data is available)
+	 *
+	 * @param array $faq_items Array of FAQ items with 'question' and 'answer' keys
+	 *
+	 * @return string
+	 */
+	private function generateFAQPageSchema(array $faq_items): string {
+		$main_entity = [];
+		
+		foreach ($faq_items as $faq) {
+			if (!empty($faq['question']) && !empty($faq['answer'])) {
+				$main_entity[] = [
+					'@type' => 'Question',
+					'name' => strip_tags($faq['question']),
+					'acceptedAnswer' => [
+						'@type' => 'Answer',
+						'text' => strip_tags($faq['answer'])
+					]
+				];
+			}
+		}
+		
+		if (empty($main_entity)) {
+			return '';
+		}
+		
+		$schema = [
+			'@context' => 'https://schema.org',
+			'@type' => 'FAQPage',
+			'mainEntity' => $main_entity
+		];
+		
+		return json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+	}
+	
+	/**
+	 * Generate OpenGraph meta tags
+	 *
+	 * @param array $product_info
+	 * @param int   $product_id
+	 * @param array $data
+	 *
+	 * @return array
+	 */
+	private function generateOpenGraphTags(array $product_info, int $product_id, array $data): array {
+		$base_url = rtrim($this->config->get('config_url'), '/');
+		$product_url = $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id, true);
+		
+		$og = [
+			'og:type' => 'product',
+			'og:title' => $product_info['name'],
+			'og:url' => $product_url,
+			'og:site_name' => $this->config->get('config_name'),
+		];
+		
+		// Description
+		if (!empty($product_info['meta_description'])) {
+			$og['og:description'] = htmlspecialchars(strip_tags($product_info['meta_description']), ENT_QUOTES, 'UTF-8');
+		} elseif (!empty($product_info['description'])) {
+			$description = strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8'));
+			$og['og:description'] = htmlspecialchars(mb_substr($description, 0, 200), ENT_QUOTES, 'UTF-8');
+		}
+		
+		// Image
+		if (!empty($data['popup'])) {
+			$og['og:image'] = $data['popup'];
+			$og['og:image:width'] = $this->config->get('config_image_popup_width') ?: 800;
+			$og['og:image:height'] = $this->config->get('config_image_popup_height') ?: 800;
+		}
+		
+		// Price
+		if (!empty($product_info['price'])) {
+			$price_value = (float)($product_info['special'] ?: $product_info['price']);
+			$currency_code = $this->session->data['currency'] ?? $this->config->get('config_currency');
+			$og['product:price:amount'] = number_format($price_value, 2, '.', '');
+			$og['product:price:currency'] = $currency_code;
+		}
+		
+		// Availability
+		if ($product_info['quantity'] > 0) {
+			$og['product:availability'] = 'in stock';
+		} else {
+			$og['product:availability'] = 'out of stock';
+		}
+		
+		return $og;
+	}
+	
+	/**
+	 * Generate Twitter Card meta tags
+	 *
+	 * @param array $product_info
+	 * @param int   $product_id
+	 * @param array $data
+	 *
+	 * @return array
+	 */
+	private function generateTwitterTags(array $product_info, int $product_id, array $data): array {
+		$twitter = [
+			'twitter:card' => 'summary_large_image',
+			'twitter:title' => $product_info['name'],
+		];
+		
+		// Description
+		if (!empty($product_info['meta_description'])) {
+			$twitter['twitter:description'] = htmlspecialchars(strip_tags($product_info['meta_description']), ENT_QUOTES, 'UTF-8');
+		} elseif (!empty($product_info['description'])) {
+			$description = strip_tags(html_entity_decode($product_info['description'], ENT_QUOTES, 'UTF-8'));
+			$twitter['twitter:description'] = htmlspecialchars(mb_substr($description, 0, 200), ENT_QUOTES, 'UTF-8');
+		}
+		
+		// Image
+		if (!empty($data['popup'])) {
+			$twitter['twitter:image'] = $data['popup'];
+		}
+		
+		return $twitter;
 	}
 }

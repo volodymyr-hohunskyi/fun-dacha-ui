@@ -1,4 +1,9 @@
 {{ header }}
+{% if schema_breadcrumb %}
+<script type="application/ld+json">
+{{ schema_breadcrumb }}
+</script>
+{% endif %}
 <div id="product-category" class="container">
   <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
@@ -9,12 +14,16 @@
     <div id="content" class="col">{{ content_top }}
       <h1>{{ heading_title }}</h1>
       {% if image or description %}
-        <div class="row">
+        <div class="row mb-4">
           {% if image %}
-            <div class="col-3"><img src="{{ image }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="img-thumbnail"/></div>
+            <div class="col-md-3 mb-3 mb-md-0"><img src="{{ image }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="img-thumbnail"/></div>
           {% endif %}
           {% if description %}
-            <div class="col-9">{{ description }}</div>
+            <div class="{% if image %}col-md-9{% else %}col-12{% endif %}">
+              <div class="category-description">
+                {{ description }}
+              </div>
+            </div>
           {% endif %}
         </div>
         <hr/>

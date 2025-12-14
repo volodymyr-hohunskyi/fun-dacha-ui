@@ -1,4 +1,29 @@
 {{ header }}
+{% if schema_product %}
+<script type="application/ld+json">
+{{ schema_product }}
+</script>
+{% endif %}
+{% if schema_breadcrumb %}
+<script type="application/ld+json">
+{{ schema_breadcrumb }}
+</script>
+{% endif %}
+{% if schema_faq %}
+<script type="application/ld+json">
+{{ schema_faq }}
+</script>
+{% endif %}
+{% if og_tags %}
+{% for key, value in og_tags %}
+<meta property="{{ key }}" content="{{ value }}" />
+{% endfor %}
+{% endif %}
+{% if twitter_tags %}
+{% for key, value in twitter_tags %}
+<meta name="{{ key }}" content="{{ value }}" />
+{% endfor %}
+{% endif %}
 <div id="product-info" class="container">
   <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}

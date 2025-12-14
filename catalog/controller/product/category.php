@@ -60,9 +60,37 @@ class Category extends \Opencart\System\Engine\Controller {
 		$category_info = $this->model_catalog_category->getCategory($category_id);
 
 		if ($category_info) {
-			$this->document->setTitle($category_info['meta_title']);
-			$this->document->setDescription($category_info['meta_description']);
-			$this->document->setKeywords($category_info['meta_keyword']);
+			// Set meta tags with fallback if not configured
+			$meta_title = !empty($category_info['meta_title']) 
+				? $category_info['meta_title'] 
+				: $category_info['name'] . ' - Купити в Україні | ' . $this->config->get('config_name');
+			
+			$meta_description = !empty($category_info['meta_description']) 
+				? $category_info['meta_description'] 
+				: 'Купити ' . mb_strtolower($category_info['name']) . ' в Україні. Якісне насіння з гарантією. Великий вибір, доставка Новою Поштою по всій Україні. ' . $this->config->get('config_name') . '.';
+			
+			$this->document->setTitle($meta_title);
+			$this->document->setDescription($meta_description);
+			
+			if (!empty($category_info['meta_keyword'])) {
+				$this->document->setKeywords($category_info['meta_keyword']);
+			}
+			
+			// Add canonical tag for category (without filters/sort/page parameters)
+			$canonical_url = $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $this->request->get['path']);
+			
+			// For paginated pages (page > 1), canonical must point to page 1
+			if (isset($this->request->get['page']) && $this->request->get['page'] > 1) {
+				$this->document->addLink($canonical_url, 'canonical');
+				$this->document->setRobots('noindex, follow');
+			} else {
+				$this->document->addLink($canonical_url, 'canonical');
+			}
+			
+			// Add meta robots noindex for filtered/sorted pages
+			if (isset($this->request->get['filter']) || isset($this->request->get['sort'])) {
+				$this->document->setRobots('noindex, follow');
+			}
 
 			$data['breadcrumbs'] = [];
 
@@ -445,5 +473,34 @@ class Category extends \Opencart\System\Engine\Controller {
 		}
 
 		return null;
+	}
+	
+	/**
+	 * Generate BreadcrumbList Schema.org JSON-LD
+	 *
+	 * @param array $breadcrumbs
+	 *
+	 * @return string
+	 */
+	private function generateBreadcrumbSchema(array $breadcrumbs): string {
+		$items = [];
+		$position = 1;
+		
+		foreach ($breadcrumbs as $breadcrumb) {
+			$items[] = [
+				'@type' => 'ListItem',
+				'position' => $position++,
+				'name' => $breadcrumb['text'],
+				'item' => $breadcrumb['href']
+			];
+		}
+		
+		$schema = [
+			'@context' => 'https://schema.org',
+			'@type' => 'BreadcrumbList',
+			'itemListElement' => $items
+		];
+		
+		return json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 	}
 }
