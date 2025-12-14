@@ -25,6 +25,28 @@ class Product extends \Opencart\System\Engine\Controller {
 		$product_info = $this->model_catalog_product->getProduct($product_id);
 
 		if ($product_info) {
+			// Track recently viewed products
+			if (!isset($this->session->data['recently_viewed'])) {
+				$this->session->data['recently_viewed'] = [];
+			}
+			
+			// Remove if already exists (to avoid duplicates)
+			$key = array_search($product_id, $this->session->data['recently_viewed']);
+			if ($key !== false) {
+				unset($this->session->data['recently_viewed'][$key]);
+			}
+			
+			// Add to beginning of array
+			array_unshift($this->session->data['recently_viewed'], $product_id);
+			
+			// Keep only last 20 products
+			$this->session->data['recently_viewed'] = array_slice($this->session->data['recently_viewed'], 0, 20);
+			
+			// Store for logged-in customers (optional - can be implemented later)
+			if ($this->customer->isLogged()) {
+				// Could store in database here if needed
+			}
+			
 			$this->document->setTitle($product_info['meta_title']);
 			$this->document->setDescription($product_info['meta_description']);
 			$this->document->setKeywords($product_info['meta_keyword']);
