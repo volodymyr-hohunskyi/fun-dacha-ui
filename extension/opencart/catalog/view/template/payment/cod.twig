@@ -117,20 +117,42 @@ window.validateOrderButton = function() {
         showFieldError('lastname', 'Будь ласка, введіть ваше прізвище');
     }
     
-    // Rule 2: Phone Number is valid and not empty
+    // Rule 2: Phone Number is valid and not empty (Ukrainian format validation)
+    function validateUkrainianPhone(phoneValue) {
+        if (!phoneValue || phoneValue.trim() === '') {
+            return { valid: false, message: 'Будь ласка, введіть номер телефону' };
+        }
+        
+        // Remove all spaces and non-digit characters
+        var digits = phoneValue.replace(/\D/g, '');
+        
+        // Must be exactly 10 digits
+        if (digits.length !== 10) {
+            return { valid: false, message: 'Телефон повинен містити рівно 10 цифр (формат: 0XX XXX XX XX)' };
+        }
+        
+        // Must start with 0 (Ukrainian mobile format)
+        if (digits.charAt(0) !== '0') {
+            return { valid: false, message: 'Номер телефону повинен починатися з 0 (формат: 0XX XXX XX XX)' };
+        }
+        
+        // Second digit should be 5, 6, 7, 8, or 9 (Ukrainian mobile operators)
+        var secondDigit = digits.charAt(1);
+        if (!['5', '6', '7', '8', '9'].includes(secondDigit)) {
+            return { valid: false, message: 'Невірний формат телефону. Використовуйте формат: 0XX XXX XX XX' };
+        }
+        
+        return { valid: true };
+    }
+    
     var $telephone = $('#input-telephone');
     if ($telephone.length) {
         var phoneValue = $telephone.val();
-        if (!phoneValue || phoneValue.trim() === '') {
+        var phoneValidation = validateUkrainianPhone(phoneValue);
+        
+        if (!phoneValidation.valid) {
             isValid = false;
-            showFieldError('telephone', 'Будь ласка, введіть номер телефону');
-        } else {
-            // Basic phone validation: should contain at least 10 digits
-            var phoneDigits = phoneValue.replace(/\D/g, '');
-            if (phoneDigits.length < 10) {
-                isValid = false;
-                showFieldError('telephone', 'Телефон повинен містити мінімум 10 цифр');
-            }
+            showFieldError('telephone', phoneValidation.message);
         }
     } else {
         isValid = false;

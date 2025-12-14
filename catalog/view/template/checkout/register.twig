@@ -25,7 +25,8 @@
       {# Phone Number field - always visible, required for checkout, goes to the left #}
       <div class="col mb-3 required">
         <label for="input-telephone" class="form-label">{{ entry_telephone }}</label>
-        <input type="text" name="telephone" value="{{ telephone }}" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control"/>
+        <input type="tel" name="telephone" value="{{ telephone }}" placeholder="0XX XXX XX XX" id="input-telephone" class="form-control" maxlength="13"/>
+        <small class="form-text text-muted" id="phone-hint">Формат: <span id="phone-example">0XX XXX XX XX</span></small>
         <div id="error-telephone" class="invalid-feedback"></div>
       </div>
     </div>
@@ -452,6 +453,129 @@
   {# Comment and callback section removed from here - it's displayed in confirm.twig for all users #}
 </form>
 <script type="text/javascript"><!--
+
+// Phone number formatting function for Ukrainian format: 0XX XXX XX XX
+function formatUkrainianPhone(input) {
+    // Remove all non-digit characters
+    var value = input.value.replace(/\D/g, '');
+    
+    // Limit to 10 digits (Ukrainian mobile numbers)
+    if (value.length > 10) {
+        value = value.substring(0, 10);
+    }
+    
+    // Format: XXX XXX XX XX
+    var formatted = '';
+    if (value.length > 0) {
+        formatted = value.substring(0, 3);
+        if (value.length > 3) {
+            formatted += ' ' + value.substring(3, 6);
+        }
+        if (value.length > 6) {
+            formatted += ' ' + value.substring(6, 8);
+        }
+        if (value.length > 8) {
+            formatted += ' ' + value.substring(8, 10);
+        }
+    }
+    
+    // Update input value
+    input.value = formatted;
+    
+    // Clear error state when user starts typing
+    var $input = $(input);
+    var fieldId = $input.attr('id') ? $input.attr('id').replace('input-', '') : 'telephone';
+    $input.removeClass('is-invalid');
+    $('#error-' + fieldId).text('').hide();
+}
+
+// Validate Ukrainian phone number format
+function validateUkrainianPhone(phoneValue) {
+    // Remove all spaces and non-digit characters
+    var digits = phoneValue.replace(/\D/g, '');
+    
+    // Must be exactly 10 digits and start with 0
+    if (digits.length !== 10) {
+        return false;
+    }
+    
+    // Must start with 0 (Ukrainian mobile format)
+    if (digits.charAt(0) !== '0') {
+        return false;
+    }
+    
+    // Second digit should be 5, 6, 7, 8, or 9 (Ukrainian mobile operators)
+    var secondDigit = digits.charAt(1);
+    if (!['5', '6', '7', '8', '9'].includes(secondDigit)) {
+        return false;
+    }
+    
+    return true;
+}
+
+// Generate random Ukrainian phone number for hint
+function generateRandomPhoneExample() {
+    // Second digit must be 5, 6, 7, 8, or 9
+    var secondDigit = ['5', '6', '7', '8', '9'][Math.floor(Math.random() * 5)];
+    // Generate remaining 8 random digits
+    var remainingDigits = '';
+    for (var i = 0; i < 8; i++) {
+        remainingDigits += Math.floor(Math.random() * 10).toString();
+    }
+    // Format: 0XX XXX XX XX
+    var formatted = '0' + secondDigit + remainingDigits.substring(0, 1) + ' ' + 
+                    remainingDigits.substring(1, 4) + ' ' + 
+                    remainingDigits.substring(4, 6) + ' ' + 
+                    remainingDigits.substring(6, 8);
+    return formatted;
+}
+
+// Apply phone formatting to telephone input fields
+$(document).ready(function() {
+    // Generate and display random phone number example
+    var randomPhone = generateRandomPhoneExample();
+    $('#phone-example').text(randomPhone);
+    $('#input-telephone').attr('placeholder', randomPhone);
+    
+    // Format on input (as user types)
+    $('#input-telephone').on('input', function() {
+        formatUkrainianPhone(this);
+        
+        // Trigger validation update
+        if (typeof validateOrderButton === 'function') {
+            setTimeout(validateOrderButton, 50);
+        }
+    });
+    
+    // Format on paste
+    $('#input-telephone').on('paste', function(e) {
+        var element = this;
+        setTimeout(function() {
+            formatUkrainianPhone(element);
+            if (typeof validateOrderButton === 'function') {
+                setTimeout(validateOrderButton, 50);
+            }
+        }, 10);
+    });
+    
+    // Format existing value on page load
+    if ($('#input-telephone').val()) {
+        formatUkrainianPhone(document.getElementById('input-telephone'));
+    }
+    
+    // Also format when field value changes programmatically (e.g., for logged-in users)
+    var observer = new MutationObserver(function(mutations) {
+        if ($('#input-telephone').val() && $('#input-telephone').val().replace(/\D/g, '').length > 0) {
+            formatUkrainianPhone(document.getElementById('input-telephone'));
+        }
+    });
+    
+    // Observe the form for changes
+    var formElement = document.getElementById('form-register');
+    if (formElement) {
+        observer.observe(formElement, { childList: true, subtree: true });
+    }
+});
 
 // Customer Group
 $('#input-customer-group').on('change', function() {

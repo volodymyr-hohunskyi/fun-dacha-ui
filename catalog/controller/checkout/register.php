@@ -348,8 +348,20 @@ class Register extends \Opencart\System\Engine\Controller {
 				}
 			}
 
-			if ($this->config->get('config_telephone_required') && !oc_validate_length($post_info['telephone'], 3, 32)) {
-				$json['error']['telephone'] = $this->language->get('error_telephone');
+			if ($this->config->get('config_telephone_required')) {
+				// Remove spaces and non-digit characters for validation
+				$telephone_digits = preg_replace('/\D/', '', $post_info['telephone']);
+				
+				// Validate Ukrainian phone format: must be exactly 10 digits, start with 0, second digit 5-9
+				if (!oc_validate_length($post_info['telephone'], 3, 32)) {
+					$json['error']['telephone'] = $this->language->get('error_telephone');
+				} elseif (strlen($telephone_digits) !== 10) {
+					$json['error']['telephone'] = 'Телефон повинен містити рівно 10 цифр (формат: 0XX XXX XX XX)';
+				} elseif (substr($telephone_digits, 0, 1) !== '0') {
+					$json['error']['telephone'] = 'Номер телефону повинен починатися з 0 (формат: 0XX XXX XX XX)';
+				} elseif (!in_array(substr($telephone_digits, 1, 1), ['5', '6', '7', '8', '9'])) {
+					$json['error']['telephone'] = 'Невірний формат телефону. Використовуйте формат: 0XX XXX XX XX';
+				}
 			}
 			
 			// Validate account creation requirements
