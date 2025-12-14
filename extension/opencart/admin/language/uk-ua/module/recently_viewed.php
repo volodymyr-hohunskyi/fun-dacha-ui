@@ -1,7 +1,6 @@
 <?php
 // Heading
-$_['heading_title']           = 'Нещодавно переглянуті товари';
-$_['recently_viewed_heading_title'] = 'Нещодавно переглянуті товари';
+$_['heading_title'] = 'Нещодавно переглянуті товари';
 
 // Text
 $_['text_extension']   = 'Розширення';

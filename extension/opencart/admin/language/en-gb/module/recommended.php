@@ -1,7 +1,6 @@
 <?php
 // Heading
-$_['heading_title']        = 'Recommended Products';
-$_['recommended_heading_title'] = 'Recommended Products';
+$_['heading_title'] = 'Recommended Products';
 
 // Text
 $_['text_extension']   = 'Extensions';

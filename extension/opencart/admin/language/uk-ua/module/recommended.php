@@ -1,7 +1,6 @@
 <?php
 // Heading
-$_['heading_title']        = 'Рекомендовані товари';
-$_['recommended_heading_title'] = 'Рекомендовані товари';
+$_['heading_title'] = 'Рекомендовані товари';
 
 // Text
 $_['text_extension']   = 'Розширення';

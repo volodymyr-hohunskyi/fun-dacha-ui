@@ -1,7 +1,6 @@
 <?php
 // Heading
-$_['heading_title']           = 'Recently Viewed Products';
-$_['recently_viewed_heading_title'] = 'Recently Viewed Products';
+$_['heading_title'] = 'Recently Viewed Products';
 
 // Text
 $_['text_extension']   = 'Extensions';
