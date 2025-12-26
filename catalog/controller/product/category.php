@@ -82,14 +82,14 @@ class Category extends \Opencart\System\Engine\Controller {
 			// For paginated pages (page > 1), canonical must point to page 1
 			if (isset($this->request->get['page']) && $this->request->get['page'] > 1) {
 				$this->document->addLink($canonical_url, 'canonical');
-				$this->document->setRobots('noindex, follow');
+				$this->response->addHeader('X-Robots-Tag: noindex, follow');
 			} else {
 				$this->document->addLink($canonical_url, 'canonical');
 			}
 			
 			// Add meta robots noindex for filtered/sorted pages
 			if (isset($this->request->get['filter']) || isset($this->request->get['sort'])) {
-				$this->document->setRobots('noindex, follow');
+				$this->response->addHeader('X-Robots-Tag: noindex, follow');
 			}
 
 			$data['breadcrumbs'] = [];

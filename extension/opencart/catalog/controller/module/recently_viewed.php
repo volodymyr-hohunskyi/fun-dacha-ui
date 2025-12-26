@@ -81,3 +81,5 @@ class RecentlyViewed extends \Opencart\System\Engine\Controller {
 }
 
 
+
+

@@ -69,8 +69,8 @@ class Manufacturer extends \Opencart\System\Engine\Controller {
 	public function info(): ?\Opencart\System\Engine\Action {
 		$this->load->language('product/manufacturer');
 		
-		// Add meta robots noindex for manufacturer pages (often thin/duplicate content)
-		$this->document->setRobots('noindex, follow');
+		// Add meta robots noindex for manufacturer pages (often thin/duplicate content) (OpenCart 4.x compatible)
+		$this->response->addHeader('X-Robots-Tag: noindex, follow');
 
 		if (isset($this->request->get['manufacturer_id'])) {
 			$manufacturer_id = (int)$this->request->get['manufacturer_id'];
