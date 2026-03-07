@@ -35,7 +35,24 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: var(--weight-heading-bold);
-  color: var(--color-primary-dark);
+  color: var(--color-primary-dark) !important;
+}
+
+/* Section headings & card titles - force brand color (Recently viewed, product cards, etc.) */
+.recently-viewed-section h3,
+.product-thumb .description h4,
+.product-thumb .description h4 a,
+.card-title,
+.card-title a,
+.blog-thumb h4,
+.blog-thumb h4 a {
+  color: var(--color-primary-dark) !important;
+}
+.recently-viewed-section h3 a:hover,
+.product-thumb .description h4 a:hover,
+.card-title a:hover,
+.blog-thumb h4 a:hover {
+  color: var(--color-primary) !important;
 }
 
 h1 {
