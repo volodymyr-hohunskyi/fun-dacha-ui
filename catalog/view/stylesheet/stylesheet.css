@@ -1,6 +1,6 @@
 /* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
 :root {
-  --color-primary: #4b8106;
+  --color-primary: #6BA828;
   --color-primary-dark: #000;
   --color-primary-light: #5a9a0a;
   --color-secondary: #8B5E3C;
@@ -458,25 +458,33 @@ button:focus {
   box-shadow: 0 0 0 5px rgb(var(--bs-dark-rgb), 0.1);
 }
 
-/* top */
+/* top - FreshGo: green bar, phone left, welcome center, currency/language right */
 #top {
-  background-color: var(--color-neutral-bg);
-  border-bottom: 1px solid var(--bs-border-color);
-  margin-bottom: 20px;
+  background-color: var(--color-primary);
+  border-bottom: none;
+  margin-bottom: 0;
   position: relative;
-  padding-bottom: 5px;
+  padding: 8px 0;
 }
 
 #top ul.list-inline {
   margin-bottom: 0;
 }
 
-#top .list-inline-item > a, #top .list-inline-item .dropdown > a {
+#top .list-inline-item > a,
+#top .list-inline-item .dropdown > a,
+#top .top-welcome {
   font-size: 1.1em;
-  color: var(--bs-gray-600);
+  color: rgba(255, 255, 255, 0.95);
   line-height: 40px;
   vertical-align: middle;
-  padding: 10px 0px 5px 0px;
+  padding: 10px 0 5px 0;
+  text-decoration: none;
+}
+
+#top .list-inline-item > a:hover,
+#top .list-inline-item .dropdown > a:hover {
+  color: #fff;
 }
 
 /* logo */

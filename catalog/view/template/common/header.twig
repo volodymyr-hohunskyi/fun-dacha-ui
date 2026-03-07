@@ -59,21 +59,20 @@
 <body>
 <div id="container">
   <div id="alert"></div>
-  <nav id="top">
+  <nav id="top" class="freshgo-top-bar">
     <div class="container">
-      <div class="row">
-        <div class="col-4">
-          <ul class="list-inline">
-            <li class="list-inline-item me-3">{{ currency }}</li>
-            <li class="list-inline-item">{{ language }}</li>
-          </ul>
+      <div class="row align-items-center">
+        <div class="col-4 d-none d-md-block">
+          <a href="{{ contact }}" class="text-white text-decoration-none"><i class="fa-solid fa-phone"></i> {{ telephone }}</a>
         </div>
-        <div class="col text-end">
-          <ul class="list-inline">
-            <li class="list-inline-item"><a href="{{ contact }}"><i class="fa-solid fa-phone"></i> <span class="d-none d-lg-inline">{{ telephone }}</span></a></li>
-            <li class="list-inline-item"><a href="{{ shopping_cart }}" title="{{ text_shopping_cart }}"><i class="fa-solid fa-cart-shopping"></i> <span class="d-none d-lg-inline">{{ text_shopping_cart }}</span></a></li>
-            <li class="list-inline-item"><a href="{{ checkout }}" title="{{ text_checkout }}"><i class="fa-solid fa-share"></i> <span class="d-none d-lg-inline">{{ text_checkout }}</span></a></li>
-          </ul>
+        <div class="col-12 col-md-4 text-center">
+          <span class="text-white d-none d-md-inline">{{ text_welcome_store }}</span>
+        </div>
+        <div class="col-8 col-md-4 text-end">
+          {{ currency }}
+          {{ language }}
+          <a href="{{ shopping_cart }}" title="{{ text_shopping_cart }}" class="text-white text-decoration-none ms-2"><i class="fa-solid fa-cart-shopping"></i> <span class="d-none d-lg-inline">{{ text_shopping_cart }}</span></a>
+          <a href="{{ checkout }}" title="{{ text_checkout }}" class="text-white text-decoration-none ms-2"><i class="fa-solid fa-share"></i> <span class="d-none d-lg-inline">{{ text_checkout }}</span></a>
         </div>
       </div>
     </div>

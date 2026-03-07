@@ -10,5 +10,6 @@ $_['text_transaction']   = 'Транзакції';
 $_['text_download']      = 'Завантаження';
 $_['text_logout']        = 'Вихід';
 $_['text_checkout']      = 'Оформити Замовлення';
+$_['text_welcome_store'] = 'Ласкаво просимо до нашого інтернет-магазину!';
 $_['text_forgotten']     = 'Забули Пароль';
 

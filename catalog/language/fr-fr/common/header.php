@@ -10,3 +10,4 @@ $_['text_transaction']   = 'Transactions';
 $_['text_download']      = 'Téléchargements';
 $_['text_logout']        = 'Déconnexion';
 $_['text_checkout']      = 'Paiement';
+$_['text_welcome_store'] = 'Bienvenue dans notre boutique en ligne !';
