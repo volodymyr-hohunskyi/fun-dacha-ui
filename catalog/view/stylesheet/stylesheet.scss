@@ -66,10 +66,18 @@ button:focus {
   outline: none !important;
 }
 
-/* Fun Dacha Button / CTA - Brand specs */
-.btn-primary {
-  background-color: var(--color-primary);
-  color: var(--color-white);
+/* Fun Dacha Button / CTA - Brand specs - !important ensures brand color wins over Bootstrap */
+.btn-primary,
+#cart .btn-primary,
+#checkout-cart .btn-primary,
+#checkout-button,
+#button-confirm,
+#button-confirm-footer,
+.btn-primary.btn-sm,
+.btn-primary.btn-lg {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
   font-family: var(--font-heading);
   font-weight: var(--weight-heading-semibold);
   font-size: var(--size-button);
@@ -77,13 +85,19 @@ button:focus {
   line-height: var(--line-height-button);
   padding: 14px 28px;
   border-radius: 6px;
-  border-color: var(--color-primary);
 }
 
-.btn-primary:hover {
-  background-color: var(--color-primary-dark);
-  border-color: var(--color-primary-dark);
-  color: var(--color-white);
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+#cart .btn-primary:hover,
+#checkout-cart .btn-primary:hover,
+#checkout-button:hover,
+#button-confirm:hover,
+#button-confirm-footer:hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--color-white) !important;
 }
 
 /* container */
@@ -243,7 +257,19 @@ button:focus {
 }
 
 #cart .dropdown-menu {
-  background: #eee;
+  background: var(--color-neutral-bg);
+}
+
+/* Cart & checkout links - use brand primary */
+#cart a:not(.btn),
+#cart .dropdown-menu a,
+#cart a strong {
+  color: var(--color-primary) !important;
+}
+#cart a:not(.btn):hover,
+#cart .dropdown-menu a:hover,
+#cart a:hover {
+  color: var(--color-primary-dark) !important;
 }
 
 #cart .dropdown-menu li {
