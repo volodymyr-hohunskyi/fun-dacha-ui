@@ -1,10 +1,13 @@
-/* Fun Dacha Brand Design Tokens */
+/* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
+@import "brand-variables";
+
 :root {
-  --color-primary: #2E7D32;
-  --color-primary-dark: #1B4D1B;
-  --color-secondary: #8B5E3C;
-  --color-neutral-bg: #F5F1E6;
-  --color-white: #FFFFFF;
+  --color-primary: #{$primary};
+  --color-primary-dark: #{$primary-dark};
+  --color-primary-light: #{$primary-light};
+  --color-secondary: #{$secondary};
+  --color-neutral-bg: #{$neutral-bg};
+  --color-white: #{$white};
   --font-heading: 'Montserrat', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
   --weight-heading-bold: 700;
@@ -256,7 +259,7 @@ button:focus {
 /* menu */
 #menu {
   background-color: var(--color-primary);
-  background-image: linear-gradient(to bottom, #3d9b42, var(--color-primary));
+  background-image: linear-gradient(to bottom, var(--color-primary-light), var(--color-primary));
   background-repeat: repeat-x;
   border: 1px solid var(--color-primary-dark);
   border-color: var(--color-primary) var(--color-primary) var(--color-primary-dark);
@@ -568,54 +571,6 @@ footer h5 {
 
 .blog-thumb .description {
   padding: 15px;
-}
-
-/* News/Welcome banner - maintain aspect ratio 2087:680 (welcome_banner.png) */
-[id^="carousel-banner-"] .carousel-inner {
-  aspect-ratio: 2087 / 680;
-}
-
-[id^="carousel-banner-"] .carousel-item {
-  height: 100%;
-}
-
-[id^="carousel-banner-"] .carousel-item .row {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-}
-
-[id^="carousel-banner-"] .carousel-item [class^="col-"] {
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-}
-
-[id^="carousel-banner-"] .carousel-item [class^="col-"] a {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-}
-
-[id^="carousel-banner-"] .carousel-item [class^="col-"] a img {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
-}
-
-[id^="carousel-banner-"] .carousel-item img {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0;
-  min-height: 0;
-  object-fit: cover;
-  object-position: center;
 }
 
 /* Theme Custom CSS */

@@ -1,0 +1,31 @@
+// =============================================================================
+// Fun Dacha Brand - SINGLE SOURCE OF TRUTH FOR ALL COLORS
+// Change primary color here and it updates everywhere across the site.
+// =============================================================================
+
+// Brand Colors
+$primary:           #2E7D32;
+$primary-dark:      #1B4D1B;
+$primary-light:     #3d9b42;  // Lighter shade for gradients (menu, etc.)
+$secondary:         #8B5E3C;
+$neutral-bg:        #F5F1E6;
+$white:             #FFFFFF;
+$black:             #000;
+
+// Typography
+$font-family-heading: 'Montserrat', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-family-body: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+// Bootstrap variable mappings (derived from brand colors)
+$blue:              $primary;
+$green:             $primary;
+$gray-100:          $neutral-bg;
+$gray-900:          $primary-dark;
+$font-family-sans-serif: $font-family-body;
+$headings-font-family:   $font-family-heading;
+$body-bg:           $white;
+$border-radius:     6px;
+$border-radius-sm:  4px;
+$border-radius-lg:  8px;
+$border-radius-xl:  8px;
+$border-radius-2xl: 8px;

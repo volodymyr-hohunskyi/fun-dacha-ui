@@ -1,7 +1,8 @@
-/* Fun Dacha Brand Design Tokens */
+/* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
 :root {
   --color-primary: #2E7D32;
   --color-primary-dark: #1B4D1B;
+  --color-primary-light: #3d9b42;
   --color-secondary: #8B5E3C;
   --color-neutral-bg: #F5F1E6;
   --color-white: #FFFFFF;
@@ -166,7 +167,7 @@ button:focus {
 
 /* top */
 #top {
-  background-color: var(--bs-tertiary-bg);
+  background-color: var(--color-neutral-bg);
   border-bottom: 1px solid var(--bs-border-color);
   margin-bottom: 20px;
   position: relative;
@@ -247,10 +248,10 @@ button:focus {
     min-width: 100%;
   }
 }
-/* menu - Fun Dacha brand colors */
+/* menu */
 #menu {
   background-color: var(--color-primary);
-  background-image: linear-gradient(to bottom, #3d9b42, var(--color-primary));
+  background-image: linear-gradient(to bottom, var(--color-primary-light), var(--color-primary));
   background-repeat: repeat-x;
   border: 1px solid var(--color-primary-dark);
   border-color: var(--color-primary) var(--color-primary) var(--color-primary-dark);
@@ -268,7 +269,7 @@ button:focus {
 }
 
 #menu .navbar-nav > li > a:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--color-primary-dark);
 }
 
 #menu .dropdown-menu {
@@ -315,8 +316,9 @@ button:focus {
   font-weight: var(--weight-heading-semibold);
   font-family: var(--font-heading);
   line-height: 40px;
-  color: #fff;
+  color: var(--color-white);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
 }
 
 #menu .navbar-toggler i {
@@ -548,54 +550,6 @@ footer h5 {
   padding: 15px;
 }
 
-/* News/Welcome banner - maintain aspect ratio 2087:680 (welcome_banner.png) */
-[id^="carousel-banner-"] .carousel-inner {
-  aspect-ratio: 2087 / 680;
-}
-
-[id^="carousel-banner-"] .carousel-item {
-  height: 100%;
-}
-
-[id^="carousel-banner-"] .carousel-item .row {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-}
-
-[id^="carousel-banner-"] .carousel-item [class^="col-"] {
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-}
-
-[id^="carousel-banner-"] .carousel-item [class^="col-"] a {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-}
-
-[id^="carousel-banner-"] .carousel-item [class^="col-"] a img {
-  flex: 1;
-  min-width: 0;
-  min-height: 0;
-}
-
-[id^="carousel-banner-"] .carousel-item img {
-  display: block;
-  width: 100% !important;
-  height: 100% !important;
-  min-width: 0;
-  min-height: 0;
-  object-fit: cover;
-  object-position: center;
-}
-
 /* Theme Custom CSS */
 #cookie {
   position: fixed;
@@ -613,3 +567,5 @@ footer h5 {
   font-size: 16px;
   color: #FFFFFF;
 }
+
+/*# sourceMappingURL=stylesheet.css.map */
