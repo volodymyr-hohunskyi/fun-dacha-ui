@@ -8,8 +8,8 @@
   --color-secondary: #{$secondary};
   --color-neutral-bg: #{$neutral-bg};
   --color-white: #{$white};
-  --font-heading: 'Montserrat', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-heading: #{$font-family-heading};
+  --font-body: #{$font-family-body};
   --weight-heading-bold: 700;
   --weight-heading-semibold: 600;
   --weight-body-regular: 400;
@@ -101,7 +101,8 @@ button:focus {
   letter-spacing: 0.5px;
   line-height: var(--line-height-button);
   padding: 14px 28px;
-  border-radius: 6px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .btn-primary:hover,
@@ -287,26 +288,38 @@ button:focus {
   }
 }
 
-/* search */
+/* search - FreshGo: 45px height, 10px right radius on button */
 #search {
   margin-bottom: 10px;
 }
 
 #search .form-control-lg {
-  height: 40px;
-  font-size: 12px;
+  height: 45px;
+  font-size: 14px;
   line-height: 20px;
-  padding: 0 10px;
+  padding: 0 15px;
+  border-radius: 10px 0 0 10px;
+  border: 1px solid #eee;
 }
 
 #search .btn-lg {
+  height: 45px;
   font-size: 15px;
   line-height: 18px;
-  padding: 0.57rem 35px;
-  text-shadow: 0 1px 0 #FFF;
+  padding: 0 20px;
+  border-radius: 0 10px 10px 0;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  transition: background-color 0.3s ease;
+}
+#search .btn-lg:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: var(--color-white);
 }
 
-/* cart */
+/* cart - FreshGo: green button, 10px radius, min-height 35px */
 #cart {
   margin-bottom: 10px;
 }
@@ -316,9 +329,12 @@ button:focus {
 }
 
 #cart .btn-lg {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 18px;
-  padding: 14px 35px;
+  padding: 10px 25px;
+  min-height: 35px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
 }
 
 #cart .dropdown-menu {
@@ -355,7 +371,7 @@ button:focus {
   border: 1px solid var(--color-primary-dark);
   border-color: var(--color-primary) var(--color-primary) var(--color-primary-dark);
   min-height: 40px;
-  border-radius: 6px;
+  border-radius: 10px;
   padding: 0 1rem;
   margin-bottom: 20px;
 }
@@ -559,31 +575,36 @@ footer h5 {
 .product-thumb .description h4 {
   font-weight: bold;
 }
+/* FreshGo: 3-button layout (wishlist, compare, add to cart) */
 .product-thumb .button {
   display: flex;
   position: absolute;
   width: 100%;
   bottom: 0;
 }
+.product-thumb .button form {
+  flex: 1;
+  min-width: 0;
+}
 .product-thumb .button button {
-  width: 33.33%;
+  width: 100%;
   border: none;
   border-top: 1px solid var(--bs-border-color);
+  border-left: 1px solid var(--bs-border-color);
   background-color: var(--bs-tertiary-bg);
   color: var(--bs-gray-600);
   line-height: 38px;
   text-align: center;
+  transition: background-color 0.3s ease;
 }
-
+.product-thumb .button form:first-child button {
+  border-left: none;
+}
 .product-thumb .button button:hover {
   color: var(--bs-gray-600);
   background-color: #ddd;
   text-decoration: none;
   cursor: pointer;
-}
-
-.product-thumb .button button + button {
-  border-left: 1px solid var(--bs-border-color);
 }
 
 @media (min-width: 960px) {

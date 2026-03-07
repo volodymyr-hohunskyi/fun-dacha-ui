@@ -1,31 +1,32 @@
 // =============================================================================
-// Fun Dacha Brand - SINGLE SOURCE OF TRUTH FOR ALL COLORS
-// Change primary color here and it updates everywhere across the site.
+// FreshGo-inspired Design - Organic/Food Store Theme
+// Based on: https://opencart.dostguru.com/FD03/freshgo_01/
 // =============================================================================
 
-// Brand Colors
-$primary:           #2E7D32;
-$primary-dark:      #1B4D1B;
-$primary-light:     #3d9b42;  // Lighter shade for gradients (menu, etc.)
+// Brand Colors (FreshGo organic green)
+$primary:           #4b8106;
+$primary-dark:      #000;      // Hover state
+$primary-light:     #5a9a0a;   // Lighter for gradients
 $secondary:         #8B5E3C;
-$neutral-bg:        #F5F1E6;
+$neutral-bg:        #f7f7f7;
 $white:             #FFFFFF;
 $black:             #000;
 
-// Typography
-$font-family-heading: 'Montserrat', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-$font-family-body: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+// Typography (FreshGo: Cairo)
+$font-family-heading: 'Cairo', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-family-body: 'Cairo', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+$font-family-display: 'Great Vibes', cursive;
 
-// Bootstrap variable mappings (derived from brand colors)
+// Bootstrap variable mappings
 $blue:              $primary;
 $green:             $primary;
 $gray-100:          $neutral-bg;
-$gray-900:          $primary-dark;
+$gray-900:          #303030;
 $font-family-sans-serif: $font-family-body;
 $headings-font-family:   $font-family-heading;
 $body-bg:           $white;
-$border-radius:     6px;
-$border-radius-sm:  4px;
-$border-radius-lg:  8px;
-$border-radius-xl:  8px;
-$border-radius-2xl: 8px;
+$border-radius:     10px;
+$border-radius-sm:  6px;
+$border-radius-lg:  10px;
+$border-radius-xl:  10px;
+$border-radius-2xl: 10px;

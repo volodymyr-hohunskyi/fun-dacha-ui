@@ -1,13 +1,13 @@
 /* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
 :root {
-  --color-primary: #2E7D32;
-  --color-primary-dark: #1B4D1B;
-  --color-primary-light: #3d9b42;
+  --color-primary: #4b8106;
+  --color-primary-dark: #000;
+  --color-primary-light: #5a9a0a;
   --color-secondary: #8B5E3C;
-  --color-neutral-bg: #F5F1E6;
+  --color-neutral-bg: #f7f7f7;
   --color-white: #FFFFFF;
-  --font-heading: 'Montserrat', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-heading: Cairo, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-body: Cairo, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   --weight-heading-bold: 700;
   --weight-heading-semibold: 600;
   --weight-body-regular: 400;
@@ -77,187 +77,6 @@ label {
   font-weight: normal;
 }
 
-/* Checkout & forms - black text (not green). Labels, legends, headings, table text. */
-#checkout-checkout legend,
-#checkout-checkout .form-label,
-#checkout-checkout .col-form-label,
-#checkout-checkout label,
-#checkout-checkout .form-check-label,
-#checkout-checkout h3, #checkout-checkout h4, #checkout-checkout h5, #checkout-checkout h6,
-#checkout-checkout .table,
-#checkout-checkout .table th,
-#checkout-checkout .table td,
-#checkout-checkout .form-control,
-#checkout-checkout .form-control::placeholder,
-#checkout-checkout .form-text,
-#checkout-checkout .text-muted,
-#checkout-checkout p,
-#checkout-checkout small,
-#checkout-register legend,
-#checkout-register .form-label,
-#checkout-register .col-form-label,
-#checkout-register label,
-#checkout-register .form-check-label,
-#checkout-register h3,
-#checkout-register h4,
-#checkout-register h5,
-#checkout-register h6,
-#checkout-register .table,
-#checkout-register .table th,
-#checkout-register .table td,
-#checkout-register .form-control,
-#checkout-register .form-control::placeholder,
-#checkout-register .form-text,
-#checkout-register .text-muted,
-#checkout-register p,
-#checkout-register small,
-#checkout-confirm legend,
-#checkout-confirm .form-label,
-#checkout-confirm .col-form-label,
-#checkout-confirm label,
-#checkout-confirm .form-check-label,
-#checkout-confirm h3,
-#checkout-confirm h4,
-#checkout-confirm h5,
-#checkout-confirm h6,
-#checkout-confirm .table,
-#checkout-confirm .table th,
-#checkout-confirm .table td,
-#checkout-confirm .form-control,
-#checkout-confirm .form-control::placeholder,
-#checkout-confirm .form-text,
-#checkout-confirm .text-muted,
-#checkout-confirm p,
-#checkout-confirm small,
-#checkout-payment-address legend,
-#checkout-payment-address .form-label,
-#checkout-payment-address .col-form-label,
-#checkout-payment-address label,
-#checkout-payment-address .form-check-label,
-#checkout-payment-address h3,
-#checkout-payment-address h4,
-#checkout-payment-address h5,
-#checkout-payment-address h6,
-#checkout-payment-address .table,
-#checkout-payment-address .table th,
-#checkout-payment-address .table td,
-#checkout-payment-address .form-control,
-#checkout-payment-address .form-control::placeholder,
-#checkout-payment-address .form-text,
-#checkout-payment-address .text-muted,
-#checkout-payment-address p,
-#checkout-payment-address small,
-#checkout-shipping-address legend,
-#checkout-shipping-address .form-label,
-#checkout-shipping-address .col-form-label,
-#checkout-shipping-address label,
-#checkout-shipping-address .form-check-label,
-#checkout-shipping-address h3,
-#checkout-shipping-address h4,
-#checkout-shipping-address h5,
-#checkout-shipping-address h6,
-#checkout-shipping-address .table,
-#checkout-shipping-address .table th,
-#checkout-shipping-address .table td,
-#checkout-shipping-address .form-control,
-#checkout-shipping-address .form-control::placeholder,
-#checkout-shipping-address .form-text,
-#checkout-shipping-address .text-muted,
-#checkout-shipping-address p,
-#checkout-shipping-address small,
-#checkout-payment-method legend,
-#checkout-payment-method .form-label,
-#checkout-payment-method .col-form-label,
-#checkout-payment-method label,
-#checkout-payment-method .form-check-label,
-#checkout-payment-method h3,
-#checkout-payment-method h4,
-#checkout-payment-method h5,
-#checkout-payment-method h6,
-#checkout-payment-method .table,
-#checkout-payment-method .table th,
-#checkout-payment-method .table td,
-#checkout-payment-method .form-control,
-#checkout-payment-method .form-control::placeholder,
-#checkout-payment-method .form-text,
-#checkout-payment-method .text-muted,
-#checkout-payment-method p,
-#checkout-payment-method small,
-#checkout-floating-footer legend,
-#checkout-floating-footer .form-label,
-#checkout-floating-footer .col-form-label,
-#checkout-floating-footer label,
-#checkout-floating-footer .form-check-label,
-#checkout-floating-footer h3,
-#checkout-floating-footer h4,
-#checkout-floating-footer h5,
-#checkout-floating-footer h6,
-#checkout-floating-footer .table,
-#checkout-floating-footer .table th,
-#checkout-floating-footer .table td,
-#checkout-floating-footer .form-control,
-#checkout-floating-footer .form-control::placeholder,
-#checkout-floating-footer .form-text,
-#checkout-floating-footer .text-muted,
-#checkout-floating-footer p,
-#checkout-floating-footer small,
-#checkout-cart legend,
-#checkout-cart .form-label,
-#checkout-cart .col-form-label,
-#checkout-cart label,
-#checkout-cart .form-check-label,
-#checkout-cart h3,
-#checkout-cart h4,
-#checkout-cart h5,
-#checkout-cart h6,
-#checkout-cart .table,
-#checkout-cart .table th,
-#checkout-cart .table td,
-#checkout-cart .form-control,
-#checkout-cart .form-control::placeholder,
-#checkout-cart .form-text,
-#checkout-cart .text-muted,
-#checkout-cart p,
-#checkout-cart small {
-  color: #212529 !important;
-}
-#checkout-checkout a:not(.btn-primary):not(.btn),
-#checkout-register a:not(.btn-primary):not(.btn),
-#checkout-confirm a:not(.btn-primary):not(.btn),
-#checkout-payment-address a:not(.btn-primary):not(.btn),
-#checkout-shipping-address a:not(.btn-primary):not(.btn),
-#checkout-payment-method a:not(.btn-primary):not(.btn),
-#checkout-floating-footer a:not(.btn-primary):not(.btn),
-#checkout-cart a:not(.btn-primary):not(.btn) {
-  color: var(--color-primary) !important;
-}
-#checkout-checkout a:not(.btn-primary):not(.btn):hover,
-#checkout-register a:not(.btn-primary):not(.btn):hover,
-#checkout-confirm a:not(.btn-primary):not(.btn):hover,
-#checkout-payment-address a:not(.btn-primary):not(.btn):hover,
-#checkout-shipping-address a:not(.btn-primary):not(.btn):hover,
-#checkout-payment-method a:not(.btn-primary):not(.btn):hover,
-#checkout-floating-footer a:not(.btn-primary):not(.btn):hover,
-#checkout-cart a:not(.btn-primary):not(.btn):hover {
-  color: var(--color-primary-dark) !important;
-}
-
-/* Form labels & placeholders site-wide - black for readability */
-.form-label,
-.col-form-label,
-.form-check-label {
-  color: #212529 !important;
-}
-
-.form-control,
-.form-select {
-  color: #212529 !important;
-}
-
-.form-control::placeholder {
-  color: #6c757d !important;
-}
-
 /* Chrome border line */
 button:focus {
   outline: none !important;
@@ -281,7 +100,8 @@ button:focus {
   letter-spacing: 0.5px;
   line-height: var(--line-height-button);
   padding: 14px 28px;
-  border-radius: 6px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .btn-primary:hover,
@@ -674,26 +494,39 @@ button:focus {
     text-align: left;
   }
 }
-/* search */
+/* search - FreshGo: 45px height, 10px right radius on button */
 #search {
   margin-bottom: 10px;
 }
 
 #search .form-control-lg {
-  height: 40px;
-  font-size: 12px;
+  height: 45px;
+  font-size: 14px;
   line-height: 20px;
-  padding: 0 10px;
+  padding: 0 15px;
+  border-radius: 10px 0 0 10px;
+  border: 1px solid #eee;
 }
 
 #search .btn-lg {
+  height: 45px;
   font-size: 15px;
   line-height: 18px;
-  padding: 0.57rem 35px;
-  text-shadow: 0 1px 0 #FFF;
+  padding: 0 20px;
+  border-radius: 0 10px 10px 0;
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  transition: background-color 0.3s ease;
 }
 
-/* cart */
+#search .btn-lg:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: var(--color-white);
+}
+
+/* cart - FreshGo: green button, 10px radius, min-height 35px */
 #cart {
   margin-bottom: 10px;
 }
@@ -703,9 +536,12 @@ button:focus {
 }
 
 #cart .btn-lg {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 18px;
-  padding: 14px 35px;
+  padding: 10px 25px;
+  min-height: 35px;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
 }
 
 #cart .dropdown-menu {
@@ -742,7 +578,7 @@ button:focus {
   border: 1px solid var(--color-primary-dark);
   border-color: var(--color-primary) var(--color-primary) var(--color-primary-dark);
   min-height: 40px;
-  border-radius: 6px;
+  border-radius: 10px;
   padding: 0 1rem;
   margin-bottom: 20px;
 }
@@ -934,6 +770,7 @@ footer h5 {
   font-weight: bold;
 }
 
+/* FreshGo: 3-button layout (wishlist, compare, add to cart) */
 .product-thumb .button {
   display: flex;
   position: absolute;
@@ -941,14 +778,25 @@ footer h5 {
   bottom: 0;
 }
 
+.product-thumb .button form {
+  flex: 1;
+  min-width: 0;
+}
+
 .product-thumb .button button {
-  width: 33.33%;
+  width: 100%;
   border: none;
   border-top: 1px solid var(--bs-border-color);
+  border-left: 1px solid var(--bs-border-color);
   background-color: var(--bs-tertiary-bg);
   color: var(--bs-gray-600);
   line-height: 38px;
   text-align: center;
+  transition: background-color 0.3s ease;
+}
+
+.product-thumb .button form:first-child button {
+  border-left: none;
 }
 
 .product-thumb .button button:hover {
@@ -956,10 +804,6 @@ footer h5 {
   background-color: #ddd;
   text-decoration: none;
   cursor: pointer;
-}
-
-.product-thumb .button button + button {
-  border-left: 1px solid var(--bs-border-color);
 }
 
 @media (min-width: 960px) {
