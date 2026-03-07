@@ -488,15 +488,33 @@ footer h5 {
 }
 
 /* News/Welcome banner - maintain aspect ratio 2087:680 (welcome_banner.png) */
-[id^="carousel-banner-"] .carousel-inner {
+[id^="carousel-banner-"] .carousel-item .row {
+  margin: 0;
+}
+
+[id^="carousel-banner-"] .carousel-item [class^="col-"] {
   aspect-ratio: 2087 / 680;
-  overflow: hidden;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+[id^="carousel-banner-"] .carousel-item [class^="col-"] a {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 [id^="carousel-banner-"] .carousel-item img {
+  display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
 }
 
 /* Theme Custom CSS */
