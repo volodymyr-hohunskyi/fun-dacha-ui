@@ -117,6 +117,54 @@ button:focus {
   color: var(--color-white) !important;
 }
 
+/* Checkout forms - labels, legends, headings, text: black (not green) */
+#checkout-checkout,
+#checkout-register,
+#checkout-confirm,
+#checkout-payment-address,
+#checkout-shipping-address,
+#checkout-payment-method,
+#checkout-floating-footer,
+#checkout-cart {
+  color: #212529;
+  legend,
+  .form-label,
+  .col-form-label,
+  label,
+  h1, h2, h3, h4, h5, h6,
+  .form-control,
+  .form-select,
+  .form-check-label,
+  .table,
+  .table th,
+  .table td,
+  .table thead th,
+  .form-text,
+  small,
+  p,
+  .breadcrumb,
+  .breadcrumb a,
+  .form-floating > label {
+    color: #212529 !important;
+  }
+  .form-control::placeholder,
+  .form-select::placeholder,
+  textarea::placeholder {
+    color: #6c757d !important;
+  }
+  .breadcrumb a:hover {
+    color: #212529 !important;
+    opacity: 0.8;
+  }
+  legend {
+    border-bottom-color: #dee2e6;
+  }
+  /* Keep primary buttons green */
+  .btn-primary {
+    color: var(--color-white) !important;
+  }
+}
+
 /* container */
 #container {
   width: 100%;
