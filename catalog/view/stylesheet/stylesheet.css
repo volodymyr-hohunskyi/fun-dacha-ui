@@ -487,6 +487,18 @@ footer h5 {
   padding: 15px;
 }
 
+/* News/Welcome banner - maintain aspect ratio 2087:680 (welcome_banner.png) */
+[id^="carousel-banner-"] .carousel-inner {
+  aspect-ratio: 2087 / 680;
+  overflow: hidden;
+}
+
+[id^="carousel-banner-"] .carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* Theme Custom CSS */
 #cookie {
   position: fixed;
