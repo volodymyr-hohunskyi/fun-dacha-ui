@@ -1,10 +1,50 @@
+/* Fun Dacha Brand Design Tokens */
+:root {
+  --color-primary: #2E7D32;
+  --color-primary-dark: #1B4D1B;
+  --color-secondary: #8B5E3C;
+  --color-neutral-bg: #F5F1E6;
+  --color-white: #FFFFFF;
+  --font-heading: 'Montserrat', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --weight-heading-bold: 700;
+  --weight-heading-semibold: 600;
+  --weight-body-regular: 400;
+  --size-h1: 56px;
+  --size-subheadline: 20px;
+  --size-button: 16px;
+  --size-body: 14px;
+  --line-height-h1: 1.1;
+  --line-height-subheadline: 1.5;
+  --line-height-button: 1.4;
+  --line-height-body: 1.5;
+}
+
 body {
   width: 100%;
   height: 100%;
+  font-family: var(--font-body);
+  font-size: var(--size-body);
+  line-height: var(--line-height-body);
+  background-color: var(--color-white);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #444;
+  font-family: var(--font-heading);
+  font-weight: var(--weight-heading-bold);
+  color: var(--color-primary-dark);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, var(--size-h1));
+  line-height: var(--line-height-h1);
+  letter-spacing: -0.5px;
+}
+
+h2, h3 {
+  font-size: var(--size-subheadline);
+  line-height: var(--line-height-subheadline);
+  letter-spacing: 0.2px;
 }
 
 legend {
@@ -21,6 +61,26 @@ label {
 /* Chrome border line */
 button:focus {
   outline: none !important;
+}
+
+/* Fun Dacha Button / CTA - Brand specs */
+.btn-primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-family: var(--font-heading);
+  font-weight: var(--weight-heading-semibold);
+  font-size: var(--size-button);
+  letter-spacing: 0.5px;
+  line-height: var(--line-height-button);
+  padding: 14px 28px;
+  border-radius: 6px;
+  border-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  border-color: var(--color-primary-dark);
+  color: var(--color-white);
 }
 
 /* container */
@@ -110,7 +170,7 @@ button:focus {
 
 /* top */
 #top {
-  background-color: var(--bs-tertiary-bg);
+  background-color: var(--color-neutral-bg);
   border-bottom: 1px solid var(--bs-border-color);
   margin-bottom: 20px;
   position: relative;
@@ -195,13 +255,13 @@ button:focus {
 
 /* menu */
 #menu {
-  background-color: #576955;
-  background-image: linear-gradient(to bottom, #818e80, #70806e);
+  background-color: var(--color-primary);
+  background-image: linear-gradient(to bottom, #3d9b42, var(--color-primary));
   background-repeat: repeat-x;
-  border: 1px solid #70806e;
-  border-color: #70806e #70806e #414f40;
+  border: 1px solid var(--color-primary-dark);
+  border-color: var(--color-primary) var(--color-primary) var(--color-primary-dark);
   min-height: 40px;
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 0 1rem;
   margin-bottom: 20px;
 }
@@ -214,7 +274,7 @@ button:focus {
 }
 
 #menu .navbar-nav > li > a:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: var(--color-primary-dark);
 }
 
 #menu .dropdown-menu {
@@ -264,11 +324,13 @@ button:focus {
 
 #category {
   float: left;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--size-button);
+  font-weight: var(--weight-heading-semibold);
+  font-family: var(--font-heading);
   line-height: 40px;
-  color: #fff;
+  color: var(--color-white);
   text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
 }
 
 #menu .navbar-toggler i {
