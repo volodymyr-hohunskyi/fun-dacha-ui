@@ -992,6 +992,24 @@ footer.freshgo-footer {
   display: block;
 }
 
+/* Blog carousel - homepage */
+.blog-carousel-section h3 {
+  color: var(--color-primary-dark) !important;
+}
+.blog-carousel-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.blog-carousel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+.blog-carousel-card .card-title {
+  color: var(--color-primary-dark) !important;
+}
+.blog-carousel-card:hover .card-title {
+  color: var(--color-primary) !important;
+}
+
 /* Theme Custom CSS */
 #cookie {
   position: fixed;

@@ -98,12 +98,20 @@ class FileManager extends \Opencart\System\Engine\Controller {
 				$directories[] = $path;
 			}
 
-			if (is_file($path) && in_array(substr($value, strrpos($value, '.')), $allowed)) {
-				$files[] = $path;
+			if (is_file($path)) {
+				$ext = strrpos($value, '.') !== false ? strtolower(substr($value, strrpos($value, '.'))) : '';
+				if (in_array($ext, array_map('strtolower', $allowed))) {
+					$files[] = $path;
+				}
 			}
 		}
 
-		$total = count($paths);
+		// Sort files by modification time (newest first) so recent uploads appear first
+		usort($files, function ($a, $b) {
+			return filemtime($b) - filemtime($a);
+		});
+
+		$total = count($directories) + count($files);
 		$limit = 16;
 		$start = ($page - 1) * $limit;
 
