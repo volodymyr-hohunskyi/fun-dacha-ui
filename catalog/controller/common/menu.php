@@ -10,11 +10,14 @@ namespace Opencart\Catalog\Controller\Common;
  */
 class Menu extends \Opencart\System\Engine\Controller {
 	/** Super category keys - fixed set */
-	private const SUPER_OVOCHI = 'ovochi';      // Овочі (Vegetables)
-	private const SUPER_FRUKTY = 'fruity';     // Фрукти (Fruits)
-	private const SUPER_KVITY = 'kvity';       // Квіти (Flowers/Plants) - Кріти in user spec
-	private const SUPER_DOBRYVA = 'dobryva';   // Добрива (Fertilizers)
-	private const SUPER_SUPUTNI = 'suputni';   // Супутні товари (Related/Accessories)
+	private const SUPER_OVOCHI = 'ovochi';       // Овочі
+	private const SUPER_BASHTANNI = 'bashtanni';   // Баштанні
+	private const SUPER_GARBUZOVI = 'garbuzovi';   // Гарбузові
+	private const SUPER_BOBOVI = 'bobovi';         // Бобові
+	private const SUPER_ZELEN = 'zelen';           // Зелень
+	private const SUPER_KVITY = 'kvity';        // Квіти
+	private const SUPER_DOBRYVA = 'dobryva';   // Добрива та захист
+	private const SUPER_SUPUTNI = 'suputni';    // Супутні товари
 
 	/**
 	 * Index
@@ -42,27 +45,94 @@ class Menu extends \Opencart\System\Engine\Controller {
 			self::SUPER_OVOCHI => [
 				'name' => 'Овочі',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => ['овоч', 'vegetable', 'томат', 'tomato', 'картопл', 'potato', 'моркв', 'carrot', 'огір', 'cucumber', 'кабач', 'zucchini', 'перець', 'pepper', 'буряк', 'beet', 'цибул', 'onion', 'часник', 'garlic', 'салат', 'lettuce', 'капуст', 'cabbage', 'баклажан', 'eggplant', 'редис', 'radish', 'горох', 'pea', 'біб', 'bean', 'помідор', 'картопля', 'морква', 'капуста'],
+				'keywords' => [
+					'томат', 'помідор',
+					'огір',
+					'капуст',
+					'редис',
+					'перець',
+					'баклажан',
+					'цибул',
+					'моркв',
+					'буряк',
+					'кукурудз',
+				],
 			],
-			self::SUPER_FRUKTY => [
-				'name' => 'Фрукти',
+			self::SUPER_BASHTANNI => [
+				'name' => 'Баштанні',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => ['фрукт', 'fruit', 'яблук', 'apple', 'апельсин', 'orange', 'лимон', 'lemon', 'банан', 'banana', 'вишн', 'cherry', 'чорниц', 'blueberry', 'малин', 'raspberry', 'полун', 'strawberry', 'слив', 'plum', 'груш', 'pear', 'виногр', 'grape', 'персик', 'peach', 'абрикос', 'apricot', 'авокадо', 'avocado', 'диня', 'melon', 'кавун', 'watermelon', 'гранат', 'pomegranate', 'ківі', 'kiwi', 'манго', 'mango', 'ананас', 'pineapple'],
+				'keywords' => [
+					'кавун',
+					'дин',
+					'гарбуз',
+				],
+			],
+			self::SUPER_GARBUZOVI => [
+				'name' => 'Гарбузові',
+				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
+				'keywords' => [
+					'кабач',
+					'патисон',
+				],
+			],
+			self::SUPER_BOBOVI => [
+				'name' => 'Бобові',
+				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
+				'keywords' => [
+					'квасол',
+					'бобов',
+					'горох',
+				],
+			],
+			self::SUPER_ZELEN => [
+				'name' => 'Зелень',
+				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
+				'keywords' => [
+					'зелен',
+					'пряно',
+					'кріп',
+					'петруш',
+					'базил',
+					'салат',
+					'шпинат',
+					'кінз',
+				],
 			],
 			self::SUPER_KVITY => [
-				'name' => 'Кріти',
+				'name' => 'Квіти',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => ['квіт', 'flower', 'plant', 'рослин', 'дерев', 'tree', 'кущ', 'bush', 'сад', 'garden', 'насіння', 'seed', 'flower', 'бульб', 'bulb', 'розсада', 'розсади', 'plant', 'оранжере', 'greenhouse'],
+				'keywords' => [
+					'квіт',
+					'flower',
+				],
 			],
 			self::SUPER_DOBRYVA => [
-				'name' => 'Добрива',
+				'name' => 'Добрива та захист',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => ['добрив', 'fertilizer', 'удобрен', 'гумус', 'humus', 'компост', 'compost', 'органік', 'organic', 'мінерал', 'mineral', 'субстрат', 'substrate', 'грунт', 'soil', 'земл', 'земля'],
+				'keywords' => [
+					'добрив',
+					'удобрен',
+					'гумус',
+					'компост',
+					'субстрат',
+					'грунт',
+					'земля',
+					'захист',
+					'препарат',
+				],
 			],
 			self::SUPER_SUPUTNI => [
 				'name' => 'Супутні товари',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => ['інструмент', 'tool', 'інвентар', 'equipment', 'гірк', 'pot', 'посуд', 'тара', 'аксесуар', 'accessory', 'супут', 'related', 'допоміжн', 'інше', 'other', 'засіб', 'препарат', 'захист', 'protection'],
+				'keywords' => [
+					'інструмент',
+					'інвентар',
+					'аксесуар',
+					'тара',
+					'горщик',
+					'касета',
+					'контейнер',
+				],
 			],
 		];
 
@@ -71,11 +141,14 @@ class Menu extends \Opencart\System\Engine\Controller {
 
 		foreach ($superDefs as $key => $def) {
 			$children = [];
+
 			foreach ($allCategories as $cat) {
 				if (isset($assigned[$cat['category_id']])) {
 					continue;
 				}
+
 				$nameLower = mb_strtolower($cat['name']);
+
 				foreach ($def['keywords'] as $kw) {
 					if (mb_strpos($nameLower, mb_strtolower($kw)) !== false) {
 						$children[] = $cat;
@@ -84,18 +157,21 @@ class Menu extends \Opencart\System\Engine\Controller {
 					}
 				}
 			}
+
 			$superDefs[$key]['children'] = $children;
 		}
 
-		// Unassigned categories go to Супутні товари
+		// everything else → Супутні товари
 		foreach ($allCategories as $cat) {
 			if (isset($assigned[$cat['category_id']])) {
 				continue;
 			}
+
 			$superDefs[self::SUPER_SUPUTNI]['children'][] = $cat;
 		}
 
 		$result = [];
+
 		foreach ($superDefs as $key => $def) {
 			$result[] = [
 				'key'      => $key,
