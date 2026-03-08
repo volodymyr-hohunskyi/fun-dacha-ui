@@ -993,10 +993,18 @@ footer.freshgo-footer {
 }
 
 /* Blog carousel - homepage */
+.blog-carousel-section,
+.blog-carousel-section .carousel,
+#carousel-blog,
+#carousel-blog .carousel-inner {
+  border: none !important;
+}
 .blog-carousel-section h3 {
   color: var(--color-primary-dark) !important;
 }
 .blog-carousel-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .blog-carousel-card:hover {
