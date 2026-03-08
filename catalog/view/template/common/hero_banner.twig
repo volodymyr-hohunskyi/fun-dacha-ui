@@ -1,0 +1,84 @@
+{% if slides %}
+<div class="hero-banner" data-interval="{{ interval }}">
+  <div class="hero-banner-bg" {% if background %}style="background-image: url('{{ background }}');"{% endif %}></div>
+  <div class="hero-banner-inner container">
+    <div id="hero-carousel" class="hero-carousel">
+      {% for slide in slides %}
+        <div class="hero-slide{% if slide.index == 0 %} active{% endif %}" data-index="{{ slide.index }}">
+          <div class="row align-items-center min-vh-50">
+            <div class="col-lg-6 hero-content">
+              <h1 class="hero-title animate-slide-in">{{ slide.title }}</h1>
+              <p class="hero-subtitle animate-slide-in">{{ slide.subtitle }}</p>
+              {% if slide.button_link %}
+                <a href="{{ slide.button_link }}" class="btn btn-primary hero-btn animate-slide-in">{{ slide.button_text }}</a>
+              {% endif %}
+            </div>
+            <div class="col-lg-6 hero-image-col text-center">
+              <div class="hero-image-wrap">
+                <img src="{{ slide.image }}" alt="{{ slide.title }}" class="hero-image img-fluid"/>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% if slides|length > 1 %}
+      <button type="button" class="hero-arrow hero-arrow-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+      <button type="button" class="hero-arrow hero-arrow-next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+      <div class="hero-indicators">
+        {% for slide in slides %}
+          <button type="button" class="hero-indicator{% if slide.index == 0 %} active{% endif %}" data-index="{{ slide.index }}" aria-label="Slide {{ slide.index + 1 }}"></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+<script>
+(function() {
+  var hero = document.querySelector('.hero-banner');
+  if (!hero || !hero.querySelector('.hero-slide')) return;
+  var slides = hero.querySelectorAll('.hero-slide');
+  var prev = hero.querySelector('.hero-arrow-prev');
+  var next = hero.querySelector('.hero-arrow-next');
+  var indicators = hero.querySelectorAll('.hero-indicator');
+  var interval = parseInt(hero.dataset.interval || 5000, 10);
+  var current = 0;
+  var timer;
+
+  function goTo(i) {
+    slides.forEach(function(s, idx) {
+      s.classList.toggle('active', idx === i);
+      s.classList.toggle('fade-in', idx === i);
+    });
+    indicators.forEach(function(ind, idx) {
+      ind.classList.toggle('active', idx === i);
+    });
+    current = i;
+  }
+
+  function nextSlide() {
+    goTo((current + 1) % slides.length);
+  }
+
+  function startTimer() {
+    clearInterval(timer);
+    timer = setInterval(nextSlide, interval);
+  }
+
+  function stopTimer() {
+    clearInterval(timer);
+  }
+
+  if (prev) prev.onclick = function() { stopTimer(); goTo((current - 1 + slides.length) % slides.length); startTimer(); };
+  if (next) next.onclick = function() { stopTimer(); nextSlide(); startTimer(); };
+  indicators.forEach(function(ind, i) {
+    ind.onclick = function() { stopTimer(); goTo(i); startTimer(); };
+  });
+
+  hero.addEventListener('mouseenter', stopTimer);
+  hero.addEventListener('mouseleave', startTimer);
+
+  startTimer();
+})();
+</script>
+{% endif %}

@@ -107,6 +107,13 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		// On home page: hero banner first, then Our Category, then layout modules
+		if ($route == 'common/home') {
+			$hero_banner = $this->load->controller('common/hero_banner');
+			$our_category = $this->load->controller('common/our_category');
+			$data['modules'] = array_merge([$hero_banner, $our_category], $data['modules']);
+		}
+
 		return $this->load->view('common/content_top', $data);
 	}
 }

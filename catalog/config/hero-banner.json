@@ -1,0 +1,41 @@
+{
+  "background_image": "hero/hero-bg.jpg",
+  "interval_ms": 5000,
+  "slides": [
+    {
+      "title": "Organic Fresh Fruits For Your Health",
+      "subtitle": "Discover the finest selection of organic fruits and vegetables. Grown with care, delivered fresh to your door.",
+      "button_text": "SHOP NOW",
+      "button_link": "product/category&path=0",
+      "image": "hero/banner-1.jpg"
+    },
+    {
+      "title": "Fresh Vegetables From Local Farms",
+      "subtitle": "Support local farmers and enjoy the freshest seasonal produce. Farm to table, the natural way.",
+      "button_text": "SHOP NOW",
+      "button_link": "product/category&path=0",
+      "image": "hero/banner-2.jpg"
+    },
+    {
+      "title": "Healthy Living Starts Here",
+      "subtitle": "Premium quality seeds and plants for your garden. Grow your own organic produce with our trusted varieties.",
+      "button_text": "SHOP NOW",
+      "button_link": "product/category&path=0",
+      "image": "hero/banner-3.jpg"
+    },
+    {
+      "title": "Nature's Best On Your Table",
+      "subtitle": "From our fields to your family. Organic, sustainable, and full of flavor.",
+      "button_text": "SHOP NOW",
+      "button_link": "product/category&path=0",
+      "image": "hero/banner-4.jpg"
+    },
+    {
+      "title": "Quality Seeds, Rich Harvest",
+      "subtitle": "Choose from hundreds of varieties. Everything you need for a bountiful organic garden.",
+      "button_text": "SHOP NOW",
+      "button_link": "product/category&path=0",
+      "image": "hero/banner-5.jpg"
+    }
+  ]
+}
