@@ -3,7 +3,7 @@
   {% if background %}
   <div class="hero-banner-bg" style="background-image: url('{{ background }}');"></div>
   {% endif %}
-  <div class="hero-banner-inner container">
+  <div class="hero-banner-inner container position-relative">
     <div id="hero-carousel" class="hero-carousel">
       {% for slide in slides %}
         <div class="hero-slide{% if slide.index == 0 %} active{% endif %}{% if use_slide_image_as_bg %} hero-slide-bg-image{% endif %}" data-index="{{ slide.index }}"{% if use_slide_image_as_bg %} style="background-image: url('{{ slide.image }}');"{% endif %}>
@@ -15,7 +15,7 @@
                 <a href="{{ slide.button_link }}" class="btn btn-primary hero-btn animate-slide-in">{{ slide.button_text }}</a>
               {% endif %}
             </div>
-            {% if not use_slide_image_as_bg %}
+            {% if not use_slide_image_as_bg and not background %}
             <div class="col-lg-6 hero-image-col text-center">
               <div class="hero-image-wrap">
                 <img src="{{ slide.image }}" alt="{{ slide.title }}" class="hero-image img-fluid"/>
@@ -27,8 +27,8 @@
       {% endfor %}
     </div>
     {% if slides|length > 1 %}
-      <button type="button" class="hero-arrow hero-arrow-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
-      <button type="button" class="hero-arrow hero-arrow-next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+      <button type="button" class="hero-arrow hero-arrow-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left fa-lg"></i></button>
+      <button type="button" class="hero-arrow hero-arrow-next" aria-label="Next"><i class="fa-solid fa-chevron-right fa-lg"></i></button>
       <div class="hero-indicators">
         {% for slide in slides %}
           <button type="button" class="hero-indicator{% if slide.index == 0 %} active{% endif %}" data-index="{{ slide.index }}" aria-label="Slide {{ slide.index + 1 }}"></button>
@@ -79,8 +79,14 @@
     ind.onclick = function() { stopTimer(); goTo(i); startTimer(); };
   });
 
-  hero.addEventListener('mouseenter', stopTimer);
-  hero.addEventListener('mouseleave', startTimer);
+  hero.addEventListener('mouseenter', function() {
+    stopTimer();
+    hero.classList.add('hero-arrows-visible');
+  });
+  hero.addEventListener('mouseleave', function() {
+    hero.classList.remove('hero-arrows-visible');
+    startTimer();
+  });
 
   startTimer();
 })();
