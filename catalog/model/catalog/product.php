@@ -111,11 +111,7 @@ class Product extends \Opencart\System\Engine\Model {
 
 			$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p2s`.`product_id` = `p2c`.`product_id` AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "')";
 
-			if (!empty($data['filter_filter'])) {
-				$sql .= " LEFT JOIN `" . DB_PREFIX . "product_filter` `pf` ON (`pf`.`product_id` = `p2s`.`product_id`) LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `pf`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW())";
-			} else {
-				$sql .= " LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW())";
-			}
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW())";
 		} else {
 			$sql .= " FROM `" . DB_PREFIX . "product_to_store` `p2s` LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `p`.`date_available` <= NOW())";
 		}
@@ -134,15 +130,12 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 
 			if (!empty($data['filter_filter'])) {
-				$implode = [];
-
-				$filters = explode(',', $data['filter_filter']);
-
-				foreach ($filters as $filter_id) {
-					$implode[] = (int)$filter_id;
+				$filter_ids = array_filter(array_map('intval', explode(',', $data['filter_filter'])));
+				if ($filter_ids) {
+					$filter_list = implode(',', $filter_ids);
+					$filter_count = count($filter_ids);
+					$sql .= " AND `p`.`product_id` IN (SELECT `pf2`.`product_id` FROM `" . DB_PREFIX . "product_filter` `pf2` WHERE `pf2`.`filter_id` IN (" . $filter_list . ") GROUP BY `pf2`.`product_id` HAVING COUNT(DISTINCT `pf2`.`filter_id`) = " . $filter_count . ")";
 				}
-
-				$sql .= " AND `pf`.`filter_id` IN (" . implode(',', $implode) . ")";
 			}
 		}
 
@@ -282,13 +275,9 @@ class Product extends \Opencart\System\Engine\Model {
 				$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_category` `p2c` ON (`p2c`.`category_id` = `c2s`.`category_id`)";
 			}
 
-			$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p2s`.`product_id` = `p2c`.`product_id`)";
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p2s`.`product_id` = `p2c`.`product_id` AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "')";
 
-			if (!empty($data['filter_filter'])) {
-				$sql .= " LEFT JOIN `" . DB_PREFIX . "product_filter` `pf` ON (`pf`.`product_id` = `p2s`.`product_id`) LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `pf`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW())";
-			} else {
-				$sql .= " LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW() AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "')";
-			}
+			$sql .= " LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW())";
 		} else {
 			$sql .= " FROM `" . DB_PREFIX . "product_to_store` `p2s` LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `p`.`date_available` <= NOW())";
 		}
@@ -303,15 +292,12 @@ class Product extends \Opencart\System\Engine\Model {
 			}
 
 			if (!empty($data['filter_filter'])) {
-				$implode = [];
-
-				$filters = explode(',', $data['filter_filter']);
-
-				foreach ($filters as $filter_id) {
-					$implode[] = (int)$filter_id;
+				$filter_ids = array_filter(array_map('intval', explode(',', $data['filter_filter'])));
+				if ($filter_ids) {
+					$filter_list = implode(',', $filter_ids);
+					$filter_count = count($filter_ids);
+					$sql .= " AND `p`.`product_id` IN (SELECT `pf2`.`product_id` FROM `" . DB_PREFIX . "product_filter` `pf2` WHERE `pf2`.`filter_id` IN (" . $filter_list . ") GROUP BY `pf2`.`product_id` HAVING COUNT(DISTINCT `pf2`.`filter_id`) = " . $filter_count . ")";
 				}
-
-				$sql .= " AND `pf`.`filter_id` IN (" . implode(',', $implode) . ")";
 			}
 		}
 

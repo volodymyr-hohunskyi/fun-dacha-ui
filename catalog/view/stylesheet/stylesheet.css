@@ -1247,6 +1247,27 @@ footer.freshgo-footer {
   color: var(--color-primary) !important;
 }
 
+/* Category filter widget - left sidebar on product list */
+.category-filter-widget .filter-group h5 {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.category-filter-widget .filter-checkbox {
+  min-width: 18px;
+  background: var(--bs-tertiary-bg);
+  border-color: var(--bs-border-color) !important;
+}
+.category-filter-widget a:hover .filter-checkbox {
+  border-color: var(--color-primary) !important;
+  background: rgba(var(--bs-primary-rgb), 0.1);
+}
+.category-filter-widget .filter-group li a {
+  color: inherit;
+}
+.category-filter-widget .filter-group li a:hover {
+  color: var(--color-primary);
+}
+
 /* Theme Custom CSS */
 #cookie {
   position: fixed;

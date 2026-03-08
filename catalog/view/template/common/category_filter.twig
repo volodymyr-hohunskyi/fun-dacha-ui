@@ -1,0 +1,26 @@
+{% if filter_groups %}
+<aside class="category-filter-widget mb-4">
+  <h4 class="h6 mb-3">{{ text_filter }}</h4>
+  <div class="filter-groups">
+    {% for group in filter_groups %}
+      <div class="filter-group mb-4">
+        <h5 class="h6 text-muted mb-2">{{ group.name }}</h5>
+        <ul class="list-unstyled mb-0">
+          {% for filter in group.filters %}
+            <li class="mb-1">
+              <a href="{{ filter.href }}" class="text-decoration-none d-flex align-items-center">
+                <span class="filter-checkbox me-2 d-inline-flex align-items-center justify-content-center rounded border" style="width:18px;height:18px;">
+                  {% if filter.checked %}
+                    <i class="fa-solid fa-check fa-sm text-primary"></i>
+                  {% endif %}
+                </span>
+                <span>{{ filter.name }}</span>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+</aside>
+{% endif %}

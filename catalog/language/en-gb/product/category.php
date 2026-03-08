@@ -1,6 +1,7 @@
 <?php
 // Text
 $_['text_refine']      = 'Refine Search';
+$_['text_filter']      = 'Filter';
 $_['text_product']     = 'Products';
 $_['text_no_results']  = 'There are no products to list in this category.';
 $_['text_compare']     = 'Product Compare (%s)';

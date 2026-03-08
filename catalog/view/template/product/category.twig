@@ -10,7 +10,7 @@
       <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
     {% endfor %}
   </ul>
-  <div class="row">{{ column_left }}
+  <div class="row">{% if filter_widget %}<aside id="column-left" class="col-12 col-md-3 d-none d-md-block">{{ filter_widget }}</aside>{% elseif column_left %}{{ column_left }}{% endif %}
     <div id="content" class="col">{{ content_top }}
       <h1>{{ heading_title }}</h1>
       {% if image or description %}

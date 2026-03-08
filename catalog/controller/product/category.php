@@ -47,7 +47,7 @@ class Category extends \Opencart\System\Engine\Controller {
 		if (isset($this->request->get['limit']) && (int)$this->request->get['limit']) {
 			$limit = (int)$this->request->get['limit'];
 		} else {
-			$limit = $this->config->get('config_pagination');
+			$limit = 25;
 		}
 
 		// Category
@@ -394,7 +394,7 @@ class Category extends \Opencart\System\Engine\Controller {
 
 			$data['limits'] = [];
 
-			$limits = array_unique([$this->config->get('config_pagination'), 25, 50, 75, 100]);
+			$limits = array_unique([25, 50, 75, 100]);
 
 			sort($limits);
 
@@ -460,7 +460,8 @@ class Category extends \Opencart\System\Engine\Controller {
 
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
 
-			$data['column_left'] = $this->load->controller('common/column_left');
+			$data['filter_widget'] = $this->load->controller('common/category_filter', [$category_id]);
+			$data['column_left'] = $data['filter_widget'] ? '' : $this->load->controller('common/column_left');
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
 			$data['content_bottom'] = $this->load->controller('common/content_bottom');
