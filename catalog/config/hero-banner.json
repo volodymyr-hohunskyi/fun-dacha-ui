@@ -5,14 +5,14 @@
     {
       "title": "Якісне насіння для вашого врожаю",
       "subtitle": "Відкрийте для себе широкий вибір насіння овочів та квітів. Надійні сорти, перевірена якість та чудові результати у вашому саду й на городі.",
-      "button_text": "SHOP NOW",
+      "button_text": "До каталогу",
       "button_link": "product/category&path=100",
       "image": "hero/banner-1.jpg"
     },
     {
       "title": "Насіння для вашого саду",
       "subtitle": "Обирайте найкраще насіння овочів та квітів і отримуйте щедрий, здоровий врожай.",
-      "button_text": "SHOP NOW",
+      "button_text": "До каталогу",
       "button_link": "product/category&path=200",
       "image": "hero/banner-2.jpg"
     }

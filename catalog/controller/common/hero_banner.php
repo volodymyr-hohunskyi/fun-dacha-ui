@@ -78,7 +78,7 @@ class HeroBanner extends \Opencart\System\Engine\Controller {
 			$data['slides'][] = [
 				'title'       => $slide['title'] ?? '',
 				'subtitle'    => $slide['subtitle'] ?? '',
-				'button_text' => $slide['button_text'] ?? 'SHOP NOW',
+				'button_text' => $slide['button_text'] ?? 'До каталогу',
 				'button_link' => $button_link,
 				'image'       => $image_url,
 				'index'       => $i,
