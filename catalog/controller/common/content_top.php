@@ -86,6 +86,11 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 		foreach ($modules as $module) {
 			$part = explode('.', $module['code']);
 
+			// On home page: skip old OpenCart banner (replaced by hero_banner)
+			if ($route == 'common/home' && isset($part[0]) && isset($part[1]) && $part[0] === 'opencart' && $part[1] === 'banner') {
+				continue;
+			}
+
 			if (isset($part[1]) && $this->config->get('module_' . $part[1] . '_status')) {
 				$module_data = $this->load->controller('extension/' . $part[0] . '/module/' . $part[1]);
 
@@ -107,7 +112,7 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		// On home page: hero banner first, then Our Category, then layout modules
+		// On home page: hero banner first, then Our Category, then layout modules (banner skipped above)
 		if ($route == 'common/home') {
 			$hero_banner = $this->load->controller('common/hero_banner');
 			$our_category = $this->load->controller('common/our_category');
