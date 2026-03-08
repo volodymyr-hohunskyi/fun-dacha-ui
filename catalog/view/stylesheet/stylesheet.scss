@@ -25,7 +25,7 @@
 
 body {
   width: 100%;
-  height: 100%;
+  min-height: 100%;
   font-family: var(--font-body);
   font-size: var(--size-body);
   line-height: var(--line-height-body);
@@ -166,30 +166,26 @@ button:focus {
   }
 }
 
-/* container */
+/* container - flex layout so footer sits below content, no overlap */
+html {
+  height: 100%;
+}
 #container {
   width: 100%;
-  min-height: 100%;
-  position: absolute;
-  margin-bottom: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+main {
+  flex: 1 0 auto;
+  min-height: 0;
+  padding-bottom: 2rem;
 }
 
-/* content - padding matches header spacing, enough for footer (not excessive) */
+/* content - no top padding (hero extends to header), normal bottom spacing */
 #content, #column-left, #column-right {
-  padding-bottom: 280px;
-  padding-top: 1.5rem;
-}
-
-@media (min-width: 576px) {
-  #content, #column-left, #column-right {
-    padding-bottom: 260px;
-  }
-}
-
-@media (min-width: 992px) {
-  #content, #column-left, #column-right {
-    padding-bottom: 240px;
-  }
+  padding-bottom: 2rem;
+  padding-top: 0;
 }
 
 #alert {
@@ -446,8 +442,8 @@ div.required .col-form-label:before, div.required .form-label:before {
 
 /* footer - FreshGo reference: dark teal #0F3B47, bright lime #7AB80F */
 footer.freshgo-footer {
-  position: absolute;
-  bottom: -1px;
+  flex-shrink: 0;
+  margin-top: auto;
   width: 100%;
   background-color: #0F3B47;
   color: rgba(255, 255, 255, 0.9);
@@ -486,7 +482,7 @@ footer.freshgo-footer {
 }
 
 .freshgo-footer-content {
-  padding: 30px 0 20px;
+  padding: 2rem 0 1.25rem 0;
 }
 
 .freshgo-footer-content h5 {
@@ -746,7 +742,7 @@ footer.freshgo-footer {
   position: relative;
   z-index: 1;
   height: 100%;
-  padding: 2rem 0;
+  padding: 0 0 2rem 0;
 }
 
 .hero-carousel {

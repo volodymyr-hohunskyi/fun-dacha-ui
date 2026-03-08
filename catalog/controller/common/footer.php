@@ -56,6 +56,9 @@ class Footer extends \Opencart\System\Engine\Controller {
 		$data['wishlist'] = $this->url->link('account/wishlist', 'language=' . $this->config->get('config_language') . (isset($this->session->data['customer_token']) ? '&customer_token=' . $this->session->data['customer_token'] : ''));
 
 		$data['powered'] = sprintf($this->language->get('text_powered'), $this->config->get('config_name'), date('Y'));
+		$data['text_news_and_specials'] = $this->language->get('text_news_and_specials');
+		$data['text_news'] = $this->language->get('text_news');
+		$data['text_special'] = $this->language->get('text_special');
 
 		$data['name'] = $this->config->get('config_name');
 		$data['address'] = $this->config->get('config_address');
