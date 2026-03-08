@@ -34,11 +34,15 @@ class HeroBanner extends \Opencart\System\Engine\Controller {
 		$image_base = $base_url . 'image/';
 
 		$data['background'] = '';
+		$data['use_slide_image_as_bg'] = false;
 		if (!empty($config['background_image'])) {
 			$bg_file = DIR_IMAGE . html_entity_decode($config['background_image'], ENT_QUOTES, 'UTF-8');
 			if (is_file($bg_file)) {
 				$data['background'] = $image_base . $config['background_image'];
 			}
+		}
+		if (empty($data['background'])) {
+			$data['use_slide_image_as_bg'] = true;
 		}
 
 		$data['interval'] = (int)($config['interval_ms'] ?? 5000);
