@@ -55,7 +55,18 @@ class Footer extends \Opencart\System\Engine\Controller {
 		$data['order'] = $this->url->link('account/order', 'language=' . $this->config->get('config_language') . (isset($this->session->data['customer_token']) ? '&customer_token=' . $this->session->data['customer_token'] : ''));
 		$data['wishlist'] = $this->url->link('account/wishlist', 'language=' . $this->config->get('config_language') . (isset($this->session->data['customer_token']) ? '&customer_token=' . $this->session->data['customer_token'] : ''));
 
-		$data['powered'] = $this->language->get('text_powered');
+		$data['powered'] = sprintf($this->language->get('text_powered'), $this->config->get('config_name'), date('Y'));
+
+		$data['name'] = $this->config->get('config_name');
+		$data['address'] = $this->config->get('config_address');
+		$data['telephone'] = $this->config->get('config_telephone');
+		$data['email'] = $this->config->get('config_email');
+		$data['newsletter_action'] = $this->customer->isLogged()
+			? $this->url->link('account/newsletter', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token'])
+			: $this->url->link('account/register', 'language=' . $this->config->get('config_language'));
+		$data['newsletter_href'] = $this->customer->isLogged()
+			? $this->url->link('account/newsletter', 'language=' . $this->config->get('config_language') . '&customer_token=' . $this->session->data['customer_token'])
+			: $this->url->link('account/register', 'language=' . $this->config->get('config_language'));
 
 		// Who's Online
 		if ($this->config->get('config_customer_online')) {

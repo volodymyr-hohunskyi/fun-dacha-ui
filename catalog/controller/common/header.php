@@ -46,9 +46,11 @@ class Header extends \Opencart\System\Engine\Controller {
 		}
 
 		// Hard coding css, so they can be replaced via the event's system.
-		$data['bootstrap'] = 'catalog/view/stylesheet/bootstrap.css';
+		// Cache bust: bump version when layout/CSS changes
+		$cssVer = '2';
+		$data['bootstrap'] = 'catalog/view/stylesheet/bootstrap.css?v=' . $cssVer;
 		$data['icons'] = 'catalog/view/stylesheet/fonts/fontawesome/css/all.min.css';
-		$data['stylesheet'] = 'catalog/view/stylesheet/stylesheet.css';
+		$data['stylesheet'] = 'catalog/view/stylesheet/stylesheet.css?v=' . $cssVer;
 
 		// Hard coding scripts, so they can be replaced via the event's system.
 		$data['jquery'] = 'catalog/view/javascript/jquery/jquery-3.7.1.min.js';

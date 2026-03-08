@@ -280,6 +280,38 @@ button:focus {
   color: #fff;
 }
 
+/* Header 2nd line - logo + super categories nav, no search/cart */
+.freshgo-header {
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.freshgo-header #logo {
+  margin: 0;
+}
+
+.freshgo-header-nav .navbar-nav .nav-link {
+  color: #303030 !important;
+  font-weight: 600;
+  padding: 12px 16px;
+}
+
+.freshgo-header-nav .navbar-nav .nav-link:hover {
+  color: var(--color-primary) !important;
+}
+
+.freshgo-header-nav .dropdown-menu {
+  border-radius: 0 0 10px 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+@media (min-width: 992px) {
+  .freshgo-header-nav .navbar-nav .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+}
+
 /* logo */
 #logo {
   text-align: center;
@@ -371,90 +403,9 @@ button:focus {
   }
 }
 
-/* menu */
-#menu {
-  background-color: var(--color-primary);
-  background-image: linear-gradient(to bottom, var(--color-primary-light), var(--color-primary));
-  background-repeat: repeat-x;
-  border: 1px solid var(--color-primary-dark);
-  border-color: var(--color-primary) var(--color-primary) var(--color-primary-dark);
-  min-height: 40px;
-  border-radius: 10px;
-  padding: 0 1rem;
-  margin-bottom: 20px;
-}
-
-#menu .navbar-nav > li > a {
-  color: #fff;
-  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-  padding: 10px 15px 10px 15px;
-  background-color: transparent;
-}
-
-#menu .navbar-nav > li > a:hover {
-  background-color: var(--color-primary-dark);
-}
-
-#menu .dropdown-menu {
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-#menu .dropdown-inner {
-  display: flex;
-  flex-direction: column;
-}
-
-#menu .dropdown-inner ul {
-  width: 100%;
-  min-width: 200px;
-}
-
-@media (min-width: 960px) {
-  #menu .dropdown:hover .dropdown-menu {
-    display: block;
-  }
-
-  #menu .dropdown-inner {
-    flex-direction: row;
-  }
-
-  #menu .nav-item + .nav-item + .nav-item .dropdown-column-3 {
-    left: -200px;
-  }
-
-  #menu .nav-item + .nav-item + .nav-item .dropdown-column-4 {
-    left: -400px;
-  }
-
-  #menu .nav-item + .nav-item + .nav-item + .nav-item .dropdown-column-2 {
-    left: -200px;
-  }
-
-  #menu .nav-item + .nav-item + .nav-item + .nav-item .dropdown-column-3 {
-    left: -400px;
-  }
-
-  #menu .nav-item + .nav-item + .nav-item + .nav-item .dropdown-column-4 {
-    left: -600px;
-  }
-}
-
-#category {
-  float: left;
-  font-size: var(--size-button);
-  font-weight: var(--weight-heading-semibold);
-  font-family: var(--font-heading);
-  line-height: 40px;
-  color: var(--color-white);
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
-  letter-spacing: 0.5px;
-}
-
-#menu .navbar-toggler i {
-  color: #fff;
-  border-color: #fff;
-  font-size: 0.9em;
+/* menu - now in header as freshgo-header-nav */
+#menu.freshgo-header-nav {
+  margin-bottom: 0;
 }
 
 /* default boostrap changes */
@@ -486,39 +437,114 @@ div.required .col-form-label:before, div.required .form-label:before {
   }
 }
 
-/* footer */
-footer {
-  border: 1px solid #000000;
+/* footer - FreshGo reference: dark teal #0F3B47, bright lime #7AB80F */
+footer.freshgo-footer {
   position: absolute;
   bottom: -1px;
   width: 100%;
-  padding-top: 30px;
-  background-color: #303030;
-  border-top: 1px solid #ddd;
-  color: #e2e2e2;
+  background-color: #0F3B47;
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
 }
 
-footer hr {
-  border-top: none;
-  border-bottom: 1px solid #666;
+.freshgo-footer-newsletter {
+  padding: 30px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-footer a {
-  color: #ccc;
-  text-decoration: none;
-}
-
-footer a:hover {
+.freshgo-footer-newsletter-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   color: #fff;
+  margin-bottom: 6px;
 }
 
-footer h5 {
-  font-family: 'Open Sans', sans-serif;
-  font-size: 13px;
-  font-weight: bold;
+.freshgo-footer-newsletter-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.freshgo-footer-newsletter-btn {
+  background-color: #7AB80F !important;
+  border-color: #7AB80F !important;
+  padding: 12px 28px;
+  font-weight: 600;
+}
+
+.freshgo-footer-newsletter-btn:hover {
+  background-color: #6aa00d !important;
+  border-color: #6aa00d !important;
+  color: #fff !important;
+}
+
+.freshgo-footer-content {
+  padding: 40px 0 30px;
+}
+
+.freshgo-footer-content h5 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
   color: #fff;
-  margin-top: 10px;
+  margin-bottom: 18px;
+}
+
+.freshgo-footer-content ul li {
   margin-bottom: 10px;
+}
+
+.freshgo-footer-content a,
+.freshgo-footer-content p {
+  color: rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.freshgo-footer-content a:hover {
+  color: #7AB80F;
+}
+
+.freshgo-footer-store-name {
+  font-weight: 600;
+  color: #fff !important;
+}
+
+.freshgo-footer-social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  margin-right: 8px;
+  transition: background 0.2s;
+}
+
+.freshgo-footer-social a:hover {
+  background: #7AB80F;
+  color: #fff;
+}
+
+.freshgo-footer-bottom {
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.freshgo-footer-bottom p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+.freshgo-footer-bottom a {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.freshgo-footer-bottom a:hover {
+  color: #7AB80F;
 }
 
 /* breadcrumb */
