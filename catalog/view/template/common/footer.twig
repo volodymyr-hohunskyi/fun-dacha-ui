@@ -3,7 +3,7 @@
   <div class="freshgo-footer-content">
     <div class="container">
       <div class="row">
-        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+        <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
           <h5>{{ text_contact_us }}</h5>
           <p class="freshgo-footer-store-name">{{ name }}</p>
           {% if address %}
@@ -11,14 +11,8 @@
           {% endif %}
           <p><i class="fa-solid fa-phone me-2"></i>{{ telephone }}</p>
           <p><i class="fa-solid fa-envelope me-2"></i>{{ email }}</p>
-          <div class="freshgo-footer-social mt-3">
-            <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
-            <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-            <a href="#" aria-label="Pinterest"><i class="fa-brands fa-pinterest"></i></a>
-          </div>
         </div>
-        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+        <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
           <h5>{{ text_information }}</h5>
           <ul class="list-unstyled">
             {% if blog %}
@@ -27,26 +21,12 @@
             {% for information in informations %}
               <li><a href="{{ information.href }}">{{ information.title }}</a></li>
             {% endfor %}
-            {% if manufacturer %}
-              <li><a href="{{ manufacturer }}">{{ text_manufacturer }}</a></li>
-            {% endif %}
           </ul>
         </div>
-        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <h5>{{ text_account }}</h5>
-          <ul class="list-unstyled">
-            <li><a href="{{ account }}">{{ text_account }}</a></li>
-            <li><a href="{{ order }}">{{ text_order }}</a></li>
-            <li><a href="{{ wishlist }}">{{ text_wishlist }}</a></li>
-            <li><a href="{{ newsletter_href }}">{{ text_newsletter }}</a></li>
-            <li><a href="{{ special }}">{{ text_special }}</a></li>
-          </ul>
-        </div>
-        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+        <div class="col-md-6 col-lg-4 mb-4 mb-lg-0">
           <h5>{{ text_service }}</h5>
           <ul class="list-unstyled">
             <li><a href="{{ contact }}">{{ text_contact }}</a></li>
-            <li><a href="{{ return }}">{{ text_return }}</a></li>
             {% if gdpr %}
               <li><a href="{{ gdpr }}">{{ text_gdpr }}</a></li>
             {% endif %}
