@@ -1,0 +1,19 @@
+{% if categories %}
+<section class="our-category-widget mt-4 mb-4">
+  <div class="container">
+    <h2 class="our-category-title text-center mb-4">{{ heading_title }}</h2>
+    <div class="row g-3 g-md-4 justify-content-center">
+      {% for category in categories %}
+        <div class="col-4 col-sm-3 col-md-2">
+          <a href="{{ category.href }}" class="our-category-card text-center text-decoration-none d-block">
+            <div class="our-category-image mb-2">
+              <img src="{{ category.image }}" alt="{{ category.name }}" class="img-fluid rounded-circle"/>
+            </div>
+            <span class="our-category-name">{{ category.name }}</span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

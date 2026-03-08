@@ -4,9 +4,9 @@
     <div id="navbar-menu" class="collapse navbar-collapse">
       <ul class="navbar-nav flex-wrap">
         {% for super in super_categories %}
-          {% if super.children %}
+          {% if super.children and not super.no_dropdown %}
             <li class="nav-item dropdown">
-              <a href="{{ super.href }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">{{ super.name }}</a>
+              <a href="{{ super.href }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">{{ super.name }} <i class="fa-solid fa-chevron-down ms-1"></i></a>
               <ul class="dropdown-menu">
                 {% for child in super.children %}
                   <li><a href="{{ child.href }}" class="dropdown-item">{{ child.name }}</a></li>

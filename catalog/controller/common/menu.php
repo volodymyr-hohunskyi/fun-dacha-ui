@@ -119,6 +119,10 @@ class Menu extends \Opencart\System\Engine\Controller {
 					'земля',
 					'захист',
 					'препарат',
+					'гербіцид',
+					'інсектицид',
+					'фунгіцид',
+					'прилипач',
 				],
 			],
 			self::SUPER_SUPUTNI => [
@@ -133,6 +137,7 @@ class Menu extends \Opencart\System\Engine\Controller {
 					'касета',
 					'контейнер',
 				],
+				'no_dropdown' => true,
 			],
 		];
 
@@ -161,23 +166,32 @@ class Menu extends \Opencart\System\Engine\Controller {
 			$superDefs[$key]['children'] = $children;
 		}
 
-		// everything else → Супутні товари
+		// everything else → Супутні товари (but Супутні has no_dropdown, so we don't add unassigned)
 		foreach ($allCategories as $cat) {
 			if (isset($assigned[$cat['category_id']])) {
 				continue;
 			}
-
 			$superDefs[self::SUPER_SUPUTNI]['children'][] = $cat;
 		}
 
 		$result = [];
 
 		foreach ($superDefs as $key => $def) {
+			$href = $def['href'];
+			if (!empty($def['no_dropdown'])) {
+				$href = $this->findCategoryHrefByName($allCategories, 'супутні') ?: $href;
+				$children = [];
+			} else {
+				$href = $this->getFirstCategoryHref($def['children']) ?: $href;
+				$children = $def['children'];
+			}
+
 			$result[] = [
-				'key'      => $key,
-				'name'     => $def['name'],
-				'href'     => $this->getFirstCategoryHref($def['children']) ?: $def['href'],
-				'children' => $def['children'],
+				'key'         => $key,
+				'name'        => $def['name'],
+				'href'        => $href,
+				'children'    => $children,
+				'no_dropdown' => !empty($def['no_dropdown']),
 			];
 		}
 
@@ -220,5 +234,18 @@ class Menu extends \Opencart\System\Engine\Controller {
 
 	private function getFirstCategoryHref(array $children): ?string {
 		return $children[0]['href'] ?? null;
+	}
+
+	/**
+	 * Find category href by name containing keyword (e.g. "супутні" for Супутні товари).
+	 */
+	private function findCategoryHrefByName(array $categories, string $keyword): ?string {
+		$kw = mb_strtolower($keyword);
+		foreach ($categories as $cat) {
+			if (mb_strpos(mb_strtolower($cat['name']), $kw) !== false) {
+				return $cat['href'];
+			}
+		}
+		return null;
 	}
 }

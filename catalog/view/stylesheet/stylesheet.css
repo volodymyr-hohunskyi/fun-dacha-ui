@@ -922,6 +922,41 @@ footer.freshgo-footer {
   padding: 15px;
 }
 
+/* Our Category widget - homepage, below banner */
+.our-category-widget .our-category-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.our-category-card {
+  padding: 1rem 0.5rem;
+  border-radius: 10px;
+  transition: background-color 0.2s;
+}
+
+.our-category-card:hover {
+  background-color: var(--color-neutral-bg);
+}
+
+.our-category-card:hover .our-category-name {
+  color: var(--color-primary);
+}
+
+.our-category-image img {
+  width: 100%;
+  max-width: 80px;
+  height: auto;
+  object-fit: cover;
+}
+
+.our-category-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  display: block;
+}
+
 /* Theme Custom CSS */
 #cookie {
   position: fixed;
