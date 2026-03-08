@@ -12,11 +12,12 @@ class CategoryFilter extends \Opencart\System\Engine\Controller {
 	/**
 	 * Index
 	 *
-	 * @param int $category_id
+	 * @param int|array $category_id Category ID, or array with category_id as first element
 	 *
 	 * @return string
 	 */
-	public function index(int $category_id = 0): string {
+	public function index($category_id = 0): string {
+		$category_id = is_array($category_id) ? (int)($category_id[0] ?? 0) : (int)$category_id;
 		if (!$category_id) {
 			return '';
 		}
