@@ -24,7 +24,9 @@ class CategoryFilter extends \Opencart\System\Engine\Controller {
 		$this->load->model('catalog/category');
 
 		$filter_groups = $this->model_catalog_category->getFilters($category_id);
-
+		if (empty($filter_groups)) {
+			$filter_groups = $this->model_catalog_category->getFiltersFromProducts($category_id);
+		}
 		if (empty($filter_groups)) {
 			return '';
 		}

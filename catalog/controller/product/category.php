@@ -461,7 +461,7 @@ class Category extends \Opencart\System\Engine\Controller {
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
 
 			$data['filter_widget'] = $this->load->controller('common/category_filter', [$category_id]);
-			$data['column_left'] = $data['filter_widget'] ? '' : $this->load->controller('common/column_left');
+			$data['column_left'] = ''; // Never show category list - use filter widget only
 			$data['column_right'] = $this->load->controller('common/column_right');
 			$data['content_top'] = $this->load->controller('common/content_top');
 			$data['content_bottom'] = $this->load->controller('common/content_bottom');

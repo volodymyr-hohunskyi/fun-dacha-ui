@@ -26,14 +26,6 @@
       {% endif %}
     </div>
     <div class="button w-100 d-flex">
-      <form method="post" data-oc-toggle="ajax" action="{{ wishlist_add }}" class="flex-fill">
-        <input type="hidden" name="product_id" value="{{ product_id }}"/>
-        <button type="submit" data-bs-toggle="tooltip" title="{{ button_wishlist }}" class="w-100"><i class="fa-regular fa-heart"></i></button>
-      </form>
-      <form method="post" data-oc-toggle="ajax" action="{{ compare_add }}" class="flex-fill">
-        <input type="hidden" name="product_id" value="{{ product_id }}"/>
-        <button type="submit" data-bs-toggle="tooltip" title="{{ button_compare }}" class="w-100"><i class="fa-solid fa-arrow-right-arrow-left"></i></button>
-      </form>
       <form method="post" data-oc-toggle="ajax" data-oc-load="{{ cart }}" data-oc-target="#cart" action="{{ cart_add }}" class="flex-fill">
         <input type="hidden" name="product_id" value="{{ product_id }}"/>
         <input type="hidden" name="quantity" value="{{ minimum }}"/>
