@@ -1208,11 +1208,24 @@ footer.freshgo-footer {
 }
 
 /* Blog carousel - homepage */
+/* Remove border/shadow from all wrappers - only individual cards should have them */
 .blog-carousel-section,
+.blog-carousel-section .container,
 .blog-carousel-section .carousel,
+.blog-carousel-section .carousel-inner,
+.blog-carousel-section .carousel-item,
+.blog-carousel-section .row,
 #carousel-blog,
-#carousel-blog .carousel-inner {
+#carousel-blog .carousel-inner,
+#carousel-blog .carousel-item,
+#carousel-blog .row {
   border: none !important;
+  box-shadow: none !important;
+}
+.blog-carousel-section .carousel-inner,
+.blog-carousel-section .carousel-item,
+.blog-carousel-section .row {
+  background-color: transparent !important;
 }
 .blog-carousel-section h3 {
   color: var(--color-primary-dark) !important;
@@ -1220,6 +1233,7 @@ footer.freshgo-footer {
 .blog-carousel-card {
   border: 1px solid #eee;
   border-radius: 10px;
+  box-shadow: none;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 .blog-carousel-card:hover {
