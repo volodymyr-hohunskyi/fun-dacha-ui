@@ -51,76 +51,53 @@ class Category extends \Opencart\System\Engine\Model {
 	}
 
 	/**
-	 * Get Filters
-	 *
-	 * Get the record of the category filter records in the database.
+	 * Get attribute filters for category - collected from product attributes.
+	 * Returns attribute groups with attributes and their distinct values from products in category.
 	 *
 	 * @param int $category_id primary key of the category record
 	 *
-	 * @return array<int, array<string, mixed>> filter records that have category ID
-	 *
-	 * @example
-	 *
-	 * $this->load->model('catalog/category');
-	 *
-	 * $results = $this->model_catalog_category->getFilters($category_id);
-	 */
-	public function getFilters(int $category_id): array {
-		$implode = [];
-
-		$query = $this->db->query("SELECT `filter_id` FROM `" . DB_PREFIX . "category_filter` WHERE `category_id` = '" . (int)$category_id . "'");
-
-		foreach ($query->rows as $result) {
-			$implode[] = (int)$result['filter_id'];
-		}
-
-		$filter_group_data = [];
-
-		if ($implode) {
-			$filter_group_query = $this->db->query("SELECT DISTINCT `f`.`filter_group_id`, `fgd`.`name`, `fg`.`sort_order` FROM `" . DB_PREFIX . "filter` `f` LEFT JOIN `" . DB_PREFIX . "filter_group` `fg` ON (`f`.`filter_group_id` = `fg`.`filter_group_id`) LEFT JOIN `" . DB_PREFIX . "filter_group_description` `fgd` ON (`fg`.`filter_group_id` = `fgd`.`filter_group_id`) WHERE `f`.`filter_id` IN (" . implode(',', $implode) . ") AND `fgd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' GROUP BY `f`.`filter_group_id` ORDER BY `fg`.`sort_order`, LCASE(`fgd`.`name`)");
-
-			foreach ($filter_group_query->rows as $filter_group) {
-				$filter_query = $this->db->query("SELECT DISTINCT `f`.`filter_id`, `fd`.`name` FROM `" . DB_PREFIX . "filter` `f` LEFT JOIN `" . DB_PREFIX . "filter_description` `fd` ON (`f`.`filter_id` = `fd`.`filter_id`) WHERE `f`.`filter_id` IN (" . implode(',', $implode) . ") AND `f`.`filter_group_id` = '" . (int)$filter_group['filter_group_id'] . "' AND `fd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' ORDER BY `f`.`sort_order`, LCASE(`fd`.`name`)");
-
-				if ($filter_query->num_rows) {
-					$filter_group_data[] = ['filter' => $filter_query->rows] + $filter_group;
-				}
-			}
-		}
-
-		return $filter_group_data;
-	}
-
-	/**
-	 * Get filters from products in category (when category_filter not set up)
-	 *
-	 * @param int $category_id
-	 *
 	 * @return array<int, array<string, mixed>>
 	 */
-	public function getFiltersFromProducts(int $category_id): array {
-		$query = $this->db->query("SELECT DISTINCT pf.`filter_id` FROM `" . DB_PREFIX . "product_filter` pf
-			INNER JOIN `" . DB_PREFIX . "product_to_category` p2c ON pf.`product_id` = p2c.`product_id` AND p2c.`category_id` = '" . (int)$category_id . "'
-			INNER JOIN `" . DB_PREFIX . "product` p ON pf.`product_id` = p.`product_id` AND p.`status` = '1' AND p.`date_available` <= NOW()
-			INNER JOIN `" . DB_PREFIX . "product_to_store` p2s ON pf.`product_id` = p2s.`product_id` AND p2s.`store_id` = '" . (int)$this->config->get('config_store_id') . "'");
-		$implode = [];
-		foreach ($query->rows as $row) {
-			$implode[] = (int)$row['filter_id'];
-		}
-		if (empty($implode)) {
-			return [];
-		}
+	public function getAttributeFiltersForCategory(int $category_id): array {
+		$lang = (int)$this->config->get('config_language_id');
+		$store = (int)$this->config->get('config_store_id');
+		$query = $this->db->query("SELECT DISTINCT ag.`attribute_group_id`, agd.`name` AS group_name, ag.`sort_order`
+			FROM `" . DB_PREFIX . "product_attribute` pa
+			INNER JOIN `" . DB_PREFIX . "product_to_category` p2c ON pa.`product_id` = p2c.`product_id` AND p2c.`category_id` = '" . (int)$category_id . "'
+			INNER JOIN `" . DB_PREFIX . "product` p ON pa.`product_id` = p.`product_id` AND p.`status` = '1' AND p.`date_available` <= NOW()
+			INNER JOIN `" . DB_PREFIX . "product_to_store` p2s ON pa.`product_id` = p2s.`product_id` AND p2s.`store_id` = '" . $store . "'
+			INNER JOIN `" . DB_PREFIX . "attribute` a ON pa.`attribute_id` = a.`attribute_id`
+			INNER JOIN `" . DB_PREFIX . "attribute_group` ag ON a.`attribute_group_id` = ag.`attribute_group_id`
+			LEFT JOIN `" . DB_PREFIX . "attribute_group_description` agd ON ag.`attribute_group_id` = agd.`attribute_group_id` AND agd.`language_id` = '" . $lang . "'
+			WHERE pa.`language_id` = '" . $lang . "'
+			GROUP BY ag.`attribute_group_id` ORDER BY ag.`sort_order`, LCASE(agd.`name`)");
 		$filter_group_data = [];
-		$filter_group_query = $this->db->query("SELECT DISTINCT f.`filter_group_id`, fgd.`name`, fg.`sort_order` FROM `" . DB_PREFIX . "filter` f
-			LEFT JOIN `" . DB_PREFIX . "filter_group` fg ON f.`filter_group_id` = fg.`filter_group_id`
-			LEFT JOIN `" . DB_PREFIX . "filter_group_description` fgd ON fg.`filter_group_id` = fgd.`filter_group_id` AND fgd.`language_id` = '" . (int)$this->config->get('config_language_id') . "'
-			WHERE f.`filter_id` IN (" . implode(',', $implode) . ") GROUP BY f.`filter_group_id` ORDER BY fg.`sort_order`, LCASE(fgd.`name`)");
-		foreach ($filter_group_query->rows as $filter_group) {
-			$filter_query = $this->db->query("SELECT DISTINCT f.`filter_id`, fd.`name` FROM `" . DB_PREFIX . "filter` f
-				LEFT JOIN `" . DB_PREFIX . "filter_description` fd ON f.`filter_id` = fd.`filter_id` AND fd.`language_id` = '" . (int)$this->config->get('config_language_id') . "'
-				WHERE f.`filter_id` IN (" . implode(',', $implode) . ") AND f.`filter_group_id` = '" . (int)$filter_group['filter_group_id'] . "' ORDER BY f.`sort_order`, LCASE(fd.`name`)");
-			if ($filter_query->num_rows) {
-				$filter_group_data[] = ['filter' => $filter_query->rows, 'name' => $filter_group['name']] + $filter_group;
+		foreach ($query->rows as $row) {
+			$attr_query = $this->db->query("SELECT DISTINCT a.`attribute_id`, ad.`name` AS attribute_name, pa.`text` AS attribute_value
+				FROM `" . DB_PREFIX . "product_attribute` pa
+				INNER JOIN `" . DB_PREFIX . "product_to_category` p2c ON pa.`product_id` = p2c.`product_id` AND p2c.`category_id` = '" . (int)$category_id . "'
+				INNER JOIN `" . DB_PREFIX . "product` p ON pa.`product_id` = p.`product_id` AND p.`status` = '1' AND p.`date_available` <= NOW()
+				INNER JOIN `" . DB_PREFIX . "product_to_store` p2s ON pa.`product_id` = p2s.`product_id` AND p2s.`store_id` = '" . $store . "'
+				INNER JOIN `" . DB_PREFIX . "attribute` a ON pa.`attribute_id` = a.`attribute_id` AND a.`attribute_group_id` = '" . (int)$row['attribute_group_id'] . "'
+				LEFT JOIN `" . DB_PREFIX . "attribute_description` ad ON a.`attribute_id` = ad.`attribute_id` AND ad.`language_id` = '" . $lang . "'
+				WHERE pa.`language_id` = '" . $lang . "'
+				ORDER BY a.`sort_order`, LCASE(ad.`name`), pa.`text`");
+			$filters = [];
+			foreach ($attr_query->rows as $av) {
+				$val = trim((string)$av['attribute_value']);
+				if ($val !== '') {
+					$filters[] = [
+						'attribute_id'   => (int)$av['attribute_id'],
+						'attribute_name' => $av['attribute_name'],
+						'attribute_value' => $val,
+					];
+				}
+			}
+			if (!empty($filters)) {
+				$filter_group_data[] = [
+					'name'    => $row['group_name'] ?? '',
+					'filters' => $filters,
+				];
 			}
 		}
 		return $filter_group_data;

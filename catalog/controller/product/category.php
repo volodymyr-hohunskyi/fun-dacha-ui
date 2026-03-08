@@ -20,10 +20,19 @@ class Category extends \Opencart\System\Engine\Controller {
 			$path = '';
 		}
 
-		if (isset($this->request->get['filter'])) {
-			$filter = $this->request->get['filter'];
-		} else {
-			$filter = '';
+		$filter_attr = [];
+		if (isset($this->request->get['filter_attr']) && is_string($this->request->get['filter_attr'])) {
+			foreach (explode(',', $this->request->get['filter_attr']) as $part) {
+				$part = trim($part);
+				if ($part && strpos($part, ':') !== false) {
+					$kv = explode(':', $part, 2);
+					$aid = (int)$kv[0];
+					$val = isset($kv[1]) ? base64_decode(strtr($kv[1], '-_', '+/')) : '';
+					if ($aid && $val !== false && $val !== '') {
+						$filter_attr[] = ['attribute_id' => $aid, 'text' => $val];
+					}
+				}
+			}
 		}
 
 		if (isset($this->request->get['sort'])) {
@@ -88,7 +97,7 @@ class Category extends \Opencart\System\Engine\Controller {
 			}
 			
 			// Add meta robots noindex for filtered/sorted pages
-			if (isset($this->request->get['filter']) || isset($this->request->get['sort'])) {
+			if (isset($this->request->get['filter_attr']) || isset($this->request->get['sort'])) {
 				$this->response->addHeader('X-Robots-Tag: noindex, follow');
 			}
 
@@ -138,8 +147,8 @@ class Category extends \Opencart\System\Engine\Controller {
 				$url .= '&path=' . $this->request->get['path'];
 			}
 
-			if (isset($this->request->get['filter'])) {
-				$url .= '&filter=' . $this->request->get['filter'];
+			if (isset($this->request->get['filter_attr'])) {
+				$url .= '&filter_attr=' . $this->request->get['filter_attr'];
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -182,8 +191,8 @@ class Category extends \Opencart\System\Engine\Controller {
 
 			$url = '';
 
-			if (isset($this->request->get['filter'])) {
-				$url .= '&filter=' . $this->request->get['filter'];
+			if (isset($this->request->get['filter_attr'])) {
+				$url .= '&filter_attr=' . $this->request->get['filter_attr'];
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -223,8 +232,8 @@ class Category extends \Opencart\System\Engine\Controller {
 				$url .= '&path=' . $this->request->get['path'];
 			}
 
-			if (isset($this->request->get['filter'])) {
-				$url .= '&filter=' . $this->request->get['filter'];
+			if (isset($this->request->get['filter_attr'])) {
+				$url .= '&filter_attr=' . $this->request->get['filter_attr'];
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -249,7 +258,7 @@ class Category extends \Opencart\System\Engine\Controller {
 			$filter_data = [
 				'filter_category_id'  => $category_id,
 				'filter_sub_category' => false,
-				'filter_filter'       => $filter,
+				'filter_attribute'    => $filter_attr,
 				'sort'                => $sort,
 				'order'               => $order,
 				'start'               => ($page - 1) * $limit,
@@ -308,8 +317,8 @@ class Category extends \Opencart\System\Engine\Controller {
 				$url .= '&path=' . $this->request->get['path'];
 			}
 
-			if (isset($this->request->get['filter'])) {
-				$url .= '&filter=' . $this->request->get['filter'];
+			if (isset($this->request->get['filter_attr'])) {
+				$url .= '&filter_attr=' . $this->request->get['filter_attr'];
 			}
 
 			if (isset($this->request->get['limit'])) {
@@ -380,8 +389,8 @@ class Category extends \Opencart\System\Engine\Controller {
 				$url .= '&path=' . $this->request->get['path'];
 			}
 
-			if (isset($this->request->get['filter'])) {
-				$url .= '&filter=' . $this->request->get['filter'];
+			if (isset($this->request->get['filter_attr'])) {
+				$url .= '&filter_attr=' . $this->request->get['filter_attr'];
 			}
 
 			if (isset($this->request->get['sort'])) {
@@ -412,8 +421,8 @@ class Category extends \Opencart\System\Engine\Controller {
 				$url .= '&path=' . $this->request->get['path'];
 			}
 
-			if (isset($this->request->get['filter'])) {
-				$url .= '&filter=' . $this->request->get['filter'];
+			if (isset($this->request->get['filter_attr'])) {
+				$url .= '&filter_attr=' . $this->request->get['filter_attr'];
 			}
 
 			if (isset($this->request->get['sort'])) {

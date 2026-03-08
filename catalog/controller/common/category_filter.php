@@ -3,8 +3,8 @@ namespace Opencart\Catalog\Controller\Common;
 /**
  * Class Category Filter
  *
- * Filter widget for product category page. Replaces category list in left column.
- * Uses Filter/FilterGroup via category model. AND logic for selected filters.
+ * Filter widget for product category page. Filters are collected from product attributes.
+ * AND logic for selected filters.
  *
  * @package Opencart\Catalog\Controller\Common
  */
@@ -23,48 +23,62 @@ class CategoryFilter extends \Opencart\System\Engine\Controller {
 		}
 		$this->load->model('catalog/category');
 
-		$filter_groups = $this->model_catalog_category->getFilters($category_id);
-		if (empty($filter_groups)) {
-			$filter_groups = $this->model_catalog_category->getFiltersFromProducts($category_id);
-		}
+		$filter_groups = $this->model_catalog_category->getAttributeFiltersForCategory($category_id);
 		if (empty($filter_groups)) {
 			return '';
 		}
 
-		$data['filter_groups'] = [];
 		$current_filters = [];
-		if (isset($this->request->get['filter']) && $this->request->get['filter'] !== '') {
-			$current_filters = array_filter(array_map('intval', explode(',', (string)$this->request->get['filter'])));
+		if (isset($this->request->get['filter_attr']) && is_string($this->request->get['filter_attr'])) {
+			foreach (explode(',', $this->request->get['filter_attr']) as $part) {
+				$part = trim($part);
+				if ($part && strpos($part, ':') !== false) {
+					$kv = explode(':', $part, 2);
+					$aid = (int)$kv[0];
+					$val = isset($kv[1]) ? base64_decode(strtr($kv[1], '-_', '+/')) : '';
+					if ($aid && $val !== false && $val !== '') {
+						$current_filters[] = ['attribute_id' => $aid, 'text' => $val];
+					}
+				}
+			}
 		}
 
-		$base_url = 'index.php?route=product/category';
 		$url_params = [
-			'path'     => $this->request->get['path'] ?? '',
-			'sort'     => $this->request->get['sort'] ?? '',
-			'order'    => $this->request->get['order'] ?? '',
-			'limit'    => $this->request->get['limit'] ?? '',
+			'path'  => $this->request->get['path'] ?? '',
+			'sort'  => $this->request->get['sort'] ?? '',
+			'order' => $this->request->get['order'] ?? '',
+			'limit' => $this->request->get['limit'] ?? '',
 		];
 
+		$data['filter_groups'] = [];
 		foreach ($filter_groups as $group) {
 			$filters = [];
-			foreach ($group['filter'] as $filter) {
-				$new_filter_ids = $current_filters;
-				$filter_id = (int)$filter['filter_id'];
-				$key = array_search($filter_id, $new_filter_ids);
-				if ($key !== false) {
-					unset($new_filter_ids[$key]);
-					$new_filter_ids = array_values($new_filter_ids);
-					$checked = true;
-				} else {
-					$new_filter_ids[] = $filter_id;
-					$new_filter_ids = array_values(array_unique($new_filter_ids));
-					$checked = false;
+			foreach ($group['filters'] as $f) {
+				$key = $f['attribute_id'] . ':' . $f['attribute_value'];
+				$new_filters = $current_filters;
+				$found = false;
+				foreach ($new_filters as $i => $cf) {
+					if ($cf['attribute_id'] === $f['attribute_id'] && $cf['text'] === $f['attribute_value']) {
+						unset($new_filters[$i]);
+						$found = true;
+						break;
+					}
 				}
-				sort($new_filter_ids);
-				$filter_param = $new_filter_ids ? implode(',', $new_filter_ids) : '';
+				if (!$found) {
+					$new_filters[] = ['attribute_id' => $f['attribute_id'], 'text' => $f['attribute_value']];
+				}
+				$new_filters = array_values($new_filters);
+				$filter_attr_param = '';
+				if (!empty($new_filters)) {
+					$parts = [];
+					foreach ($new_filters as $nf) {
+						$parts[] = $nf['attribute_id'] . ':' . strtr(base64_encode($nf['text']), '+/', '-_');
+					}
+					$filter_attr_param = implode(',', $parts);
+				}
 				$href = $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . ($url_params['path'] ?: $category_id));
-				if ($filter_param) {
-					$href .= '&filter=' . $filter_param;
+				if ($filter_attr_param) {
+					$href .= '&filter_attr=' . rawurlencode($filter_attr_param);
 				}
 				if (!empty($url_params['sort'])) {
 					$href .= '&sort=' . $url_params['sort'];
@@ -75,11 +89,15 @@ class CategoryFilter extends \Opencart\System\Engine\Controller {
 				if (!empty($url_params['limit'])) {
 					$href .= '&limit=' . $url_params['limit'];
 				}
+				$display_name = $f['attribute_value'];
+				if (!empty($f['attribute_name'])) {
+					$display_name = $f['attribute_name'] . ': ' . $f['attribute_value'];
+				}
 				$filters[] = [
-					'filter_id' => $filter_id,
-					'name'      => $filter['name'],
-					'href'      => $href,
-					'checked'   => $checked,
+					'attribute_id' => $f['attribute_id'],
+					'name'         => $display_name,
+					'href'         => $href,
+					'checked'      => $found,
 				];
 			}
 			$data['filter_groups'][] = [

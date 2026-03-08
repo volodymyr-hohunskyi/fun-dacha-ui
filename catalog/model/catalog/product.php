@@ -129,12 +129,14 @@ class Product extends \Opencart\System\Engine\Model {
 				$sql .= " AND `p2c`.`category_id` = '" . (int)$data['filter_category_id'] . "'";
 			}
 
-			if (!empty($data['filter_filter'])) {
-				$filter_ids = array_filter(array_map('intval', explode(',', $data['filter_filter'])));
-				if ($filter_ids) {
-					$filter_list = implode(',', $filter_ids);
-					$filter_count = count($filter_ids);
-					$sql .= " AND `p`.`product_id` IN (SELECT `pf2`.`product_id` FROM `" . DB_PREFIX . "product_filter` `pf2` WHERE `pf2`.`filter_id` IN (" . $filter_list . ") GROUP BY `pf2`.`product_id` HAVING COUNT(DISTINCT `pf2`.`filter_id`) = " . $filter_count . ")";
+			if (!empty($data['filter_attribute']) && is_array($data['filter_attribute'])) {
+				$lang_id = (int)$this->config->get('config_language_id');
+				foreach ($data['filter_attribute'] as $fa) {
+					if (isset($fa['attribute_id'], $fa['text']) && (int)$fa['attribute_id'] && (string)$fa['text'] !== '') {
+						$aid = (int)$fa['attribute_id'];
+						$txt = $this->db->escape(trim((string)$fa['text']));
+						$sql .= " AND `p`.`product_id` IN (SELECT `pa`.`product_id` FROM `" . DB_PREFIX . "product_attribute` `pa` WHERE `pa`.`attribute_id` = " . $aid . " AND `pa`.`text` = '" . $txt . "' AND `pa`.`language_id` = " . $lang_id . ")";
+					}
 				}
 			}
 		}
@@ -291,12 +293,14 @@ class Product extends \Opencart\System\Engine\Model {
 				$sql .= " AND `p2c`.`category_id` = '" . (int)$data['filter_category_id'] . "'";
 			}
 
-			if (!empty($data['filter_filter'])) {
-				$filter_ids = array_filter(array_map('intval', explode(',', $data['filter_filter'])));
-				if ($filter_ids) {
-					$filter_list = implode(',', $filter_ids);
-					$filter_count = count($filter_ids);
-					$sql .= " AND `p`.`product_id` IN (SELECT `pf2`.`product_id` FROM `" . DB_PREFIX . "product_filter` `pf2` WHERE `pf2`.`filter_id` IN (" . $filter_list . ") GROUP BY `pf2`.`product_id` HAVING COUNT(DISTINCT `pf2`.`filter_id`) = " . $filter_count . ")";
+			if (!empty($data['filter_attribute']) && is_array($data['filter_attribute'])) {
+				$lang_id = (int)$this->config->get('config_language_id');
+				foreach ($data['filter_attribute'] as $fa) {
+					if (isset($fa['attribute_id'], $fa['text']) && (int)$fa['attribute_id'] && (string)$fa['text'] !== '') {
+						$aid = (int)$fa['attribute_id'];
+						$txt = $this->db->escape(trim((string)$fa['text']));
+						$sql .= " AND `p`.`product_id` IN (SELECT `pa`.`product_id` FROM `" . DB_PREFIX . "product_attribute` `pa` WHERE `pa`.`attribute_id` = " . $aid . " AND `pa`.`text` = '" . $txt . "' AND `pa`.`language_id` = " . $lang_id . ")";
+					}
 				}
 			}
 		}
