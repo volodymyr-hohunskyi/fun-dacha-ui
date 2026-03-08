@@ -1028,19 +1028,21 @@ footer.freshgo-footer {
 }
 
 .hero-content {
-  padding-left: 1rem;
-  padding-right: 2rem;
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
 }
 
 @media (min-width: 576px) {
   .hero-content {
-    padding-left: 1.5rem;
+    padding-left: 4rem;
+    padding-right: 4rem;
   }
 }
 
 @media (min-width: 992px) {
   .hero-content {
-    padding-left: 2rem;
+    padding-left: 4.5rem;
+    padding-right: 4.5rem;
   }
 }
 
@@ -1068,6 +1070,11 @@ footer.freshgo-footer {
 .min-vh-50 {
   min-height: 320px;
   height: 100%;
+}
+
+.hero-image-col {
+  padding-left: 2rem;
+  padding-right: 3.5rem;
 }
 
 .hero-image-wrap {
