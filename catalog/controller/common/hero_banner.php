@@ -17,7 +17,9 @@ class HeroBanner extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->load->model('tool/image');
 
-		$config_path = DIR_CATALOG . 'config/hero-banner.json';
+		$catalog_dir = defined('DIR_APPLICATION') ? DIR_APPLICATION : dirname(__DIR__, 2) . '/';
+		$config_path = $catalog_dir . 'config/hero-banner.json';
+		$image_dir = defined('DIR_IMAGE') ? DIR_IMAGE : (dirname($catalog_dir) . '/image/');
 
 		if (!is_file($config_path)) {
 			return '';
@@ -36,7 +38,7 @@ class HeroBanner extends \Opencart\System\Engine\Controller {
 		$data['background'] = '';
 		$data['use_slide_image_as_bg'] = false;
 		if (!empty($config['background_image'])) {
-			$bg_file = DIR_IMAGE . html_entity_decode($config['background_image'], ENT_QUOTES, 'UTF-8');
+			$bg_file = $image_dir . html_entity_decode($config['background_image'], ENT_QUOTES, 'UTF-8');
 			if (is_file($bg_file)) {
 				$data['background'] = $image_base . $config['background_image'];
 			}
@@ -51,7 +53,7 @@ class HeroBanner extends \Opencart\System\Engine\Controller {
 		foreach ($config['slides'] as $i => $slide) {
 			$image_url = $image_base . 'placeholder.png';
 			if (!empty($slide['image'])) {
-				$img_file = DIR_IMAGE . html_entity_decode($slide['image'], ENT_QUOTES, 'UTF-8');
+				$img_file = $image_dir . html_entity_decode($slide['image'], ENT_QUOTES, 'UTF-8');
 				if (is_file($img_file)) {
 					$image_url = $image_base . $slide['image'];
 				} else {
