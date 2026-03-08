@@ -3,13 +3,43 @@
   <div class="freshgo-footer-content">
     <div class="container">
       <div class="row">
-        <div class="col-12">
-          <h5>{{ text_news_and_specials }}</h5>
+        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+          <h5>{{ text_contact_us }}</h5>
+          <p class="freshgo-footer-store-name">{{ name }}</p>
+          {% if address %}
+            <p><i class="fa-solid fa-location-dot me-2"></i>{{ address }}</p>
+          {% endif %}
+          <p><i class="fa-solid fa-phone me-2"></i>{{ telephone }}</p>
+          <p><i class="fa-solid fa-envelope me-2"></i>{{ email }}</p>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+          <h5>{{ text_information }}</h5>
           <ul class="list-unstyled">
             {% if blog %}
-              <li><a href="{{ blog }}">{{ text_news }}</a></li>
+              <li><a href="{{ blog }}">{{ text_blog }}</a></li>
+            {% endif %}
+            {% for information in informations %}
+              <li><a href="{{ information.href }}">{{ information.title }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+          <h5>{{ text_news }}</h5>
+          <ul class="list-unstyled">
+            {% if blog %}
+              <li><a href="{{ blog }}">{{ text_blog }}</a></li>
             {% endif %}
             <li><a href="{{ special }}">{{ text_special }}</a></li>
+          </ul>
+        </div>
+        <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
+          <h5>{{ text_service }}</h5>
+          <ul class="list-unstyled">
+            <li><a href="{{ contact }}">{{ text_contact }}</a></li>
+            {% if gdpr %}
+              <li><a href="{{ gdpr }}">{{ text_gdpr }}</a></li>
+            {% endif %}
+            <li><a href="{{ sitemap }}">{{ text_sitemap }}</a></li>
           </ul>
         </div>
       </div>
