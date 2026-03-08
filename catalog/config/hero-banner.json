@@ -3,39 +3,18 @@
   "interval_ms": 5000,
   "slides": [
     {
-      "title": "Organic Fresh Fruits For Your Health",
-      "subtitle": "Discover the finest selection of organic fruits and vegetables. Grown with care, delivered fresh to your door.",
+      "title": "Якісне насіння для вашого врожаю",
+      "subtitle": "Відкрийте для себе широкий вибір насіння овочів та квітів. Надійні сорти, перевірена якість та чудові результати у вашому саду й на городі.",
       "button_text": "SHOP NOW",
-      "button_link": "product/category&path=0",
+      "button_link": "product/category&path=100",
       "image": "hero/banner-1.jpg"
     },
     {
-      "title": "Fresh Vegetables From Local Farms",
-      "subtitle": "Support local farmers and enjoy the freshest seasonal produce. Farm to table, the natural way.",
+      "title": "Насіння для вашого саду",
+      "subtitle": "Обирайте найкраще насіння овочів та квітів і отримуйте щедрий, здоровий врожай.",
       "button_text": "SHOP NOW",
-      "button_link": "product/category&path=0",
+      "button_link": "product/category&path=200",
       "image": "hero/banner-2.jpg"
-    },
-    {
-      "title": "Healthy Living Starts Here",
-      "subtitle": "Premium quality seeds and plants for your garden. Grow your own organic produce with our trusted varieties.",
-      "button_text": "SHOP NOW",
-      "button_link": "product/category&path=0",
-      "image": "hero/banner-3.jpg"
-    },
-    {
-      "title": "Nature's Best On Your Table",
-      "subtitle": "From our fields to your family. Organic, sustainable, and full of flavor.",
-      "button_text": "SHOP NOW",
-      "button_link": "product/category&path=0",
-      "image": "hero/banner-4.jpg"
-    },
-    {
-      "title": "Quality Seeds, Rich Harvest",
-      "subtitle": "Choose from hundreds of varieties. Everything you need for a bountiful organic garden.",
-      "button_text": "SHOP NOW",
-      "button_link": "product/category&path=0",
-      "image": "hero/banner-5.jpg"
     }
   ]
 }
