@@ -247,8 +247,14 @@ def write_opencart_workbook(
             )
         )
 
-    # ProductFilters: product_id | filter_group | filter
-    ws_pf = wb.create_sheet("ProductFilters", 1)
+    # NormalizedAttributes: ProductID | AttributeGroup | AttributeValue (Step 1 canonical format)
+    ws_na = wb.create_sheet("NormalizedAttributes", 1)
+    ws_na.append(["ProductID", "AttributeGroup", "AttributeValue"])
+    for product_id, filter_group, filter_name in pf_rows:
+        ws_na.append((product_id, filter_group, filter_name))
+
+    # ProductFilters: product_id | filter_group | filter (OpenCart import format)
+    ws_pf = wb.create_sheet("ProductFilters", 2)
     ws_pf.append(["product_id", "filter_group", "filter"])
     for product_id, filter_group, filter_name in pf_rows:
         ws_pf.append((product_id, filter_group, filter_name))
@@ -278,7 +284,7 @@ def write_opencart_workbook(
                 group_sort[name_ua] = 99
 
         if group_to_id:
-            ws_fg = wb.create_sheet("FilterGroups", 2)
+            ws_fg = wb.create_sheet("FilterGroups", 3)
             ws_fg.append(
                 [
                     "filter_group_id",
@@ -288,7 +294,7 @@ def write_opencart_workbook(
                     "name(ru-ru)",
                 ]
             )
-            ws_f = wb.create_sheet("Filters", 3)
+            ws_f = wb.create_sheet("Filters", 4)
             ws_f.append(
                 [
                     "filter_id",

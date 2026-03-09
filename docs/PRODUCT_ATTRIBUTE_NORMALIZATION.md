@@ -62,6 +62,7 @@ OpenCart uses two systems: **Attributes** (product display) and **Filters** (cat
    ```
 
 3. **Inspect output**
+   - `NormalizedAttributes` – Canonical format: ProductID | AttributeGroup | AttributeValue (one row per value)
    - `ProductAttributes` – OpenCart ProductAttributes worksheet
    - `ProductFilters` – OpenCart ProductFilters worksheet
    - `FilterGroups` – Filter group taxonomy
@@ -280,7 +281,7 @@ Add these to `FILTER_VALUE_TAXONOMY` and `ATTRIBUTE_DEFINITIONS` as needed.
 | `shared/data/create_sample_import.py` | Creates sample `products_import.xlsx` |
 | `shared/data/build_attribute_workbook.py` | Generates AttributeGroups + Attributes for OpenCart |
 | `shared/data/products_import.xlsx` | Source (create via create_sample_import or use your own) |
-| `shared/data/products_import_normalized.xlsx` | Output: ProductAttributes, ProductFilters, FilterGroups, Filters |
+| `shared/data/products_import_normalized.xlsx` | Output: NormalizedAttributes, ProductAttributes, ProductFilters, FilterGroups, Filters |
 
 ---
 

@@ -1,4 +1,4 @@
-<div class="card">
+<div class="card catalog-filter-card">
   <div class="card-header"><i class="fa-solid fa-filter"></i> {{ heading_title }}</div>
   <div class="list-group list-group-flush">
     {% for filter_group in filter_groups %}
@@ -30,3 +30,9 @@ $('#button-filter').on('click', function() {
     location = '{{ action|escape('js') }}&filter=' + filter.join(',');
 });
 //--></script>
+<style>
+/* Seed store filter UX: square checkboxes, spacing, cursor */
+.catalog-filter-card .form-check { margin-bottom: 0.35rem; }
+.catalog-filter-card .form-check-input { margin-top: 0.2em; cursor: pointer; border-radius: 0.2rem; }
+.catalog-filter-card .form-check-label { cursor: pointer; font-size: 0.95rem; }
+</style>
