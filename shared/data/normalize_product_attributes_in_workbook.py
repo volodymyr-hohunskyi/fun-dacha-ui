@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
-Normalize ProductAttributes sheet in products_import.xlsx: split combined values,
-map to taxonomy, write back. Add ProductFilters, FilterGroups, Filters for filtering.
+Normalize ProductAttributes sheet in products_import.xlsx: split combined values
+into separate rows. Each row has only one attribute value.
 
-Reads ProductAttributes sheet: product_id, attribute_group, attribute, text(en-gb), text(uk-ua), text(ru-ru)
-Splits comma-separated values, creates one ProductFilters row per value.
-Updates ProductAttributes in place (keeps one row per product+attribute, comma-joined for display).
+Input:  product_id=1, Колір, text="Червоний, Жовтий"
+Output: two rows: (1, Колір, Червоний) and (1, Колір, Жовтий)
+
+Also adds ProductFilters, FilterGroups, Filters for OpenCart filtering.
 
 Usage:
     python3 shared/data/normalize_product_attributes_in_workbook.py
@@ -76,8 +77,8 @@ def main() -> None:
     ws = wb[SHEET_NAME]
     rows = list(ws.iter_rows(min_row=2, values_only=True))
 
-    # Collect: (product_id, attr_ua) -> {en: [vals], ua: [vals], ru: [vals]}
-    pa_agg: Dict[Tuple[int, str], Dict[str, List[str]]] = {}
+    # One row per value: (product_id, attr_ua, en, ua, ru)
+    pa_rows: List[Tuple[int, str, str, str, str]] = []
     pf_rows: List[Tuple[int, str, str]] = []
     taxonomy_seen: Dict[str, List[str]] = {}
 
@@ -101,19 +102,15 @@ def main() -> None:
         ua_tokens = pad(ua_tokens, len(en_tokens), (text_ua or "").strip() if ua_tokens else "")
         ru_tokens = pad(ru_tokens, len(en_tokens), (text_ru or "").strip() if ru_tokens else "")
 
-        key = (product_id, attr_ua)
-        bucket = pa_agg.setdefault(key, {"en": [], "ua": [], "ru": []})
-
         for i, en_val in enumerate(en_tokens):
-            if not en_val and not ua_tokens[i] if i < len(ua_tokens) else True:
-                continue
             ua_val = ua_tokens[i] if i < len(ua_tokens) else en_val
             ru_val = ru_tokens[i] if i < len(ru_tokens) else ua_val
-            bucket["en"].append(en_val or ua_val)
-            bucket["ua"].append(ua_val)
-            bucket["ru"].append(ru_val or ua_val)
-
-            # ProductFilters: one row per value (use uk-ua for filter name)
+            if not en_val and not ua_val:
+                continue
+            en_val = en_val or ua_val
+            ua_val = ua_val or en_val
+            ru_val = ru_val or ua_val
+            pa_rows.append((product_id, attr_ua, en_val, ua_val, ru_val))
             canon_ua = normalize_filter_value(attr_ua, ua_val) if ua_val else None
             if canon_ua:
                 pf_rows.append((product_id, attr_ua, canon_ua))
@@ -121,13 +118,11 @@ def main() -> None:
                 if canon_ua not in taxonomy_seen[attr_ua]:
                     taxonomy_seen[attr_ua].append(canon_ua)
 
-    # Rewrite ProductAttributes sheet
+    # Rewrite ProductAttributes: one row per value
     ws.delete_rows(2, max(1, ws.max_row - 1))
-    for (product_id, attr_ua), texts in sorted(pa_agg.items()):
-        en_join = ", ".join(dict.fromkeys(filter(None, texts["en"])))
-        ua_join = ", ".join(dict.fromkeys(filter(None, texts["ua"])))
-        ru_join = ", ".join(dict.fromkeys(filter(None, texts["ru"])))
-        ws.append((product_id, CHARACTERISTICS_GROUP["names"][TARGET_LANGUAGE], attr_ua, en_join, ua_join, ru_join))
+    attr_group = CHARACTERISTICS_GROUP["names"][TARGET_LANGUAGE]
+    for product_id, attr_ua, en_val, ua_val, ru_val in sorted(pa_rows, key=lambda x: (x[0], x[1], x[3])):
+        ws.append((product_id, attr_group, attr_ua, en_val, ua_val, ru_val))
 
     # Add/update ProductFilters sheet
     if "ProductFilters" in wb.sheetnames:
@@ -189,9 +184,10 @@ def main() -> None:
                 fid += 1
 
     wb.save(WORKBOOK_PATH)
-    print(f"Normalized ProductAttributes: {len(rows)} rows → {len(pa_agg)} unique product+attribute rows")
+    print(f"ProductAttributes: {len(rows)} rows → {len(pa_rows)} rows (one value per row)")
     print(f"ProductFilters: {len(pf_rows)} rows")
-    print(f"Filter groups: {list(group_to_id.keys())}")
+    if group_to_id:
+        print(f"Filter groups: {list(group_to_id.keys())}")
 
 
 if __name__ == "__main__":
