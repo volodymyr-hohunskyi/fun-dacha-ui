@@ -1,12 +1,13 @@
 <?php
 namespace Opencart\Catalog\Controller\Common;
 /**
- * Home Brands – manufacturer carousel.
+ * Home Brands – manufacturer carousel (Наші партнери).
  *
  * @package Opencart\Catalog\Controller\Common
  */
 class HomeBrands extends \Opencart\System\Engine\Controller {
 	public function index(): string {
-		return $this->load->controller('extension/opencart/module/manufacturer');
+		$output = $this->load->controller('extension/opencart/module/manufacturer');
+		return $output ? '<section class="home-brands-section">' . $output . '</section>' : '';
 	}
 }

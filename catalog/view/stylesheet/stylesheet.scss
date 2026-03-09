@@ -21,6 +21,10 @@
   --line-height-subheadline: 1.5;
   --line-height-button: 1.4;
   --line-height-body: 1.5;
+  /* Homepage section spacing - Johnny's style */
+  --home-section-gap: 4rem;
+  --home-section-padding-y: 2.5rem;
+  --home-heading-margin: 1.5rem;
 }
 
 body {
@@ -994,6 +998,42 @@ footer.freshgo-footer {
   font-weight: 600;
   color: var(--color-primary-dark);
   display: block;
+}
+
+/* Homepage - consistent spacing (Johnny's quality) */
+#common-home #content {
+  padding-left: 0;
+  padding-right: 0;
+}
+#common-home #content > * + * {
+  margin-top: var(--home-section-gap);
+}
+#common-home .container {
+  padding-left: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
+  padding-right: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 768px) {
+  #common-home .container {
+    padding-left: calc(var(--bs-gutter-x, 0.75rem) * 2);
+    padding-right: calc(var(--bs-gutter-x, 0.75rem) * 2);
+  }
+}
+#common-home section,
+#common-home .recommended-products-section,
+#common-home .recently-viewed-section,
+#common-home .home-brands-section {
+  padding-top: var(--home-section-padding-y);
+  padding-bottom: var(--home-section-padding-y);
+}
+#common-home section:first-of-type,
+#common-home .popular-crops-section {
+  padding-top: 2rem;
+}
+#common-home h2, #common-home h3, #common-home .popular-crops-title {
+  margin-bottom: var(--home-heading-margin) !important;
 }
 
 /* Popular Crops - image, title, description, SHOP NOW */
