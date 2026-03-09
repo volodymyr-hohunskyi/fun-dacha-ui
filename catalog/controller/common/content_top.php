@@ -117,12 +117,10 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 			$home_modules = [
 				$this->load->controller('common/hero_banner'),
 				$this->load->controller('common/popular_crops'),
-				$this->load->controller('common/featured_seeds'),
+				$this->load->controller('common/home_recommended'),
 				$this->load->controller('common/why_our_seeds'),
 				$this->load->controller('common/blog_carousel'),
-				$this->load->controller('common/home_promotions'),
 				$this->load->controller('common/home_recently_viewed'),
-				$this->load->controller('common/home_brands'),
 			];
 			$data['modules'] = array_filter($home_modules);
 		}

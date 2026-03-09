@@ -127,7 +127,7 @@ class Recommended extends \Opencart\System\Engine\Controller {
 		}
 
 		if ($data['products']) {
-			$data['heading_title'] = $this->language->get('heading_title');
+			$data['heading_title'] = !empty($setting['heading_override']) ? $setting['heading_override'] : $this->language->get('heading_title');
 			$data['axis'] = $setting['axis'] ?? 'horizontal';
 			return $this->load->view('extension/opencart/module/recommended', $data);
 		} else {
