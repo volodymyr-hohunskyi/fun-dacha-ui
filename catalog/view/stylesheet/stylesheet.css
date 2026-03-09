@@ -1253,7 +1253,11 @@ footer.freshgo-footer {
 }
 #common-home .blog-carousel-section,
 #common-home .home-recommended-wrapper,
-#common-home .home-recently-viewed-wrapper {
+#common-home .home-recently-viewed-wrapper,
+#common-home .home-brands-section {
+  margin-bottom: 0 !important;
+}
+#common-home #content .mb-5 {
   margin-bottom: 0 !important;
 }
 #common-home h2, #common-home h3, #common-home .popular-crops-title {
@@ -1314,25 +1318,35 @@ footer.freshgo-footer {
   color: var(--color-primary) !important;
 }
 
-/* Category filter widget - left sidebar on product list */
-.category-filter-widget .filter-group h5 {
-  font-size: 0.9rem;
-  font-weight: 600;
+/* Category filter widget - all black */
+.category-filter-widget > div:first-child h4 {
+  color: #000 !important;
+  font-size: 0.95rem;
+}
+.category-filter-widget .accordion-button {
+  font-size: 0.85rem;
+  color: #000 !important;
+}
+.category-filter-widget .accordion-button:focus {
+  box-shadow: none;
+}
+.category-filter-widget .accordion-flush .accordion-button {
+  padding-left: 0;
 }
 .category-filter-widget .filter-checkbox {
   min-width: 18px;
+  border-radius: 0;
   background: var(--bs-tertiary-bg);
   border-color: var(--bs-border-color) !important;
+}
+.category-filter-widget .accordion-body a,
+.category-filter-widget .accordion-body a:hover,
+.category-filter-widget .accordion-body a.filter-checked {
+  color: #000 !important;
 }
 .category-filter-widget a:hover .filter-checkbox {
   border-color: var(--color-primary) !important;
   background: rgba(var(--bs-primary-rgb), 0.1);
-}
-.category-filter-widget .filter-group li a {
-  color: inherit;
-}
-.category-filter-widget .filter-group li a:hover {
-  color: var(--color-primary);
 }
 
 /* Theme Custom CSS */

@@ -13,8 +13,8 @@
   --weight-heading-bold: 700;
   --weight-heading-semibold: 600;
   --weight-body-regular: 400;
-  --size-h1: 1.75rem;
-  --size-subheadline: 1.125rem;
+  --size-h1: 56px;
+  --size-subheadline: 20px;
   --size-button: 16px;
   --size-body: 14px;
   --line-height-h1: 1.1;
@@ -66,7 +66,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: clamp(1.25rem, 3vw, var(--size-h1));
+  font-size: clamp(2rem, 5vw, var(--size-h1));
   line-height: var(--line-height-h1);
   letter-spacing: -0.5px;
 }
@@ -1043,8 +1043,13 @@ footer.freshgo-footer {
 }
 #common-home .blog-carousel-section,
 #common-home .home-recommended-wrapper,
-#common-home .home-recently-viewed-wrapper {
-  margin-bottom: 0 !important; /* override mb-5 for consistent spacing */
+#common-home .home-recently-viewed-wrapper,
+#common-home .home-brands-section {
+  margin-bottom: 0 !important;
+}
+/* Override mb-5 from manufacturer, recommended, recently-viewed templates */
+#common-home #content .mb-5 {
+  margin-bottom: 0 !important;
 }
 #common-home h2, #common-home h3, #common-home .popular-crops-title {
   margin-bottom: var(--home-heading-margin) !important;
@@ -1148,7 +1153,7 @@ footer.freshgo-footer {
   color: var(--color-primary) !important;
 }
 
-/* Category filter widget - left sidebar on product list */
+/* Category filter widget - left sidebar on product list - all black */
 .category-filter-widget {
   /* Filter header ("Фільтр") - black */
   > div:first-child h4 { color: #000 !important; font-size: 0.95rem; }
@@ -1166,16 +1171,15 @@ footer.freshgo-footer {
     background: var(--bs-tertiary-bg);
     border-color: var(--bs-border-color) !important;
   }
-  /* Filter items - black by default, green when selected/hover */
+  /* Filter items - black */
   .filter-group li a,
-  .accordion-body a { color: #000; }
+  .accordion-body a,
   .accordion-body a:hover,
-  a:hover .filter-checkbox { color: var(--color-primary); }
+  .accordion-body a.filter-checked { color: #000 !important; }
   a:hover .filter-checkbox {
     border-color: var(--color-primary) !important;
     background: rgba(var(--bs-primary-rgb), 0.1);
   }
-  .accordion-body a.filter-checked { color: var(--color-primary); }
 }
 
 /* Theme Custom CSS */
