@@ -124,17 +124,7 @@ def main() -> None:
     for product_id, attr_ua, en_val, ua_val, ru_val in sorted(pa_rows, key=lambda x: (x[0], x[1], x[3])):
         ws.append((product_id, attr_group, attr_ua, en_val, ua_val, ru_val))
 
-    # Add/update ProductFilters sheet
-    if "ProductFilters" in wb.sheetnames:
-        ws_pf = wb["ProductFilters"]
-        ws_pf.delete_rows(2, max(1, ws_pf.max_row - 1))
-    else:
-        ws_pf = wb.create_sheet("ProductFilters", wb.sheetnames.index(SHEET_NAME) + 1)
-        ws_pf.append(["product_id", "filter_group", "filter"])
-    for r in pf_rows:
-        ws_pf.append(r)
-
-    # Add FilterGroups and Filters if we have taxonomy
+    # Add FilterGroups and Filters first (needed for filter_id mapping)
     all_values: Dict[str, List[str]] = dict(FILTER_VALUE_TAXONOMY)
     for g, vals in taxonomy_seen.items():
         for v in vals:
@@ -177,11 +167,36 @@ def main() -> None:
         while ws_f.max_row > 1:
             ws_f.delete_rows(2, 1)
         fid = 1
+        name_to_ids: Dict[Tuple[str, str], Tuple[int, int]] = {}
         for name_ua in sorted(group_to_id.keys(), key=lambda x: (group_sort.get(x, 99), x)):
             gid = group_to_id[name_ua]
             for si, val in enumerate(all_values.get(name_ua, []), 1):
                 ws_f.append((fid, gid, si, val, val, val))
+                name_to_ids[(name_ua, val)] = (gid, fid)
                 fid += 1
+
+        # ProductFilters: product_id, filter_group_id, filter_id (OpenCart-compatible header)
+        if "ProductFilters" in wb.sheetnames:
+            ws_pf = wb["ProductFilters"]
+            ws_pf.delete_rows(1, ws_pf.max_row)
+        else:
+            ws_pf = wb.create_sheet("ProductFilters", wb.sheetnames.index(SHEET_NAME) + 1)
+        ws_pf.append(["product_id", "filter_group_id", "filter_id"])
+        for product_id, fg_name, f_name in pf_rows:
+            ids = name_to_ids.get((fg_name, f_name))
+            if ids:
+                gid, fid = ids
+                ws_pf.append((product_id, gid, fid))
+    else:
+        # No FilterGroups – use names (product_id, filter_group, filter)
+        if "ProductFilters" in wb.sheetnames:
+            ws_pf = wb["ProductFilters"]
+            ws_pf.delete_rows(1, ws_pf.max_row)
+        else:
+            ws_pf = wb.create_sheet("ProductFilters", wb.sheetnames.index(SHEET_NAME) + 1)
+        ws_pf.append(["product_id", "filter_group", "filter"])
+        for r in pf_rows:
+            ws_pf.append(r)
 
     wb.save(WORKBOOK_PATH)
     print(f"ProductAttributes: {len(rows)} rows → {len(pa_rows)} rows (one value per row)")
