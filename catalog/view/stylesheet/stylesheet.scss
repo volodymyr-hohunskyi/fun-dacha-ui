@@ -1015,6 +1015,15 @@ footer.freshgo-footer {
   margin-left: auto;
   margin-right: auto;
 }
+/* Popular Crops, Recommended, Blog, Recently Viewed, Brands - wider to match hero */
+#common-home .popular-crops-section .container,
+#common-home .home-recommended-wrapper .container,
+#common-home .blog-carousel-section .container,
+#common-home .home-recently-viewed-wrapper .container,
+#common-home .home-brands-section .container {
+  max-width: 100%;
+  width: 100%;
+}
 @media (min-width: 768px) {
   #common-home .container {
     padding-left: calc(var(--bs-gutter-x, 0.75rem) * 2);

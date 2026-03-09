@@ -1207,6 +1207,16 @@ footer.freshgo-footer {
   display: block;
 }
 
+/* Popular Crops, Recommended, Blog, Recently Viewed, Brands - wider to match hero */
+#common-home .popular-crops-section .container,
+#common-home .home-recommended-wrapper .container,
+#common-home .blog-carousel-section .container,
+#common-home .home-recently-viewed-wrapper .container,
+#common-home .home-brands-section .container {
+  max-width: 100%;
+  width: 100%;
+}
+
 /* Blog carousel - homepage */
 /* Remove border/shadow from all wrappers - only individual cards should have them */
 .blog-carousel-section,
