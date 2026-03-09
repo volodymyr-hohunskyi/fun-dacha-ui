@@ -3,27 +3,20 @@ namespace Opencart\Catalog\Controller\Common;
 /**
  * Class Menu
  *
- * Builds super-categories (Овочі, Фрукти, Квіти, Добрива, Супутні товари) and maps
- * DB categories to them. On hover, shows dropdown with DB categories for that super category.
+ * Navigation: Овочі, Зелень, Квіти, Добрива та захист, Супутні товари, Блог, Знижки.
+ * Blog dropdown shows articles. Product categories grouped by keyword matching.
  *
  * @package Opencart\Catalog\Controller\Common
  */
 class Menu extends \Opencart\System\Engine\Controller {
-	/** Super category keys - fixed set */
 	private const SUPER_OVOCHI = 'ovochi';       // Овочі
-	private const SUPER_BASHTANNI = 'bashtanni';   // Баштанні
-	private const SUPER_GARBUZOVI = 'garbuzovi';   // Гарбузові
-	private const SUPER_BOBOVI = 'bobovi';         // Бобові
-	private const SUPER_ZELEN = 'zelen';           // Зелень
-	private const SUPER_KVITY = 'kvity';        // Квіти
-	private const SUPER_DOBRYVA = 'dobryva';   // Добрива та захист
-	private const SUPER_SUPUTNI = 'suputni';    // Супутні товари
+	private const SUPER_ZELEN = 'zelen';         // Зелень
+	private const SUPER_KVITY = 'kvity';         // Квіти
+	private const SUPER_DOBRYVA = 'dobryva';     // Добрива та захист
+	private const SUPER_SUPUTNI = 'suputni';     // Супутні товари
+	private const SUPER_BLOG = 'blog';            // Блог (articles dropdown)
+	private const SUPER_ZNIZHKY = 'znizhky';     // Знижки
 
-	/**
-	 * Index
-	 *
-	 * @return string
-	 */
 	public function index(): string {
 		$this->load->language('common/menu');
 
@@ -35,125 +28,53 @@ class Menu extends \Opencart\System\Engine\Controller {
 		return $this->load->view('common/menu', $data);
 	}
 
-	/**
-	 * Build super categories with DB categories grouped by keyword matching.
-	 *
-	 * @return array<int, array{key: string, name: string, href: string, children: array}>
-	 */
 	private function buildSuperCategories(): array {
+		$allCategories = $this->collectAllCategories();
+		$assigned = [];
+
+		// Product super categories
 		$superDefs = [
 			self::SUPER_OVOCHI => [
 				'name' => 'Овочі',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
 				'keywords' => [
-					'томат', 'помідор',
-					'огір',
-					'капуст',
-					'редис',
-					'перець',
-					'баклажан',
-					'цибул',
-					'моркв',
-					'буряк',
-					'кукурудз',
-				],
-			],
-			self::SUPER_BASHTANNI => [
-				'name' => 'Баштанні',
-				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => [
-					'кавун',
-					'дин',
-					'гарбуз',
-				],
-			],
-			self::SUPER_GARBUZOVI => [
-				'name' => 'Гарбузові',
-				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => [
-					'кабач',
-					'патисон',
-				],
-			],
-			self::SUPER_BOBOVI => [
-				'name' => 'Бобові',
-				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => [
-					'квасол',
-					'бобов',
-					'горох',
+					'томат', 'помідор', 'огір', 'капуст', 'редис', 'перець', 'баклажан', 'цибул', 'моркв', 'буряк', 'кукурудз',
+					'кавун', 'дин', 'гарбуз', 'кабач', 'патисон', 'квасол', 'бобов', 'горох',
 				],
 			],
 			self::SUPER_ZELEN => [
 				'name' => 'Зелень',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => [
-					'зелен',
-					'пряно',
-					'кріп',
-					'петруш',
-					'базил',
-					'салат',
-					'шпинат',
-					'кінз',
-				],
+				'keywords' => ['зелен', 'пряно', 'кріп', 'петруш', 'базил', 'салат', 'шпинат', 'кінз'],
 			],
 			self::SUPER_KVITY => [
 				'name' => 'Квіти',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => [
-					'квіт',
-					'flower',
-				],
+				'keywords' => ['квіт', 'flower'],
 			],
 			self::SUPER_DOBRYVA => [
 				'name' => 'Добрива та захист',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
 				'keywords' => [
-					'добрив',
-					'удобрен',
-					'гумус',
-					'компост',
-					'субстрат',
-					'грунт',
-					'земля',
-					'захист',
-					'препарат',
-					'гербіцид',
-					'інсектицид',
-					'фунгіцид',
-					'прилипач',
+					'добрив', 'удобрен', 'гумус', 'компост', 'субстрат', 'грунт', 'земля', 'захист',
+					'препарат', 'гербіцид', 'інсектицид', 'фунгіцид', 'прилипач',
 				],
 			],
 			self::SUPER_SUPUTNI => [
 				'name' => 'Супутні товари',
 				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=0'),
-				'keywords' => [
-					'інструмент',
-					'інвентар',
-					'аксесуар',
-					'тара',
-					'горщик',
-					'касета',
-					'контейнер',
-				],
+				'keywords' => ['інструмент', 'інвентар', 'аксесуар', 'тара', 'горщик', 'касета', 'контейнер'],
 				'no_dropdown' => true,
 			],
 		];
 
-		$allCategories = $this->collectAllCategories();
-		$assigned = [];
-
 		foreach ($superDefs as $key => $def) {
 			$children = [];
-
 			foreach ($allCategories as $cat) {
 				if (isset($assigned[$cat['category_id']])) {
 					continue;
 				}
-
 				$nameLower = mb_strtolower($cat['name']);
-
 				foreach ($def['keywords'] as $kw) {
 					if (mb_strpos($nameLower, mb_strtolower($kw)) !== false) {
 						$children[] = $cat;
@@ -162,16 +83,13 @@ class Menu extends \Opencart\System\Engine\Controller {
 					}
 				}
 			}
-
 			$superDefs[$key]['children'] = $children;
 		}
 
-		// everything else → Супутні товари (but Супутні has no_dropdown, so we don't add unassigned)
 		foreach ($allCategories as $cat) {
-			if (isset($assigned[$cat['category_id']])) {
-				continue;
+			if (!isset($assigned[$cat['category_id']])) {
+				$superDefs[self::SUPER_SUPUTNI]['children'][] = $cat;
 			}
-			$superDefs[self::SUPER_SUPUTNI]['children'][] = $cat;
 		}
 
 		$result = [];
@@ -185,7 +103,6 @@ class Menu extends \Opencart\System\Engine\Controller {
 				$href = $this->getFirstCategoryHref($def['children']) ?: $href;
 				$children = $def['children'];
 			}
-
 			$result[] = [
 				'key'         => $key,
 				'name'        => $def['name'],
@@ -195,14 +112,48 @@ class Menu extends \Opencart\System\Engine\Controller {
 			];
 		}
 
+		// Блог – dropdown with articles
+		$blogChildren = $this->getBlogArticles();
+		$result[] = [
+			'key'         => self::SUPER_BLOG,
+			'name'        => 'Блог',
+			'href'        => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language')),
+			'children'    => $blogChildren,
+			'no_dropdown' => empty($blogChildren),
+		];
+
+		// Знижки – no dropdown
+		$result[] = [
+			'key'         => self::SUPER_ZNIZHKY,
+			'name'        => 'Знижки',
+			'href'        => $this->url->link('product/special', 'language=' . $this->config->get('config_language')),
+			'children'    => [],
+			'no_dropdown' => true,
+		];
+
 		return $result;
 	}
 
-	/**
-	 * Collect all categories (top-level + children) as flat list with href.
-	 *
-	 * @return array<int, array{category_id: int, name: string, href: string}>
-	 */
+	private function getBlogArticles(): array {
+		$this->load->model('cms/article');
+		$filter_data = [
+			'sort'  => 'date_added',
+			'order' => 'DESC',
+			'start' => 0,
+			'limit' => 15,
+		];
+		$results = $this->model_cms_article->getArticles($filter_data);
+		$children = [];
+		foreach ($results as $row) {
+			$children[] = [
+				'category_id' => 0,
+				'name'        => $row['name'],
+				'href'        => $this->url->link('cms/blog.info', 'language=' . $this->config->get('config_language') . '&article_id=' . $row['article_id']),
+			];
+		}
+		return $children;
+	}
+
 	private function collectAllCategories(): array {
 		$out = [];
 		$top = $this->model_catalog_category->getCategories(0);
@@ -236,9 +187,6 @@ class Menu extends \Opencart\System\Engine\Controller {
 		return $children[0]['href'] ?? null;
 	}
 
-	/**
-	 * Find category href by name containing keyword (e.g. "супутні" for Супутні товари).
-	 */
 	private function findCategoryHrefByName(array $categories, string $keyword): ?string {
 		$kw = mb_strtolower($keyword);
 		foreach ($categories as $cat) {
