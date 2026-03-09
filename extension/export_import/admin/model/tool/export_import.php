@@ -5112,12 +5112,39 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		// Also include filter groups and filters from the FilterGroups and Filters worksheets in the import file,
+		// so ProductFilters and CategoryFilters can reference them (FilterGroups/Filters are imported later in the upload order)
+		if ($export_import_settings_use_filter_group_id && $export_import_settings_use_filter_id) {
+			$fg_data = $reader->getSheetByName( 'FilterGroups' );
+			$f_data = $reader->getSheetByName( 'Filters' );
+			if ($fg_data != null && $f_data != null) {
+				for ($i=1; $i<$fg_data->getHighestRow(); $i+=1) {
+					$filter_group_id = trim($this->getCell($fg_data, $i, 1));
+					if ($filter_group_id != '' && $this->isInteger($filter_group_id)) {
+						if (!isset($filter_groups[$filter_group_id])) {
+							$filter_groups[$filter_group_id] = array();
+						}
+					}
+				}
+				for ($i=1; $i<$f_data->getHighestRow(); $i+=1) {
+					$filter_id = trim($this->getCell($f_data, $i, 1));
+					$filter_group_id = trim($this->getCell($f_data, $i, 2));
+					if ($filter_id != '' && $filter_group_id != '' && $this->isInteger($filter_group_id) && $this->isInteger($filter_id)) {
+						if (!isset($filter_groups[$filter_group_id])) {
+							$filter_groups[$filter_group_id] = array();
+						}
+						$filter_groups[$filter_group_id][$filter_id] = true;
+					}
+				}
+			}
+		}
+
 		// only existing filter_groups and filters can be used in the 'ProductFilters' and 'CategoryFilters' worksheets
 		$worksheet_names = array('ProductFilters','CategoryFilters');
 		foreach ($worksheet_names as $worksheet_name) {
-			$data = $reader->getSheetByName( 'ProductFilters' );
+			$data = $reader->getSheetByName( $worksheet_name );
 			if ($data==null) {
-				return $ok;
+				continue;
 			}
 			$has_missing_filter_groups = false;
 			$has_missing_filters = false;
@@ -5991,6 +6018,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$available_category_ids = array();
 			$available_customer_ids = array();
 			$this->uploadCategories( $reader, $incremental, $available_category_ids );
+			$this->uploadFilterGroups( $reader, $incremental );
+			$this->uploadFilters( $reader, $incremental );
 			$this->uploadCategoryFilters( $reader, $incremental, $available_category_ids );
 			$this->uploadCategorySEOKeywords( $reader, $incremental, $available_category_ids );
 			$this->uploadProducts( $reader, $incremental, $available_product_ids );
@@ -6012,8 +6041,6 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$this->uploadOptionValues( $reader, $incremental );
 			$this->uploadAttributeGroups( $reader, $incremental );
 			$this->uploadAttributes( $reader, $incremental );
-			$this->uploadFilterGroups( $reader, $incremental );
-			$this->uploadFilters( $reader, $incremental );
 			$this->uploadCustomers( $reader, $incremental, $available_customer_ids );
 			$this->uploadAddresses( $reader, $incremental, $available_customer_ids );
 			return true;
