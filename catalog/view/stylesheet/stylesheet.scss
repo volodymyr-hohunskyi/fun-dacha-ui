@@ -61,6 +61,11 @@ h1 {
   letter-spacing: -0.5px;
 }
 
+/* Category page - smaller page title */
+#product-category h1 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+
 h2, h3 {
   font-size: var(--size-subheadline);
   line-height: var(--line-height-subheadline);
@@ -1034,8 +1039,12 @@ footer.freshgo-footer {
 
 /* Category filter widget - left sidebar on product list */
 .category-filter-widget {
+  /* Filter header ("Фільтр") - black */
+  > div:first-child h4 { color: #000 !important; font-size: 0.95rem; }
+  /* Section headers (Колір, Вирощування...) - black */
   .accordion-button {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    color: #000 !important;
     &:focus { box-shadow: none; }
     &::after { margin-left: auto; }
   }
@@ -1046,14 +1055,16 @@ footer.freshgo-footer {
     background: var(--bs-tertiary-bg);
     border-color: var(--bs-border-color) !important;
   }
+  /* Filter items - black by default, green when selected/hover */
+  .filter-group li a,
+  .accordion-body a { color: #000; }
+  .accordion-body a:hover,
+  a:hover .filter-checkbox { color: var(--color-primary); }
   a:hover .filter-checkbox {
     border-color: var(--color-primary) !important;
     background: rgba(var(--bs-primary-rgb), 0.1);
   }
-  .filter-group li a,
-  .accordion-body a { color: inherit; }
-  .filter-group li a:hover,
-  .accordion-body a:hover { color: var(--color-primary); }
+  .accordion-body a.filter-checked { color: var(--color-primary); }
 }
 
 /* Theme Custom CSS */

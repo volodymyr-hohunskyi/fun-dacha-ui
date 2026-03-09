@@ -3,7 +3,7 @@
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h4 class="h6 mb-0">{{ text_filter }}</h4>
     {% if filter_reset_href %}
-    <a href="{{ filter_reset_href }}" class="btn btn-sm btn-outline-secondary">{{ text_filter_reset }}</a>
+    <a href="{{ filter_reset_href }}" class="btn btn-sm btn-primary">{{ text_filter_reset }}</a>
     {% endif %}
   </div>
   <div id="filter-accordion" class="accordion accordion-flush">
@@ -19,7 +19,7 @@
             <ul class="list-unstyled mb-0">
               {% for filter in group.filters %}
                 <li class="mb-1">
-                  <a href="{{ filter.href }}" class="text-decoration-none d-flex align-items-center">
+                  <a href="{{ filter.href }}" class="text-decoration-none d-flex align-items-center{% if filter.checked %} filter-checked{% endif %}">
                     <span class="filter-checkbox me-2 d-inline-flex align-items-center justify-content-center border" style="width:18px;height:18px;">
                       {% if filter.checked %}
                         <i class="fa-solid fa-check fa-sm text-primary"></i>
