@@ -1066,6 +1066,14 @@ footer.freshgo-footer {
 #common-home {
   overflow-x: hidden;
 }
+/* Hero and About Us - constrain to match Popular Crops / other sections width */
+#common-home .hero-banner,
+#common-home .why-our-seeds-section {
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
 #common-home #content {
   padding-left: 0;
   padding-right: 0;
