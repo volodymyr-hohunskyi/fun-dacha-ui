@@ -22,7 +22,7 @@ class WhyOurSeeds extends \Opencart\System\Engine\Controller {
 		$data['library_href'] = $this->url->link('cms/blog', 'language=' . $this->config->get('config_language'));
 		$data['text_library'] = $this->language->get('text_library');
 
-		$image_path = 'catalog/about-seeds.jpg';
+		$image_path = 'catalog/seeds.jpg';
 		if (is_file(DIR_IMAGE . $image_path)) {
 			$data['image'] = $this->model_tool_image->resize($image_path, 400, 300);
 		} else {
