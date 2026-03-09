@@ -280,7 +280,8 @@ Add these to `FILTER_VALUE_TAXONOMY` and `ATTRIBUTE_DEFINITIONS` as needed.
 | `shared/data/normalize_flat_attributes.py` | Main normalization script for flat ProductAttributes |
 | `shared/data/create_sample_import.py` | Creates sample `products_import.xlsx` |
 | `shared/data/build_attribute_workbook.py` | Generates AttributeGroups + Attributes for OpenCart |
-| `shared/data/products_import.xlsx` | Source (create via create_sample_import or use your own) |
+| `shared/data/products_import.xlsx` | Source (your real data with Products, Categories, etc.) |
+| `shared/data/products_import_sample.xlsx` | Sample (created by create_sample_import.py for testing only) |
 | `shared/data/products_import_normalized.xlsx` | Output: NormalizedAttributes, ProductAttributes, ProductFilters, FilterGroups, Filters |
 
 ---
@@ -288,10 +289,10 @@ Add these to `FILTER_VALUE_TAXONOMY` and `ATTRIBUTE_DEFINITIONS` as needed.
 ## Quick Start
 
 ```bash
-# 1. Create sample (or use your products_import.xlsx)
+# 1. (Optional) Create sample for testing only → products_import_sample.xlsx
 python3 shared/data/create_sample_import.py
 
-# 2. Normalize
+# 2. Normalize your products_import.xlsx (or use --input for sample/custom path)
 python3 shared/data/normalize_flat_attributes.py
 
 # 3. Build attribute taxonomy (if needed)

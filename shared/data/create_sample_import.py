@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """
-Create a sample products_import.xlsx with flat ProductAttributes for testing normalization.
+Create a sample products_import_sample.xlsx with flat ProductAttributes for testing normalization.
+
+Does NOT overwrite products_import.xlsx (which may contain real Products, Categories, etc.).
 
 Usage:
     python3 shared/data/create_sample_import.py
@@ -12,7 +14,7 @@ from pathlib import Path
 
 from openpyxl import Workbook
 
-OUTPUT_PATH = Path(__file__).resolve().with_name("products_import.xlsx")
+OUTPUT_PATH = Path(__file__).resolve().with_name("products_import_sample.xlsx")
 
 SAMPLE_DATA = [
     (101, "Колір: Жовтий, Оранжевий"),
@@ -31,7 +33,7 @@ def main() -> None:
     for pid, attrs in SAMPLE_DATA:
         ws.append([pid, f"Product {pid}", f"MOD-{pid}", attrs])
     wb.save(OUTPUT_PATH)
-    print(f"Created sample file: {OUTPUT_PATH}")
+    print(f"Created sample file: {OUTPUT_PATH} (use --input {OUTPUT_PATH} for normalize_flat_attributes.py)")
 
 
 if __name__ == "__main__":
