@@ -85,7 +85,10 @@ class ColumnRight extends \Opencart\System\Engine\Controller {
 
 		foreach ($modules as $module) {
 			$part = explode('.', $module['code']);
-
+			// On home: skip manufacturer (shown once via home_brands in content_top)
+			if ($route == 'common/home' && ($part[1] ?? '') === 'manufacturer') {
+				continue;
+			}
 			if (isset($part[1]) && $this->config->get('module_' . $part[1] . '_status')) {
 				$module_data = $this->load->controller('extension/' . $part[0] . '/module/' . $part[1]);
 

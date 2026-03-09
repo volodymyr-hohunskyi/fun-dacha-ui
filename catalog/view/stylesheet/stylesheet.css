@@ -30,6 +30,13 @@
     --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 2);
   }
 }
+/* MacBook Retina 16" (~1512px) and larger - 40px vertical spacing between sections */
+@media (min-width: 1512px) {
+  :root {
+    --home-section-gap: 40px;
+    --home-section-padding-y: 40px;
+  }
+}
 
 body {
   width: 100%;
@@ -974,16 +981,11 @@ footer.freshgo-footer {
   transition: opacity 0.5s ease;
 }
 
+/* Keep bg image effect but constrain to match other sections - no viewport breakout */
 .hero-slide.hero-slide-bg-image {
   background-size: cover;
   background-position: center;
   position: relative;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  width: 100vw;
-  max-width: 100vw;
-  padding-left: calc(50vw - 50%);
-  padding-right: calc(50vw - 50%);
   min-height: 380px;
 }
 
@@ -1061,6 +1063,9 @@ footer.freshgo-footer {
 }
 
 /* Homepage - unified padding so all sections align left/right */
+#common-home {
+  overflow-x: hidden;
+}
 #common-home #content {
   padding-left: 0;
   padding-right: 0;
