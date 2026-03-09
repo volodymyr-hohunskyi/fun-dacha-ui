@@ -80,3 +80,100 @@ def build_attribute_lookup():
 
 
 ATTRIBUTE_LOOKUP = build_attribute_lookup()
+
+
+# --- Filter value taxonomies for seed e-commerce (uk-ua primary) ---
+# Each group maps to canonical filter values. Used for FilterGroups/Filters import
+# and for normalizing raw attribute text into consistent filter assignments.
+FILTER_VALUE_TAXONOMY = {
+    "Колір": [
+        "Жовтий",
+        "Оранжевий",
+        "Рожевий",
+        "Малиновий",
+        "Червоний",
+        "Коричневий",
+        "Чорний",
+        "Білий",
+        "Зелений",
+        "Фіолетовий",
+        "Різнокольоровий",
+    ],
+    "Вирощування": [
+        "Відкритий ґрунт",
+        "Теплиця",
+        "Потребує підв'язки",
+        "Підв'язка не потрібна",
+        "Контейнер",
+        "Балкон",
+    ],
+    "Ріст": [
+        "Високорослий",
+        "Розлогий",
+        "Детермінантний",
+        "Індетермінантний",
+        "Низькорослий",
+        "Середньорослий",
+    ],
+    "Стиглість": [
+        "Рання",
+        "Середньорання",
+        "Середня",
+        "Середньопізня",
+        "Пізня",
+    ],
+    "Стійкість": [
+        "До холоду",
+        "До посухи",
+        "До хвороб",
+        "До шкідників",
+    ],
+    "Форма": [
+        "Кругла",
+        "Овальна",
+        "Витягнута",
+        "Серцеподібна",
+        "Плоска",
+    ],
+    "Текстура": [
+        "Гладка",
+        "Ребриста",
+        "М'ясиста",
+    ],
+    "Особливості": [
+        "Ароматна",
+        "Солодка",
+        "Кисла",
+        "Хрустка",
+    ],
+    "Призначення": [
+        "Салати",
+        "Консервування",
+        "Сушіння",
+        "Універсальне",
+        "Свіжий вжиток",
+    ],
+    "Врожайність": [
+        "Висока",
+        "Середня",
+        "Низька",
+    ],
+}
+
+
+def normalize_filter_value(group_ua: str, raw_value: str) -> str | None:
+    """
+    Map raw attribute text to canonical taxonomy value, or return None if no match.
+    Uses case-insensitive strip and optional alias mapping.
+    """
+    raw = (raw_value or "").strip()
+    if not raw:
+        return None
+    raw_lower = raw.lower()
+    values = FILTER_VALUE_TAXONOMY.get(group_ua)
+    if not values:
+        return raw  # pass through if group unknown
+    for canon in values:
+        if canon.lower() == raw_lower:
+            return canon
+    return raw  # return as-is if not in taxonomy (allow new values)
