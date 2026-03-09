@@ -1,24 +1,32 @@
 {% if filter_groups %}
 <aside class="category-filter-widget mb-4">
   <h4 class="h6 mb-3">{{ text_filter }}</h4>
-  <div class="filter-groups">
+  <div id="filter-accordion" class="accordion accordion-flush">
     {% for group in filter_groups %}
-      <div class="filter-group mb-4">
-        <h5 class="h6 text-muted mb-2">{{ group.name }}</h5>
-        <ul class="list-unstyled mb-0">
-          {% for filter in group.filters %}
-            <li class="mb-1">
-              <a href="{{ filter.href }}" class="text-decoration-none d-flex align-items-center">
-                <span class="filter-checkbox me-2 d-inline-flex align-items-center justify-content-center border" style="width:18px;height:18px;">
-                  {% if filter.checked %}
-                    <i class="fa-solid fa-check fa-sm text-primary"></i>
-                  {% endif %}
-                </span>
-                <span>{{ filter.name }}</span>
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
+      <div class="accordion-item border-0 border-bottom">
+        <h2 class="accordion-header">
+          <button type="button" class="accordion-button py-2 px-0 bg-transparent shadow-none border-0 rounded-0 fw-semibold small{{ loop.first ? '' : ' collapsed' }}" data-bs-toggle="collapse" data-bs-target="#filter-group-{{ loop.index }}" aria-expanded="{{ loop.first ? 'true' : 'false' }}" aria-controls="filter-group-{{ loop.index }}">
+            {{ group.name }}
+          </button>
+        </h2>
+        <div id="filter-group-{{ loop.index }}" class="accordion-collapse collapse{{ loop.first ? ' show' : '' }}" data-bs-parent="#filter-accordion">
+          <div class="accordion-body pt-0 pb-2 px-0">
+            <ul class="list-unstyled mb-0">
+              {% for filter in group.filters %}
+                <li class="mb-1">
+                  <a href="{{ filter.href }}" class="text-decoration-none d-flex align-items-center">
+                    <span class="filter-checkbox me-2 d-inline-flex align-items-center justify-content-center border" style="width:18px;height:18px;">
+                      {% if filter.checked %}
+                        <i class="fa-solid fa-check fa-sm text-primary"></i>
+                      {% endif %}
+                    </span>
+                    <span>{{ filter.name }}</span>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
       </div>
     {% endfor %}
   </div>

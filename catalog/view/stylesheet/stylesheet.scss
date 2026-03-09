@@ -1034,7 +1034,12 @@ footer.freshgo-footer {
 
 /* Category filter widget - left sidebar on product list */
 .category-filter-widget {
-  .filter-group h5 { font-size: 0.9rem; font-weight: 600; }
+  .accordion-button {
+    font-size: 0.9rem;
+    &:focus { box-shadow: none; }
+    &::after { margin-left: auto; }
+  }
+  .accordion-flush .accordion-button { padding-left: 0; }
   .filter-checkbox {
     min-width: 18px;
     border-radius: 0;
@@ -1045,8 +1050,10 @@ footer.freshgo-footer {
     border-color: var(--color-primary) !important;
     background: rgba(var(--bs-primary-rgb), 0.1);
   }
-  .filter-group li a { color: inherit; }
-  .filter-group li a:hover { color: var(--color-primary); }
+  .filter-group li a,
+  .accordion-body a { color: inherit; }
+  .filter-group li a:hover,
+  .accordion-body a:hover { color: var(--color-primary); }
 }
 
 /* Theme Custom CSS */
