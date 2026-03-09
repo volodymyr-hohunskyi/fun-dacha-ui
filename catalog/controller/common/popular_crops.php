@@ -56,9 +56,9 @@ class PopularCrops extends \Opencart\System\Engine\Controller {
 			}
 			$image = '';
 			if ($cat['image'] && is_file(DIR_IMAGE . html_entity_decode($cat['image'], ENT_QUOTES, 'UTF-8'))) {
-				$image = $this->model_tool_image->resize(html_entity_decode($cat['image'], ENT_QUOTES, 'UTF-8'), 400, 300);
+				$image = $this->model_tool_image->resize(html_entity_decode($cat['image'], ENT_QUOTES, 'UTF-8'), 600, 450);
 			} else {
-				$image = $this->model_tool_image->resize('placeholder.png', 400, 300);
+				$image = $this->model_tool_image->resize('placeholder.png', 600, 450);
 			}
 			$data['categories'][] = [
 				'category_id'  => $cat['category_id'],

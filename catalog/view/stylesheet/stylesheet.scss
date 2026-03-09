@@ -1049,19 +1049,27 @@ footer.freshgo-footer {
   height: 100%;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .popular-crop-image {
+  width: 100%;
   aspect-ratio: 4/3;
   overflow: hidden;
   border-radius: 10px;
-  background: var(--color-neutral-bg, #f8f9fa);
+  background: transparent;
 }
 
 .popular-crop-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.popular-crop-title,
+.popular-crop-desc {
+  width: 100%;
 }
 
 .popular-crop-title {
