@@ -5,12 +5,14 @@
     <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-4">
       {% for category in categories %}
         <div class="col">
-          <a href="{{ category.href }}" class="popular-crop-card text-center text-decoration-none d-block">
-            <div class="popular-crop-image mb-2">
+          <div class="popular-crop-card">
+            <div class="popular-crop-image mb-3">
               <img src="{{ category.image }}" alt="{{ category.name }}" class="img-fluid"/>
             </div>
-            <span class="popular-crop-name">{{ category.name }}</span>
-          </a>
+            <h3 class="popular-crop-title h6 mb-2">{{ category.name }}</h3>
+            <p class="popular-crop-desc text-muted small mb-3">{{ category.description }}</p>
+            <a href="{{ category.href }}" class="btn btn-outline-primary btn-sm">{{ button_shop }}</a>
+          </div>
         </div>
       {% endfor %}
     </div>

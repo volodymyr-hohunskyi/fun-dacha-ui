@@ -996,7 +996,7 @@ footer.freshgo-footer {
   display: block;
 }
 
-/* Popular Crops - larger cards, product-card-like width */
+/* Popular Crops - image, title, description, SHOP NOW */
 .popular-crops-section .popular-crops-title {
   font-size: 1.125rem;
   font-weight: 700;
@@ -1004,24 +1004,17 @@ footer.freshgo-footer {
 }
 
 .popular-crop-card {
-  padding: 1rem;
-  border-radius: 10px;
-  transition: background-color 0.2s;
-  display: block;
-}
-
-.popular-crop-card:hover {
-  background-color: var(--color-neutral-bg);
-}
-
-.popular-crop-card:hover .popular-crop-name {
-  color: var(--color-primary);
+  padding: 0;
+  text-align: left;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .popular-crop-image {
-  aspect-ratio: 1;
+  aspect-ratio: 4/3;
   overflow: hidden;
-  border-radius: 50%;
+  border-radius: 10px;
   background: var(--color-neutral-bg, #f8f9fa);
 }
 
@@ -1031,12 +1024,14 @@ footer.freshgo-footer {
   object-fit: cover;
 }
 
-.popular-crop-name {
-  font-size: 1rem;
+.popular-crop-title {
   font-weight: 600;
   color: var(--color-primary-dark);
-  display: block;
-  margin-top: 0.5rem;
+}
+
+.popular-crop-desc {
+  flex: 1;
+  line-height: 1.5;
 }
 
 /* Why Our Seeds - homepage trust block */
