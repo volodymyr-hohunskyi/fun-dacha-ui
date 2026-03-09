@@ -112,14 +112,15 @@ class Menu extends \Opencart\System\Engine\Controller {
 			];
 		}
 
-		// Блог – dropdown with articles
-		$blogChildren = $this->getBlogArticles();
+		// Блог – dropdown: topics with their articles
+		$blogChildren = $this->getBlogTopicsWithArticles();
 		$result[] = [
 			'key'         => self::SUPER_BLOG,
 			'name'        => 'Блог',
 			'href'        => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language')),
 			'children'    => $blogChildren,
 			'no_dropdown' => empty($blogChildren),
+			'is_nested'   => true,
 		];
 
 		// Знижки – no dropdown
@@ -134,21 +135,31 @@ class Menu extends \Opencart\System\Engine\Controller {
 		return $result;
 	}
 
-	private function getBlogArticles(): array {
+	private function getBlogTopicsWithArticles(): array {
+		$this->load->model('cms/topic');
 		$this->load->model('cms/article');
-		$filter_data = [
-			'sort'  => 'date_added',
-			'order' => 'DESC',
-			'start' => 0,
-			'limit' => 15,
-		];
-		$results = $this->model_cms_article->getArticles($filter_data);
+		$topics = $this->model_cms_topic->getTopics();
 		$children = [];
-		foreach ($results as $row) {
+		foreach ($topics as $topic) {
+			$topic_id = (int)$topic['topic_id'];
+			$articles = $this->model_cms_article->getArticles([
+				'filter_topic_id' => $topic_id,
+				'sort'            => 'date_added',
+				'order'           => 'DESC',
+				'start'           => 0,
+				'limit'           => 10,
+			]);
+			$articleItems = [];
+			foreach ($articles as $row) {
+				$articleItems[] = [
+					'name' => $row['name'],
+					'href' => $this->url->link('cms/blog.info', 'language=' . $this->config->get('config_language') . '&article_id=' . $row['article_id']),
+				];
+			}
 			$children[] = [
-				'category_id' => 0,
-				'name'        => $row['name'],
-				'href'        => $this->url->link('cms/blog.info', 'language=' . $this->config->get('config_language') . '&article_id=' . $row['article_id']),
+				'name'     => $topic['name'],
+				'href'     => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&topic_id=' . $topic_id),
+				'children' => $articleItems,
 			];
 		}
 		return $children;

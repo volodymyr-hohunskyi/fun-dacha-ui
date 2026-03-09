@@ -6,10 +6,21 @@
         {% for super in super_categories %}
           {% if super.children and not super.no_dropdown %}
             <li class="nav-item dropdown">
-              <a href="{{ super.href }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false">{{ super.name }} <i class="fa-solid fa-chevron-down ms-1"></i></a>
+              <a href="{{ super.href }}" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="{{ super.is_nested ? 'outside' : 'true' }}" role="button" aria-expanded="false">{{ super.name }} <i class="fa-solid fa-chevron-down ms-1"></i></a>
               <ul class="dropdown-menu">
                 {% for child in super.children %}
-                  <li><a href="{{ child.href }}" class="dropdown-item">{{ child.name }}</a></li>
+                  {% if child.children and super.is_nested %}
+                    <li class="dropend">
+                      <a href="{{ child.href }}" class="dropdown-item dropdown-toggle" data-bs-toggle="dropdown" data-bs-auto-close="outside">{{ child.name }}</a>
+                      <ul class="dropdown-menu dropdown-menu-end">
+                        {% for article in child.children %}
+                          <li><a href="{{ article.href }}" class="dropdown-item">{{ article.name }}</a></li>
+                        {% endfor %}
+                      </ul>
+                    </li>
+                  {% else %}
+                    <li><a href="{{ child.href }}" class="dropdown-item">{{ child.name }}</a></li>
+                  {% endif %}
                 {% endfor %}
               </ul>
             </li>

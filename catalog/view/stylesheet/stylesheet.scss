@@ -13,8 +13,8 @@
   --weight-heading-bold: 700;
   --weight-heading-semibold: 600;
   --weight-body-regular: 400;
-  --size-h1: 56px;
-  --size-subheadline: 20px;
+  --size-h1: 1.75rem;
+  --size-subheadline: 1.125rem;
   --size-button: 16px;
   --size-body: 14px;
   --line-height-h1: 1.1;
@@ -56,20 +56,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-  font-size: clamp(2rem, 5vw, var(--size-h1));
+  font-size: clamp(1.25rem, 3vw, var(--size-h1));
   line-height: var(--line-height-h1);
   letter-spacing: -0.5px;
-}
-
-/* Category page - smaller page title */
-#product-category h1 {
-  font-size: clamp(1.25rem, 3vw, 1.75rem);
 }
 
 h2, h3 {
   font-size: var(--size-subheadline);
   line-height: var(--line-height-subheadline);
   letter-spacing: 0.2px;
+}
+
+h4, h5, h6 {
+  font-size: 1rem;
 }
 
 legend {
@@ -964,7 +963,7 @@ footer.freshgo-footer {
 
 /* Our Category widget - homepage, below banner */
 .our-category-widget .our-category-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-primary-dark);
 }
