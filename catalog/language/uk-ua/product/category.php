@@ -1,7 +1,8 @@
 <?php
 // Text
 $_['text_refine']      = 'Уточнити пошук';
-$_['text_filter']      = 'Фільтр';
+$_['text_filter']       = 'Фільтр';
+$_['text_filter_reset'] = 'Скинути все';
 $_['text_product']     = 'Товари';
 $_['text_no_results']  = 'У цій категорії немає товарів для відображення.';
 $_['text_compare']     = 'Порівняння товарів (%s)';

@@ -1,7 +1,8 @@
 <?php
 // Texte
 $_['text_refine']      = 'Affiner la recherche';
-$_['text_filter']      = 'Filtre';
+$_['text_filter']       = 'Filtre';
+$_['text_filter_reset'] = 'Tout réinitialiser';
 $_['text_product']     = 'Produits';
 $_['text_no_results']  = 'Aucun produit à afficher dans cette catégorie.';
 $_['text_compare']     = 'Comparer les produits (%s)';

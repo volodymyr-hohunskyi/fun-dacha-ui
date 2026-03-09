@@ -1,15 +1,20 @@
 {% if filter_groups %}
 <aside class="category-filter-widget mb-4">
-  <h4 class="h6 mb-3">{{ text_filter }}</h4>
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="h6 mb-0">{{ text_filter }}</h4>
+    {% if filter_reset_href %}
+    <a href="{{ filter_reset_href }}" class="btn btn-sm btn-outline-secondary">{{ text_filter_reset }}</a>
+    {% endif %}
+  </div>
   <div id="filter-accordion" class="accordion accordion-flush">
     {% for group in filter_groups %}
       <div class="accordion-item border-0 border-bottom">
         <h2 class="accordion-header">
-          <button type="button" class="accordion-button py-2 px-0 bg-transparent shadow-none border-0 rounded-0 fw-semibold small{{ loop.first ? '' : ' collapsed' }}" data-bs-toggle="collapse" data-bs-target="#filter-group-{{ loop.index }}" aria-expanded="{{ loop.first ? 'true' : 'false' }}" aria-controls="filter-group-{{ loop.index }}">
+          <button type="button" class="accordion-button py-2 px-0 bg-transparent shadow-none border-0 rounded-0 fw-semibold small" data-bs-toggle="collapse" data-bs-target="#filter-group-{{ loop.index }}" aria-expanded="true" aria-controls="filter-group-{{ loop.index }}">
             {{ group.name }}
           </button>
         </h2>
-        <div id="filter-group-{{ loop.index }}" class="accordion-collapse collapse{{ loop.first ? ' show' : '' }}" data-bs-parent="#filter-accordion">
+        <div id="filter-group-{{ loop.index }}" class="accordion-collapse collapse show">
           <div class="accordion-body pt-0 pb-2 px-0">
             <ul class="list-unstyled mb-0">
               {% for filter in group.filters %}

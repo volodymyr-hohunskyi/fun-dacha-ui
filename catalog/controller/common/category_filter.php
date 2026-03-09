@@ -104,6 +104,19 @@ class CategoryFilter extends \Opencart\System\Engine\Controller {
 
 		$this->load->language('product/category');
 		$data['text_filter'] = $this->language->get('text_filter');
+		$data['text_filter_reset'] = $this->language->get('text_filter_reset');
+
+		$reset_href = $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . ($url_params['path'] ?: $category_id));
+		if (!empty($url_params['sort'])) {
+			$reset_href .= '&sort=' . $url_params['sort'];
+		}
+		if (!empty($url_params['order'])) {
+			$reset_href .= '&order=' . $url_params['order'];
+		}
+		if (!empty($url_params['limit'])) {
+			$reset_href .= '&limit=' . $url_params['limit'];
+		}
+		$data['filter_reset_href'] = !empty($current_filters) ? $reset_href : '';
 
 		return $this->load->view('common/category_filter', $data);
 	}
