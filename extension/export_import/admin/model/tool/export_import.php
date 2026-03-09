@@ -2340,7 +2340,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$language_id = $language['language_id'];
 			$text = isset($texts[$language_code]) ? $this->db->escape($texts[$language_code]) : '';
 			$sql  = "INSERT INTO `".DB_PREFIX."product_attribute` (`product_id`, `attribute_id`, `language_id`, `text`) VALUES ";
-			$sql .= "( $product_id, $attribute_id, $language_id, '$text' );";
+			$sql .= "( $product_id, $attribute_id, $language_id, '$text' ) ";
+			$sql .= "ON DUPLICATE KEY UPDATE `text` = '$text'";
 			$this->db->query( $sql );
 		}
 	}
@@ -5114,10 +5115,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 		// Also include filter groups and filters from the FilterGroups and Filters worksheets in the import file,
 		// so ProductFilters and CategoryFilters can reference them (FilterGroups/Filters are imported later in the upload order)
-		if ($export_import_settings_use_filter_group_id && $export_import_settings_use_filter_id) {
+		if ($export_import_settings_use_filter_group_id) {
 			$fg_data = $reader->getSheetByName( 'FilterGroups' );
 			$f_data = $reader->getSheetByName( 'Filters' );
-			if ($fg_data != null && $f_data != null) {
+			if ($fg_data != null) {
 				for ($i=1; $i<$fg_data->getHighestRow(); $i+=1) {
 					$filter_group_id = trim($this->getCell($fg_data, $i, 1));
 					if ($filter_group_id != '' && $this->isInteger($filter_group_id)) {
@@ -5126,14 +5127,29 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						}
 					}
 				}
+			}
+			if ($f_data != null) {
+				$f_max_col = ($f_data->getHighestRow() > 0) ? \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $f_data->getHighestColumn() ) : 0;
 				for ($i=1; $i<$f_data->getHighestRow(); $i+=1) {
 					$filter_id = trim($this->getCell($f_data, $i, 1));
 					$filter_group_id = trim($this->getCell($f_data, $i, 2));
-					if ($filter_id != '' && $filter_group_id != '' && $this->isInteger($filter_group_id) && $this->isInteger($filter_id)) {
-						if (!isset($filter_groups[$filter_group_id])) {
-							$filter_groups[$filter_group_id] = array();
-						}
+					if ($filter_group_id == '' || !$this->isInteger($filter_group_id)) {
+						continue;
+					}
+					if (!isset($filter_groups[$filter_group_id])) {
+						$filter_groups[$filter_group_id] = array();
+					}
+					if ($export_import_settings_use_filter_id && $filter_id != '' && $this->isInteger($filter_id)) {
 						$filter_groups[$filter_group_id][$filter_id] = true;
+					} else {
+						// use filter name - get first name column (e.g. "name" or "name(en-gb)")
+						$j = 4;
+						if ($j <= $f_max_col) {
+							$filter_name = trim($this->getCell($f_data, $i, $j, ''));
+							if ($filter_name != '') {
+								$filter_groups[$filter_group_id][htmlspecialchars_decode($filter_name)] = true;
+							}
+						}
 					}
 				}
 			}
