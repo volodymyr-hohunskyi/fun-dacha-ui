@@ -89,13 +89,9 @@ class CategoryFilter extends \Opencart\System\Engine\Controller {
 				if (!empty($url_params['limit'])) {
 					$href .= '&limit=' . $url_params['limit'];
 				}
-				$display_name = $f['attribute_value'];
-				if (!empty($f['attribute_name'])) {
-					$display_name = $f['attribute_name'] . ': ' . $f['attribute_value'];
-				}
 				$filters[] = [
 					'attribute_id' => $f['attribute_id'],
-					'name'         => $display_name,
+					'name'         => $f['attribute_value'],
 					'href'         => $href,
 					'checked'      => $found,
 				];
