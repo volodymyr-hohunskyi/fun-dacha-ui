@@ -4,7 +4,7 @@ namespace Opencart\Catalog\Controller\Common;
  * Class Category Filter
  *
  * Filter widget for product category page. Filters are collected from product attributes.
- * AND logic for selected filters.
+ * OR logic for selected filters.
  *
  * @package Opencart\Catalog\Controller\Common
  */

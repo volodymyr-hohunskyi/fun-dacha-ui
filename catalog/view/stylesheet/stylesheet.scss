@@ -1037,6 +1037,7 @@ footer.freshgo-footer {
   .filter-group h5 { font-size: 0.9rem; font-weight: 600; }
   .filter-checkbox {
     min-width: 18px;
+    border-radius: 0;
     background: var(--bs-tertiary-bg);
     border-color: var(--bs-border-color) !important;
   }
