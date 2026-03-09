@@ -24,9 +24,9 @@ class WhyOurSeeds extends \Opencart\System\Engine\Controller {
 
 		$image_path = 'catalog/seeds.jpg';
 		if (is_file(DIR_IMAGE . $image_path)) {
-			$data['image'] = $this->model_tool_image->resize($image_path, 400, 300);
+			$data['image'] = $this->model_tool_image->resize($image_path, 550, 400);
 		} else {
-			$data['image'] = $this->model_tool_image->resize('placeholder.png', 400, 300);
+			$data['image'] = $this->model_tool_image->resize('placeholder.png', 550, 400);
 		}
 
 		return $this->load->view('common/why_our_seeds', $data);
