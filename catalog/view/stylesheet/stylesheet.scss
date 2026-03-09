@@ -25,20 +25,6 @@
   --home-section-gap: 1.5rem;
   --home-section-padding-y: 1.5rem;
   --home-heading-margin: 1rem;
-  /* Unified horizontal padding so all content aligns left/right */
-  --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
-}
-@media (min-width: 768px) {
-  :root {
-    --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 2);
-  }
-}
-/* MacBook Retina 16" (~1512px) and larger - 40px vertical spacing between sections */
-@media (min-width: 1512px) {
-  :root {
-    --home-section-gap: 40px;
-    --home-section-padding-y: 40px;
-  }
 }
 
 body {
@@ -782,11 +768,16 @@ footer.freshgo-footer {
   transition: opacity 0.5s ease;
 }
 
-/* Keep bg image effect but constrain to match other sections - no viewport breakout */
 .hero-slide.hero-slide-bg-image {
   background-size: cover;
   background-position: center;
   position: relative;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  width: 100vw;
+  max-width: 100vw;
+  padding-left: calc(50vw - 50%);
+  padding-right: calc(50vw - 50%);
   min-height: 380px;
 }
 
@@ -1009,18 +1000,7 @@ footer.freshgo-footer {
   display: block;
 }
 
-/* Homepage - consistent spacing, all sections same width */
-#common-home {
-  overflow-x: hidden;
-}
-/* Hero and About Us - constrain to match Popular Crops / other sections width */
-#common-home .hero-banner,
-#common-home .why-our-seeds-section {
-  max-width: 1320px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
-}
+/* Homepage - consistent spacing (Johnny's quality) */
 #common-home #content {
   padding-left: 0;
   padding-right: 0;
@@ -1029,11 +1009,17 @@ footer.freshgo-footer {
   margin-top: var(--home-section-gap);
 }
 #common-home .container {
-  padding-left: var(--home-content-padding-x);
-  padding-right: var(--home-content-padding-x);
+  padding-left: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
+  padding-right: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
   max-width: 1320px;
   margin-left: auto;
   margin-right: auto;
+}
+@media (min-width: 768px) {
+  #common-home .container {
+    padding-left: calc(var(--bs-gutter-x, 0.75rem) * 2);
+    padding-right: calc(var(--bs-gutter-x, 0.75rem) * 2);
+  }
 }
 #common-home section,
 #common-home .recommended-products-section,
@@ -1096,16 +1082,9 @@ footer.freshgo-footer {
   line-height: 1.5;
 }
 
-/* Why Our Seeds - homepage trust block (container already aligned via #common-home .container) */
+/* Why Our Seeds - homepage trust block */
 .why-our-seeds-section {
   background-color: var(--color-neutral-bg, #f8f9fa);
-}
-.why-our-seeds-section .col-md-4 {
-  padding-right: 1.5rem;
-}
-.why-our-seeds-section .col-md-4 img {
-  display: block;
-  width: 100%;
 }
 .why-our-seeds-section .fa-check {
   font-size: 0.9rem;
