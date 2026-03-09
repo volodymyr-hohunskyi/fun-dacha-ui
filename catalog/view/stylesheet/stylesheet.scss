@@ -837,10 +837,23 @@ footer.freshgo-footer {
   opacity: 1;
 }
 
-/* Align hero content with other sections - remove extra padding */
-#common-home .hero-content {
-  padding-left: 0;
-  padding-right: 0;
+.hero-content {
+  padding-left: 3.5rem;
+  padding-right: 3.5rem;
+}
+
+@media (min-width: 576px) {
+  .hero-content {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 992px) {
+  .hero-content {
+    padding-left: 4.5rem;
+    padding-right: 4.5rem;
+  }
 }
 
 .hero-title {
@@ -1078,6 +1091,13 @@ footer.freshgo-footer {
 /* Why Our Seeds - homepage trust block (container already aligned via #common-home .container) */
 .why-our-seeds-section {
   background-color: var(--color-neutral-bg, #f8f9fa);
+}
+.why-our-seeds-section .col-md-4 {
+  padding-right: 1.5rem;
+}
+.why-our-seeds-section .col-md-4 img {
+  display: block;
+  width: 100%;
 }
 .why-our-seeds-section .fa-check {
   font-size: 0.9rem;

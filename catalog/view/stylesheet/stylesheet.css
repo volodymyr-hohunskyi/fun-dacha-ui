@@ -1094,11 +1094,6 @@ footer.freshgo-footer {
 #common-home h2, #common-home h3, #common-home .popular-crops-title {
   margin-bottom: var(--home-heading-margin) !important;
 }
-/* Align hero content with other sections - remove extra padding on home */
-#common-home .hero-content {
-  padding-left: 0;
-  padding-right: 0;
-}
 
 .hero-title {
   font-size: clamp(1.5rem, 4vw, 2.5rem);
@@ -1255,6 +1250,21 @@ footer.freshgo-footer {
   font-weight: 600;
   color: var(--color-primary-dark);
   display: block;
+}
+
+/* Why Our Seeds - homepage trust block */
+.why-our-seeds-section {
+  background-color: var(--color-neutral-bg, #f8f9fa);
+}
+.why-our-seeds-section .col-md-4 {
+  padding-right: 1.5rem;
+}
+.why-our-seeds-section .col-md-4 img {
+  display: block;
+  width: 100%;
+}
+.why-our-seeds-section .fa-check {
+  font-size: 0.9rem;
 }
 
 /* Blog carousel - homepage */
