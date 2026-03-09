@@ -19,6 +19,16 @@
   --line-height-subheadline: 1.5;
   --line-height-button: 1.4;
   --line-height-body: 1.5;
+  /* Homepage section spacing */
+  --home-section-gap: 1.5rem;
+  --home-section-padding-y: 1.5rem;
+  --home-heading-margin: 1rem;
+  --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
+}
+@media (min-width: 768px) {
+  :root {
+    --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 2);
+  }
 }
 
 body {
@@ -1048,6 +1058,41 @@ footer.freshgo-footer {
     padding-left: 4.5rem;
     padding-right: 4.5rem;
   }
+}
+
+/* Homepage - unified padding so all sections align left/right */
+#common-home #content {
+  padding-left: 0;
+  padding-right: 0;
+}
+#common-home #content > * + * {
+  margin-top: var(--home-section-gap);
+}
+#common-home .container {
+  padding-left: var(--home-content-padding-x);
+  padding-right: var(--home-content-padding-x);
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#common-home section,
+#common-home .recommended-products-section,
+#common-home .recently-viewed-section,
+#common-home .home-brands-section {
+  padding-top: var(--home-section-padding-y);
+  padding-bottom: var(--home-section-padding-y);
+}
+#common-home section:first-of-type,
+#common-home .popular-crops-section {
+  padding-top: 2rem;
+}
+#common-home h2, #common-home h3, #common-home .popular-crops-title {
+  margin-bottom: var(--home-heading-margin) !important;
+}
+/* Align hero content with other sections - remove extra padding on home */
+#common-home .hero-content {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .hero-title {

@@ -25,6 +25,13 @@
   --home-section-gap: 1.5rem;
   --home-section-padding-y: 1.5rem;
   --home-heading-margin: 1rem;
+  /* Unified horizontal padding so all content aligns left/right */
+  --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
+}
+@media (min-width: 768px) {
+  :root {
+    --home-content-padding-x: calc(var(--bs-gutter-x, 0.75rem) * 2);
+  }
 }
 
 body {
@@ -828,23 +835,10 @@ footer.freshgo-footer {
   opacity: 1;
 }
 
-.hero-content {
-  padding-left: 3.5rem;
-  padding-right: 3.5rem;
-}
-
-@media (min-width: 576px) {
-  .hero-content {
-    padding-left: 4rem;
-    padding-right: 4rem;
-  }
-}
-
-@media (min-width: 992px) {
-  .hero-content {
-    padding-left: 4.5rem;
-    padding-right: 4.5rem;
-  }
+/* Align hero content with other sections - remove extra padding */
+#common-home .hero-content {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .hero-title {
@@ -1009,17 +1003,11 @@ footer.freshgo-footer {
   margin-top: var(--home-section-gap);
 }
 #common-home .container {
-  padding-left: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
-  padding-right: calc(var(--bs-gutter-x, 0.75rem) * 1.5);
+  padding-left: var(--home-content-padding-x);
+  padding-right: var(--home-content-padding-x);
   max-width: 1320px;
   margin-left: auto;
   margin-right: auto;
-}
-@media (min-width: 768px) {
-  #common-home .container {
-    padding-left: calc(var(--bs-gutter-x, 0.75rem) * 2);
-    padding-right: calc(var(--bs-gutter-x, 0.75rem) * 2);
-  }
 }
 #common-home section,
 #common-home .recommended-products-section,
