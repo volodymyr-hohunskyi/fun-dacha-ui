@@ -84,13 +84,13 @@ class ContentBottom extends \Opencart\System\Engine\Controller {
 		$modules = $this->model_design_layout->getModules($layout_id, 'content_bottom');
 
 		foreach ($modules as $module) {
-			// On home page: skip manufacturer (shown once in content_top via home_brands)
-			if ($route == 'common/home' && strpos($module['code'], 'manufacturer') !== false) {
+			$part = explode('.', $module['code']);
+			// On home: skip manufacturer (shown once via home_brands in content_top)
+			if ($route == 'common/home' && ($part[1] ?? '') === 'manufacturer') {
 				continue;
 			}
-			$part = explode('.', $module['code']);
-
-			if (isset($part[1]) && $this->config->get('module_' . $part[1] . '_status')) {
+			// Only add from first block when no specific instance (part[2]) - avoids duplicate when module has module_id
+			if (isset($part[1]) && !isset($part[2]) && $this->config->get('module_' . $part[1] . '_status')) {
 				$module_data = $this->load->controller('extension/' . $part[0] . '/module/' . $part[1]);
 
 				if ($module_data) {
