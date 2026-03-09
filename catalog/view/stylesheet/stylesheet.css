@@ -19,15 +19,15 @@
   --line-height-subheadline: 1.5;
   --line-height-button: 1.4;
   --line-height-body: 1.5;
-  /* Homepage: one variable for spacing between sections */
+  /* Homepage: one variable for spacing between sections, top of first, bottom of last */
   --home-section-spacing: 1.5rem;
   --home-heading-margin: 1rem;
-  /* Homepage: left/right padding for all sections - width is fluid */
-  --home-content-padding-x: 1.25rem;
+  /* Homepage: left/right padding for all sections (half of previous) */
+  --home-content-padding-x: 0.625rem;
 }
 @media (min-width: 768px) {
   :root {
-    --home-content-padding-x: 1.5rem;
+    --home-content-padding-x: 0.75rem;
   }
 }
 
@@ -1227,6 +1227,37 @@ footer.freshgo-footer {
 }
 .why-our-seeds-section .fa-check {
   font-size: 0.9rem;
+}
+
+/* Homepage - same padding top, between sections, and bottom */
+#common-home #content {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: var(--home-section-spacing);
+  padding-bottom: var(--home-section-spacing);
+}
+#common-home #content > * + * {
+  margin-top: var(--home-section-spacing);
+}
+#common-home section:first-of-type,
+#common-home .popular-crops-section {
+  padding-top: var(--home-section-spacing);
+}
+#common-home section,
+#common-home .recommended-products-section,
+#common-home .recently-viewed-section,
+#common-home .home-brands-section {
+  padding-top: var(--home-section-spacing);
+  padding-bottom: var(--home-section-spacing);
+  margin-bottom: 0 !important; /* override mb-5 from templates */
+}
+#common-home .blog-carousel-section,
+#common-home .home-recommended-wrapper,
+#common-home .home-recently-viewed-wrapper {
+  margin-bottom: 0 !important;
+}
+#common-home h2, #common-home h3, #common-home .popular-crops-title {
+  margin-bottom: var(--home-heading-margin) !important;
 }
 
 /* All homepage sections - same left/right padding, width is fluid */
