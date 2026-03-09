@@ -996,6 +996,49 @@ footer.freshgo-footer {
   display: block;
 }
 
+/* Popular Crops - larger cards, product-card-like width */
+.popular-crops-section .popular-crops-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.popular-crop-card {
+  padding: 1rem;
+  border-radius: 10px;
+  transition: background-color 0.2s;
+  display: block;
+}
+
+.popular-crop-card:hover {
+  background-color: var(--color-neutral-bg);
+}
+
+.popular-crop-card:hover .popular-crop-name {
+  color: var(--color-primary);
+}
+
+.popular-crop-image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--color-neutral-bg, #f8f9fa);
+}
+
+.popular-crop-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.popular-crop-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  display: block;
+  margin-top: 0.5rem;
+}
+
 /* Why Our Seeds - homepage trust block */
 .why-our-seeds-section {
   background-color: var(--color-neutral-bg, #f8f9fa);
