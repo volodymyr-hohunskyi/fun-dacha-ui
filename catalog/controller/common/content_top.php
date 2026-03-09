@@ -112,12 +112,19 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		// On home page: hero banner first, then Our Category, then blog carousel, then layout modules (banner skipped above)
+		// On home page: fixed structure (ignores layout modules for content_top)
 		if ($route == 'common/home') {
-			$hero_banner = $this->load->controller('common/hero_banner');
-			$our_category = $this->load->controller('common/our_category');
-			$blog_carousel = $this->load->controller('common/blog_carousel');
-			$data['modules'] = array_merge([$hero_banner, $our_category, $blog_carousel], $data['modules']);
+			$home_modules = [
+				$this->load->controller('common/hero_banner'),
+				$this->load->controller('common/popular_crops'),
+				$this->load->controller('common/featured_seeds'),
+				$this->load->controller('common/why_our_seeds'),
+				$this->load->controller('common/blog_carousel'),
+				$this->load->controller('common/home_promotions'),
+				$this->load->controller('common/home_recently_viewed'),
+				$this->load->controller('common/home_brands'),
+			];
+			$data['modules'] = array_filter($home_modules);
 		}
 
 		return $this->load->view('common/content_top', $data);

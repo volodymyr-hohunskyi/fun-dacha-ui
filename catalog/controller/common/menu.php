@@ -112,15 +112,15 @@ class Menu extends \Opencart\System\Engine\Controller {
 			];
 		}
 
-		// Блог – dropdown: topics with their articles
-		$blogChildren = $this->getBlogTopicsWithArticles();
+		// Блог – dropdown: topics only, main link clickable
+		$blogChildren = $this->getBlogTopics();
 		$result[] = [
-			'key'         => self::SUPER_BLOG,
-			'name'        => 'Блог',
-			'href'        => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language')),
-			'children'    => $blogChildren,
-			'no_dropdown' => empty($blogChildren),
-			'is_nested'   => true,
+			'key'            => self::SUPER_BLOG,
+			'name'           => 'Блог',
+			'href'           => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language')),
+			'children'       => $blogChildren,
+			'no_dropdown'    => empty($blogChildren),
+			'link_clickable' => true,
 		];
 
 		// Знижки – no dropdown
@@ -135,31 +135,14 @@ class Menu extends \Opencart\System\Engine\Controller {
 		return $result;
 	}
 
-	private function getBlogTopicsWithArticles(): array {
+	private function getBlogTopics(): array {
 		$this->load->model('cms/topic');
-		$this->load->model('cms/article');
 		$topics = $this->model_cms_topic->getTopics();
 		$children = [];
 		foreach ($topics as $topic) {
-			$topic_id = (int)$topic['topic_id'];
-			$articles = $this->model_cms_article->getArticles([
-				'filter_topic_id' => $topic_id,
-				'sort'            => 'date_added',
-				'order'           => 'DESC',
-				'start'           => 0,
-				'limit'           => 10,
-			]);
-			$articleItems = [];
-			foreach ($articles as $row) {
-				$articleItems[] = [
-					'name' => $row['name'],
-					'href' => $this->url->link('cms/blog.info', 'language=' . $this->config->get('config_language') . '&article_id=' . $row['article_id']),
-				];
-			}
 			$children[] = [
-				'name'     => $topic['name'],
-				'href'     => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&topic_id=' . $topic_id),
-				'children' => $articleItems,
+				'name' => $topic['name'],
+				'href' => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&topic_id=' . $topic['topic_id']),
 			];
 		}
 		return $children;

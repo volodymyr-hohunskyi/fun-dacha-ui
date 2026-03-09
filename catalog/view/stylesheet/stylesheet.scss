@@ -996,6 +996,14 @@ footer.freshgo-footer {
   display: block;
 }
 
+/* Why Our Seeds - homepage trust block */
+.why-our-seeds-section {
+  background-color: var(--color-neutral-bg, #f8f9fa);
+}
+.why-our-seeds-section .fa-check {
+  font-size: 0.9rem;
+}
+
 /* Blog carousel - homepage */
 /* Remove border/shadow from all wrappers - only individual cards should have them */
 .blog-carousel-section,
