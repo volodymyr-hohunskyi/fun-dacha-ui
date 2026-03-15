@@ -1052,6 +1052,9 @@ footer.freshgo-footer {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
+#common-home .home-recently-viewed-wrapper .recently-viewed-section {
+  padding-top: 0 !important;
+}
 /* Remove gap above Наші партнери - higher specificity to override #content > * + * */
 #common-home #content > .home-brands-section {
   margin-top: 0 !important;
