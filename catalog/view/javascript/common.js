@@ -392,38 +392,27 @@ $(document).ready(function() {
         $('#form-language').submit();
     });
 
-    // Product List
-    $('#button-list').on('click', function() {
-        var element = this;
-
-        $('#product-list').attr('class', 'row row-cols-1 product-list');
-
-        $('#button-grid').removeClass('active');
-        $('#button-list').addClass('active');
-
-        localStorage.setItem('display', 'list');
-    });
-
-    // Product Grid
-    $('#button-grid').on('click', function() {
-        var element = this;
-
-        // What a shame bootstrap does not take into account dynamically loaded columns
-        $('#product-list').attr('class', 'row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3');
-
-        $('#button-list').removeClass('active');
-        $('#button-grid').addClass('active');
-
-        localStorage.setItem('display', 'grid');
-    });
-
-    // Local Storage
-    if (localStorage.getItem('display') == 'list') {
-        $('#product-list').attr('class', 'row row-cols-1 product-list');
-        $('#button-list').addClass('active');
-    } else {
-        $('#product-list').attr('class', 'row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3');
-        $('#button-grid').addClass('active');
+    // Product List/Grid toggle - only when buttons exist (list view removed, always grid)
+    if ($('#button-list').length && $('#button-grid').length) {
+        $('#button-list').on('click', function() {
+            $('#product-list').attr('class', 'row row-cols-1 product-list');
+            $('#button-grid').removeClass('active');
+            $('#button-list').addClass('active');
+            localStorage.setItem('display', 'list');
+        });
+        $('#button-grid').on('click', function() {
+            $('#product-list').attr('class', 'row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3');
+            $('#button-list').removeClass('active');
+            $('#button-grid').addClass('active');
+            localStorage.setItem('display', 'grid');
+        });
+        if (localStorage.getItem('display') == 'list') {
+            $('#product-list').attr('class', 'row row-cols-1 product-list');
+            $('#button-list').addClass('active');
+        } else {
+            $('#product-list').attr('class', 'row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-3');
+            $('#button-grid').addClass('active');
+        }
     }
 
     /* Agree to Terms */

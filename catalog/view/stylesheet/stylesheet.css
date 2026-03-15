@@ -1,3 +1,4 @@
+@charset "UTF-8";
 /* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
 :root {
   --color-primary: #7AB80F;
@@ -22,15 +23,15 @@
   /* Homepage: one variable for spacing between sections, top of first, bottom of last */
   --home-section-spacing: 1.5rem;
   --home-heading-margin: 1rem;
-  /* Homepage: left/right padding for all sections (half of previous) */
+  /* Homepage: left/right padding for all sections - width is fluid (half of previous) */
   --home-content-padding-x: 0.625rem;
 }
+
 @media (min-width: 768px) {
   :root {
     --home-content-padding-x: 0.75rem;
   }
 }
-
 body {
   width: 100%;
   min-height: 100%;
@@ -43,10 +44,10 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: var(--weight-heading-bold);
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
 
-/* Section headings & card titles - force brand color (Recently viewed, product cards, etc.) */
+/* Section headings & card titles - black for consistency */
 .recently-viewed-section h3,
 .product-thumb .description h4,
 .product-thumb .description h4 a,
@@ -54,7 +55,7 @@ h1, h2, h3, h4, h5, h6 {
 .card-title a,
 .blog-thumb h4,
 .blog-thumb h4 a {
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
 
 .recently-viewed-section h3 a:hover,
@@ -74,6 +75,10 @@ h2, h3 {
   font-size: var(--size-subheadline);
   line-height: var(--line-height-subheadline);
   letter-spacing: 0.2px;
+}
+
+h4, h5, h6 {
+  font-size: 1rem;
 }
 
 legend {
@@ -387,17 +392,18 @@ button:focus {
   color: var(--color-white) !important;
 }
 
-/* container */
 /* container - flex layout so footer sits below content, no overlap */
 html {
   height: 100%;
 }
+
 #container {
   width: 100%;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
 main {
   flex: 1 0 auto;
   min-height: 0;
@@ -409,6 +415,7 @@ main {
   padding-bottom: 2rem;
   padding-top: 0;
 }
+
 #alert {
   z-index: 9999;
   position: fixed;
@@ -524,7 +531,7 @@ main {
 .freshgo-header-nav .dropdown-menu {
   border-radius: 0 0 10px 10px;
   border: 1px solid #eee;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 @media (min-width: 992px) {
@@ -532,7 +539,6 @@ main {
     display: block;
   }
 }
-
 /* logo */
 #logo {
   text-align: center;
@@ -548,7 +554,6 @@ main {
     text-align: left;
   }
 }
-
 /* search - FreshGo: 45px height, 10px right radius on button */
 #search {
   margin-bottom: 10px;
@@ -988,10 +993,10 @@ footer.freshgo-footer {
 }
 
 .hero-slide-bg-image::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.6) 50%, transparent 70%);
+  background: linear-gradient(to right, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.6) 50%, transparent 70%);
   z-index: 1;
 }
 
@@ -1031,7 +1036,6 @@ footer.freshgo-footer {
     transform: translateX(0);
   }
 }
-
 .hero-slide .hero-image {
   opacity: 0;
   transition: opacity 0.5s ease;
@@ -1052,14 +1056,12 @@ footer.freshgo-footer {
     padding-right: 4rem;
   }
 }
-
 @media (min-width: 992px) {
   .hero-content {
     padding-left: 4.5rem;
     padding-right: 4.5rem;
   }
 }
-
 .hero-title {
   font-size: clamp(1.5rem, 4vw, 2.5rem);
   font-weight: 700;
@@ -1114,7 +1116,7 @@ footer.freshgo-footer {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: none;
   color: #333;
   display: flex;
@@ -1134,7 +1136,7 @@ footer.freshgo-footer {
 }
 
 .hero-arrow:hover {
-  background: rgba(255,255,255,0.45);
+  background: rgba(255, 255, 255, 0.45);
   color: var(--color-primary);
 }
 
@@ -1168,7 +1170,7 @@ footer.freshgo-footer {
   border-radius: 50%;
   border: none;
   padding: 0;
-  background: rgba(0,0,0,0.2);
+  background: rgba(0, 0, 0, 0.2);
   cursor: pointer;
   transition: background 0.2s;
   box-sizing: border-box;
@@ -1179,12 +1181,12 @@ footer.freshgo-footer {
 }
 
 .hero-indicator:hover {
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 /* Our Category widget - homepage, below banner */
 .our-category-widget .our-category-title {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--color-primary-dark);
 }
@@ -1217,51 +1219,16 @@ footer.freshgo-footer {
   display: block;
 }
 
-/* Why Our Seeds - same padding as other sections */
-.why-our-seeds-section {
-  background-color: var(--color-neutral-bg, #f8f9fa);
-}
-.why-our-seeds-section .container {
-  padding-left: var(--home-content-padding-x);
-  padding-right: var(--home-content-padding-x);
-}
-.why-our-seeds-section .fa-check {
-  font-size: 0.9rem;
-}
-
-/* Homepage - same padding top, between sections, and bottom */
+/* Homepage - consistent spacing: same padding top, between sections, and bottom */
 #common-home #content {
   padding-left: 0;
   padding-right: 0;
   padding-top: var(--home-section-spacing);
   padding-bottom: var(--home-section-spacing);
 }
+
 #common-home #content > * + * {
   margin-top: var(--home-section-spacing);
-}
-#common-home section:first-of-type,
-#common-home .popular-crops-section {
-  padding-top: var(--home-section-spacing);
-}
-#common-home section,
-#common-home .recommended-products-section,
-#common-home .recently-viewed-section,
-#common-home .home-brands-section {
-  padding-top: var(--home-section-spacing);
-  padding-bottom: var(--home-section-spacing);
-  margin-bottom: 0 !important; /* override mb-5 from templates */
-}
-#common-home .blog-carousel-section,
-#common-home .home-recommended-wrapper,
-#common-home .home-recently-viewed-wrapper,
-#common-home .home-brands-section {
-  margin-bottom: 0 !important;
-}
-#common-home #content .mb-5 {
-  margin-bottom: 0 !important;
-}
-#common-home h2, #common-home h3, #common-home .popular-crops-title {
-  margin-bottom: var(--home-heading-margin) !important;
 }
 
 /* All homepage sections - same left/right padding, width is fluid */
@@ -1276,6 +1243,107 @@ footer.freshgo-footer {
   padding-right: var(--home-content-padding-x);
   max-width: none;
   width: 100%;
+}
+
+#common-home section,
+#common-home .recommended-products-section,
+#common-home .recently-viewed-section,
+#common-home .home-brands-section {
+  padding-top: var(--home-section-spacing);
+  padding-bottom: var(--home-section-spacing);
+  margin-bottom: 0 !important; /* override mb-5 from templates for consistent spacing */
+}
+
+#common-home section:first-of-type,
+#common-home .popular-crops-section {
+  padding-top: var(--home-section-spacing);
+}
+
+#common-home .blog-carousel-section,
+#common-home .home-recommended-wrapper,
+#common-home .home-recently-viewed-wrapper,
+#common-home .home-brands-section {
+  margin-bottom: 0 !important;
+}
+
+/* Remove gap above Наші партнери - higher specificity to override #content > * + * */
+#common-home #content > .home-brands-section {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+/* Override mb-5 from manufacturer, recommended, recently-viewed templates */
+#common-home #content .mb-5 {
+  margin-bottom: 0 !important;
+}
+
+#common-home h2, #common-home h3, #common-home .popular-crops-title {
+  margin-bottom: var(--home-heading-margin) !important;
+  color: #000 !important;
+}
+
+/* Popular Crops - image, title, description, SHOP NOW */
+.popular-crops-section .popular-crops-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000 !important;
+}
+
+.popular-crop-card {
+  padding: 0;
+  text-align: left;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  overflow: visible;
+}
+
+/* Bigger image, edge-to-edge - counteract col padding from g-4 so image aligns with card */
+.popular-crop-image {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 10px;
+  background: transparent;
+  margin-left: calc(-0.5 * var(--bs-gutter-x, 0.75rem));
+  margin-right: calc(-0.5 * var(--bs-gutter-x, 0.75rem));
+  width: calc(100% + var(--bs-gutter-x, 0.75rem));
+}
+
+.popular-crop-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.popular-crop-title,
+.popular-crop-desc {
+  width: 100%;
+}
+
+.popular-crop-title {
+  font-weight: 600;
+  color: #000 !important;
+}
+
+.popular-crop-desc {
+  flex: 1;
+  line-height: 1.5;
+}
+
+/* Why Our Seeds - same padding as other sections */
+.why-our-seeds-section {
+  background-color: var(--color-neutral-bg, #f8f9fa);
+}
+
+.why-our-seeds-section .container {
+  padding-left: var(--home-content-padding-x);
+  padding-right: var(--home-content-padding-x);
+}
+
+.why-our-seeds-section .fa-check {
+  font-size: 0.9rem;
 }
 
 /* Blog carousel - homepage */
@@ -1293,35 +1361,47 @@ footer.freshgo-footer {
   border: none !important;
   box-shadow: none !important;
 }
+
 .blog-carousel-section .carousel-inner,
 .blog-carousel-section .carousel-item,
 .blog-carousel-section .row {
   background-color: transparent !important;
 }
+
 .blog-carousel-section h3 {
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
+
 .blog-carousel-card {
   border: 1px solid #eee;
   border-radius: 10px;
   box-shadow: none;
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .blog-carousel-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
 }
+
 .blog-carousel-card .card-title {
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
+
 .blog-carousel-card:hover .card-title {
   color: var(--color-primary) !important;
 }
 
-/* Category filter widget - all black */
+/* Category filter widget - left sidebar on product list - all black */
+.category-filter-widget {
+  /* Filter header ("Фільтр") - black */
+}
 .category-filter-widget > div:first-child h4 {
   color: #000 !important;
   font-size: 0.95rem;
+}
+.category-filter-widget {
+  /* Section headers (Колір, Вирощування...) - black */
 }
 .category-filter-widget .accordion-button {
   font-size: 0.85rem;
@@ -1329,6 +1409,9 @@ footer.freshgo-footer {
 }
 .category-filter-widget .accordion-button:focus {
   box-shadow: none;
+}
+.category-filter-widget .accordion-button::after {
+  margin-left: auto;
 }
 .category-filter-widget .accordion-flush .accordion-button {
   padding-left: 0;
@@ -1339,6 +1422,10 @@ footer.freshgo-footer {
   background: var(--bs-tertiary-bg);
   border-color: var(--bs-border-color) !important;
 }
+.category-filter-widget {
+  /* Filter items - black */
+}
+.category-filter-widget .filter-group li a,
 .category-filter-widget .accordion-body a,
 .category-filter-widget .accordion-body a:hover,
 .category-filter-widget .accordion-body a.filter-checked {
@@ -1366,3 +1453,5 @@ footer.freshgo-footer {
   font-size: 16px;
   color: #FFFFFF;
 }
+
+/*# sourceMappingURL=stylesheet.css.map */

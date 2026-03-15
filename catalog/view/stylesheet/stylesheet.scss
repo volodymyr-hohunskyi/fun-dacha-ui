@@ -45,10 +45,10 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
   font-weight: var(--weight-heading-bold);
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
 
-/* Section headings & card titles - force brand color (Recently viewed, product cards, etc.) */
+/* Section headings & card titles - black for consistency */
 .recently-viewed-section h3,
 .product-thumb .description h4,
 .product-thumb .description h4 a,
@@ -56,7 +56,7 @@ h1, h2, h3, h4, h5, h6 {
 .card-title a,
 .blog-thumb h4,
 .blog-thumb h4 a {
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
 .recently-viewed-section h3 a:hover,
 .product-thumb .description h4 a:hover,
@@ -1047,19 +1047,25 @@ footer.freshgo-footer {
 #common-home .home-brands-section {
   margin-bottom: 0 !important;
 }
+/* Remove gap above Наші партнери - higher specificity to override #content > * + * */
+#common-home #content > .home-brands-section {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
 /* Override mb-5 from manufacturer, recommended, recently-viewed templates */
 #common-home #content .mb-5 {
   margin-bottom: 0 !important;
 }
 #common-home h2, #common-home h3, #common-home .popular-crops-title {
   margin-bottom: var(--home-heading-margin) !important;
+  color: #000 !important;
 }
 
 /* Popular Crops - image, title, description, SHOP NOW */
 .popular-crops-section .popular-crops-title {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-primary-dark);
+  color: #000 !important;
 }
 
 .popular-crop-card {
@@ -1069,14 +1075,18 @@ footer.freshgo-footer {
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow: visible;
 }
 
+/* Bigger image, edge-to-edge - counteract col padding from g-4 so image aligns with card */
 .popular-crop-image {
-  width: 100%;
-  aspect-ratio: 4/3;
+  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 10px;
   background: transparent;
+  margin-left: calc(-0.5 * var(--bs-gutter-x, 0.75rem));
+  margin-right: calc(-0.5 * var(--bs-gutter-x, 0.75rem));
+  width: calc(100% + var(--bs-gutter-x, 0.75rem));
 }
 
 .popular-crop-image img {
@@ -1093,7 +1103,7 @@ footer.freshgo-footer {
 
 .popular-crop-title {
   font-weight: 600;
-  color: var(--color-primary-dark);
+  color: #000 !important;
 }
 
 .popular-crop-desc {
@@ -1134,7 +1144,7 @@ footer.freshgo-footer {
   background-color: transparent !important;
 }
 .blog-carousel-section h3 {
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
 .blog-carousel-card {
   border: 1px solid #eee;
@@ -1147,7 +1157,7 @@ footer.freshgo-footer {
   box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
 }
 .blog-carousel-card .card-title {
-  color: var(--color-primary-dark) !important;
+  color: #000 !important;
 }
 .blog-carousel-card:hover .card-title {
   color: var(--color-primary) !important;
