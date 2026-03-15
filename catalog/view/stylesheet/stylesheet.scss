@@ -1047,6 +1047,11 @@ footer.freshgo-footer {
 #common-home .home-brands-section {
   margin-bottom: 0 !important;
 }
+/* Remove gap above Нещодавно переглянуті */
+#common-home #content > .home-recently-viewed-wrapper {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
 /* Remove gap above Наші партнери - higher specificity to override #content > * + * */
 #common-home #content > .home-brands-section {
   margin-top: 0 !important;
@@ -1078,15 +1083,13 @@ footer.freshgo-footer {
   overflow: visible;
 }
 
-/* Bigger image, edge-to-edge - counteract col padding from g-4 so image aligns with card */
+/* Image same width as button (card content) */
 .popular-crop-image {
   aspect-ratio: 1;
   overflow: hidden;
   border-radius: 10px;
   background: transparent;
-  margin-left: calc(-0.5 * var(--bs-gutter-x, 0.75rem));
-  margin-right: calc(-0.5 * var(--bs-gutter-x, 0.75rem));
-  width: calc(100% + var(--bs-gutter-x, 0.75rem));
+  width: 100%;
 }
 
 .popular-crop-image img {
