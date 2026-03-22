@@ -5,11 +5,11 @@
 ## Summary
 
 - **Replaced:** 0
-- **Not found in `shared/images/products/`:** All 115
+- **Not found in `image/catalog/products/`:** All 115
 
 ## Reason
 
-The images for these products are **not present** in `shared/images/products/`. The folder contains:
+The images for these products are **not present** in `image/catalog/products/`. The catalog contains:
 - `p401001.jpg` – `p401199.jpg` (p401 range, but your list uses p401840–p401947)
 - `p402001.jpg` – `p402197.jpg` (p402 range, but your list uses p402948–p4021127)
 
@@ -17,7 +17,7 @@ So `p401840`–`p401947` and `p402948`–`p4021127` are missing.
 
 ## What You Need to Do
 
-Add the missing image files to `shared/images/products/` using the **model ID** as filename. The xlsx now uses model name for image (catalog/products/p401840.jpg):
+Add the missing image files to `image/catalog/products/` using the **model ID** as filename. The xlsx uses model name for image (catalog/products/p401840.jpg):
 
 - `p401840.jpg` → catalog `p401840.jpg`
 - `p401846.jpg` → catalog `p401846.jpg`
@@ -168,4 +168,4 @@ python3 shared/data/replace_product_images.py
 
 The replacement script is at `shared/data/replace_product_images.py`. It:
 - Reads model→image mapping from `products_import.xlsx`
-- Copies from `shared/images/products/{model}.jpg` to `image/catalog/products/{basename}`
+- Uses `image/catalog/products/` only (no shared folder)

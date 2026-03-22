@@ -3,7 +3,6 @@
 Fix product image_name in products_import.xlsx:
 1. If current image exists in catalog -> keep
 2. If not, try catalog/products/{model}.jpg -> if exists, update image_name
-3. If shared has {model}.jpg, copy to catalog and update image_name
 
 Run: python3 shared/data/fix_product_images.py
 """
@@ -12,7 +11,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CATALOG = ROOT / "image" / "catalog" / "products"
-SHARED = ROOT / "shared" / "images" / "products"
 PRODUCTS_IMPORT = Path(__file__).resolve().parent / "products_import.xlsx"
 
 
@@ -31,7 +29,6 @@ def main():
 
     catalog_ok = 0
     fixed_by_model = []
-    fixed_by_copy = []
     still_missing = []
 
     for row_idx in range(2, ws.max_row + 1):
@@ -45,7 +42,6 @@ def main():
 
         path_orig = CATALOG / basename if basename else None
         path_model = CATALOG / f"{model}.jpg"
-        path_shared = SHARED / f"{model}.jpg"
 
         if path_orig and path_orig.exists():
             catalog_ok += 1
@@ -56,15 +52,6 @@ def main():
             new_img = f"catalog/products/{model}.jpg"
             ws.cell(row_idx, img_idx + 1).value = new_img
             fixed_by_model.append((model, basename or "?", new_img))
-            continue
-
-        if path_shared.exists():
-            import shutil
-            path_model.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(path_shared, path_model)
-            new_img = f"catalog/products/{model}.jpg"
-            ws.cell(row_idx, img_idx + 1).value = new_img
-            fixed_by_copy.append((model, basename or "?", new_img))
             continue
 
         still_missing.append((model, basename or "?"))
@@ -81,14 +68,7 @@ def main():
     if len(fixed_by_model) > 20:
         print(f"    ... and {len(fixed_by_model) - 20} more")
 
-    print("\n=== Fixed: copied from shared to catalog ===")
-    print(f"  {len(fixed_by_copy)} products")
-    for m, old, new in fixed_by_copy[:20]:
-        print(f"    {m}: copied -> {new}")
-    if len(fixed_by_copy) > 20:
-        print(f"    ... and {len(fixed_by_copy) - 20} more")
-
-    print("\n=== Still missing (no catalog nor shared image) ===")
+    print("\n=== Still missing (no catalog image) ===")
     print(f"  {len(still_missing)} products")
     for m, old in still_missing[:30]:
         print(f"    {m} (was {old})")

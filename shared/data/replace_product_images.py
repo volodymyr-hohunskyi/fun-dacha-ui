@@ -1,15 +1,12 @@
 #!/usr/bin/env python3
 """
-Replace product images from shared/images/products to image/catalog/products.
-Reads products_import.xlsx Products sheet for model->image mapping.
-Source: shared/images/products/{model}.jpg
-Dest: image/catalog/products/{basename} (from products_import image_name)
-Note: image_name now uses model as filename (catalog/products/p401840.jpg)
+Verify product images in catalog. Uses catalog only (image/catalog/products).
+Reads products_import.xlsx for model->image mapping.
+Checks that catalog/products/ has the required images.
 """
 
 from pathlib import Path
 
-SHARED_PRODUCTS = Path(__file__).resolve().parent.parent / "images" / "products"
 CATALOG_PRODUCTS = Path(__file__).resolve().parent.parent.parent / "image" / "catalog" / "products"
 PRODUCTS_IMPORT = Path(__file__).resolve().parent / "products_import.xlsx"
 
@@ -181,12 +178,9 @@ def load_products_mapping():
 
 
 def main():
-    import shutil
-
     mapping = load_products_mapping()
     # Normalize USER_MODELS (handle tuple leftovers, dedupe)
     models = list(dict.fromkeys(m[0] if isinstance(m, tuple) else m for m in USER_MODELS))
-    # Build items: for each user model, get catalog path from products_import or infer p400xxx
     items = []
     for model in models:
         catalog_path = mapping.get(model)
@@ -195,33 +189,31 @@ def main():
         catalog_path = catalog_path.replace("\\", "/")
         items.append((model, catalog_path))
 
-    CATALOG_PRODUCTS.mkdir(parents=True, exist_ok=True)
-    replaced = []
+    in_catalog = []
     not_found = []
 
     for model_id, catalog_path in items:
         basename = Path(catalog_path).name
-        # Try source as model name first, then as catalog basename
-        src = SHARED_PRODUCTS / f"{model_id}.jpg"
-        if not src.exists():
-            src = SHARED_PRODUCTS / basename
-        dest = CATALOG_PRODUCTS / basename
+        # Check catalog: model.jpg or catalog_path basename
+        p_model = CATALOG_PRODUCTS / f"{model_id}.jpg"
+        p_basename = CATALOG_PRODUCTS / basename
 
-        if src.exists():
-            shutil.copy2(src, dest)
-            replaced.append((model_id, basename))
+        if p_model.exists() or p_basename.exists():
+            in_catalog.append((model_id, basename))
         else:
             not_found.append((model_id, basename))
 
-    print("=== REPLACED ===")
-    for m, b in replaced:
+    print("=== IN CATALOG ===")
+    for m, b in in_catalog[:30]:
         print(f"  {m} -> {b}")
-    print(f"\nTotal replaced: {len(replaced)}")
+    if len(in_catalog) > 30:
+        print(f"  ... and {len(in_catalog) - 30} more")
+    print(f"\nTotal in catalog: {len(in_catalog)}")
 
-    print("\n=== NOT FOUND in shared/images/products ===")
+    print("\n=== NOT IN CATALOG ===")
     for m, b in not_found:
-        print(f"  {m} (need {m}.jpg for catalog {b})")
-    print(f"\nTotal not replaced: {len(not_found)}")
+        print(f"  {m} (need {m}.jpg for {b})")
+    print(f"\nTotal missing: {len(not_found)}")
 
 
 if __name__ == "__main__":

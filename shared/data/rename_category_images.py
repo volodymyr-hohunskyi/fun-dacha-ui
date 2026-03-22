@@ -13,7 +13,6 @@ from pathlib import Path
 from openpyxl import load_workbook
 from collections import defaultdict
 
-SHARED_PRODUCTS = Path(__file__).resolve().parent.parent / "images" / "products"
 CATALOG_PRODUCTS = Path(__file__).resolve().parent.parent.parent / "image" / "catalog" / "products"
 PRODUCTS_IMPORT = Path(__file__).resolve().parent / "products_import.xlsx"
 
@@ -82,7 +81,6 @@ def main():
     dry_run = "--dry-run" in sys.argv
 
     products_by_cat = get_products_by_category()
-    dirs = [SHARED_PRODUCTS, CATALOG_PRODUCTS]
 
     total_renamed = 0
     renames = []
@@ -94,30 +92,29 @@ def main():
 
         if cat in SKIP_CATEGORIES:
             continue
-        cand = get_sequential_images(SHARED_PRODUCTS, cat, max_count=None)
+        cand = get_sequential_images(CATALOG_PRODUCTS, cat, max_count=None)
         if not cand:
             continue
 
-        for dir_path in dirs:
-            images = get_sequential_images(dir_path, cat, max_count=len(products))
-            n = min(len(products), len(images))
-            for i in range(n):
-                old_name = images[i]
-                new_name = products[i] + ".jpg"
-                old_path = dir_path / old_name
-                new_path = dir_path / new_name
-                if old_path.exists():
-                    if old_name != new_name:
-                        renames.append((str(old_path), str(new_path)))
-                        total_renamed += 1
+        images = get_sequential_images(CATALOG_PRODUCTS, cat, max_count=len(products))
+        n = min(len(products), len(images))
+        for i in range(n):
+            old_name = images[i]
+            new_name = products[i] + ".jpg"
+            old_path = CATALOG_PRODUCTS / old_name
+            new_path = CATALOG_PRODUCTS / new_name
+            if old_path.exists():
+                if old_name != new_name:
+                    renames.append((str(old_path), str(new_path)))
+                    total_renamed += 1
 
-    # Deduplicate by (old_name, new_name) since we count per dir
+    # Deduplicate by (old_name, new_name)
     unique_ops = set()
     for old_p, new_p in renames:
         unique_ops.add((Path(old_p).name, Path(new_p).name))
 
     print(f"Total unique image mappings: {len(unique_ops)}")
-    print(f"Total file renames (across both dirs): {total_renamed}")
+    print(f"Total file renames (in catalog): {total_renamed}")
 
     # Group by category
     by_cat_count = defaultdict(int)
@@ -137,29 +134,28 @@ def main():
 
     # Perform renames - use temp to avoid collisions
     done = 0
-    for dir_path in dirs:
-        for cat in sorted(products_by_cat.keys()):
-            products = products_by_cat[cat]
-            images = get_sequential_images(dir_path, cat, max_count=len(products))
-            n = min(len(products), len(images))
+    for cat in sorted(products_by_cat.keys()):
+        products = products_by_cat[cat]
+        images = get_sequential_images(CATALOG_PRODUCTS, cat, max_count=len(products))
+        n = min(len(products), len(images))
 
-            for i in range(n):
-                old_name = images[i]
-                new_name = products[i] + ".jpg"
-                old_path = dir_path / old_name
-                new_path = dir_path / new_name
-                if old_path.exists() and old_name != new_name:
-                    # Use temp name to avoid overwriting
-                    temp = dir_path / f"_tmp_rename_{old_path.stem}{old_path.suffix}"
-                    old_path.rename(temp)
-                    if new_path.exists():
-                        new_path.unlink()
-                    temp.rename(new_path)
-                    done += 1
-                    if done <= 10:
-                        print(f"  {old_name} -> {new_name}")
+        for i in range(n):
+            old_name = images[i]
+            new_name = products[i] + ".jpg"
+            old_path = CATALOG_PRODUCTS / old_name
+            new_path = CATALOG_PRODUCTS / new_name
+            if old_path.exists() and old_name != new_name:
+                # Use temp name to avoid overwriting
+                temp = CATALOG_PRODUCTS / f"_tmp_rename_{old_path.stem}{old_path.suffix}"
+                old_path.rename(temp)
+                if new_path.exists():
+                    new_path.unlink()
+                temp.rename(new_path)
+                done += 1
+                if done <= 10:
+                    print(f"  {old_name} -> {new_name}")
 
-    print(f"\nRenamed {done} files in total.")
+    print(f"\nRenamed {done} files in catalog.")
 
 
 if __name__ == "__main__":
