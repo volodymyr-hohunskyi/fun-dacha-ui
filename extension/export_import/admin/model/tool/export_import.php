@@ -3821,15 +3821,21 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		}
 		$this->load->model( 'cms/topic' );
 		$this->load->model( 'cms/article' );
+		$this->load->model( 'design/seo_url' );
 		$this->load->model( 'localisation/language' );
-		$articles = $this->db->query( "SELECT article_id FROM `" . DB_PREFIX . "article`" );
-		foreach ($articles->rows as $row) {
-			$this->model_cms_article->deleteArticle( (int) $row['article_id'] );
-		}
-		$topics = $this->db->query( "SELECT topic_id FROM `" . DB_PREFIX . "topic`" );
-		foreach ($topics->rows as $row) {
-			$this->model_cms_topic->deleteTopic( (int) $row['topic_id'] );
-		}
+		$p = DB_PREFIX;
+		$this->db->query( "DELETE FROM `{$p}article_rating`" );
+		$this->db->query( "DELETE FROM `{$p}article_comment`" );
+		$this->db->query( "DELETE FROM `{$p}article_description`" );
+		$this->db->query( "DELETE FROM `{$p}article_to_store`" );
+		$this->db->query( "DELETE FROM `{$p}seo_url` WHERE `key` = 'article_id'" );
+		$this->db->query( "DELETE FROM `{$p}article`" );
+		$this->db->query( "DELETE FROM `{$p}topic_description`" );
+		$this->db->query( "DELETE FROM `{$p}topic_to_store`" );
+		$this->db->query( "DELETE FROM `{$p}seo_url` WHERE `key` = 'topic_id'" );
+		$this->db->query( "DELETE FROM `{$p}topic`" );
+		$this->cache->delete( 'article' );
+		$this->cache->delete( 'topic' );
 		$languages = $this->model_localisation_language->getLanguages();
 		$default_language_id = (int) $this->config->get( 'config_language_id' );
 		$existing_names = array();
