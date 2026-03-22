@@ -3811,6 +3811,67 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	protected function uploadTopics( &$reader, $incremental ) {
+		$data = $reader->getSheetByName( 'Topics' );
+		if ($data == null) {
+			return;
+		}
+		if (!class_exists('\Opencart\Admin\Model\Cms\Topic')) {
+			return;
+		}
+		$this->load->model( 'cms/topic' );
+		$this->load->model( 'localisation/language' );
+		$languages = $this->model_localisation_language->getLanguages();
+		$default_language_id = (int) $this->config->get( 'config_language_id' );
+		$existing_names = array();
+		$existing = $this->model_cms_topic->getTopics();
+		foreach ($existing as $t) {
+			$descs = $this->model_cms_topic->getDescriptions( $t['topic_id'] );
+			foreach ($descs as $lid => $d) {
+				$existing_names[$d['name']] = true;
+			}
+		}
+		$k = $data->getHighestRow();
+		for ($i = 1; $i < $k; $i += 1) {
+			$name = trim( $this->getCell( $data, $i, 2, '' ) );
+			if ($name == '' || isset( $existing_names[$name] )) {
+				continue;
+			}
+			$sort_order = (int) $this->getCell( $data, $i, 3, 0 );
+			$status = (int) $this->getCell( $data, $i, 4, 1 );
+			$store_id = (int) $this->getCell( $data, $i, 5, 0 );
+			$topic_descriptions = array();
+			$topic_seo_url = array();
+			$slug = 'topic-' . preg_replace( '/[^a-z0-9]+/i', '-', strtolower( $name ) );
+			$slug = trim( $slug, '-' );
+			foreach ($languages as $lang) {
+				$lid = (int) $lang['language_id'];
+				$topic_descriptions[$lid] = array(
+					'name' => $name,
+					'description' => '',
+					'meta_title' => $name,
+					'meta_description' => '',
+					'meta_keyword' => '',
+				);
+				$topic_seo_url[$store_id][$lid] = $slug;
+			}
+			if (empty( $topic_descriptions )) {
+				$topic_descriptions[$default_language_id] = array( 'name' => $name, 'description' => '', 'meta_title' => $name, 'meta_description' => '', 'meta_keyword' => '' );
+				$topic_seo_url[$store_id][$default_language_id] = $slug;
+			}
+			$topic_data = array(
+				'sort_order' => $sort_order,
+				'status' => $status,
+				'topic_description' => $topic_descriptions,
+				'topic_store' => array( $store_id ),
+				'topic_seo_url' => $topic_seo_url,
+			);
+			$this->model_cms_topic->addTopic( $topic_data );
+			$existing_names[$name] = true;
+		}
+	}
+
+
 	protected function uploadArticles( &$reader, $incremental ) {
 		$data = $reader->getSheetByName( 'Articles' );
 		if ($data == null) {
@@ -6142,6 +6203,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$this->uploadAttributes( $reader, $incremental );
 			$this->uploadCustomers( $reader, $incremental, $available_customer_ids );
 			$this->uploadAddresses( $reader, $incremental, $available_customer_ids );
+			$this->uploadTopics( $reader, $incremental );
 			$this->uploadArticles( $reader, $incremental );
 			return true;
 		} catch (Exception $e) {
