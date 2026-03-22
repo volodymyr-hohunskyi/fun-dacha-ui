@@ -24,7 +24,9 @@
                 <div class="col-md-4">
                   <a href="{{ article.href }}" class="text-decoration-none text-dark">
                     <div class="card h-100 overflow-hidden blog-carousel-card">
+                      {% if article.thumb %}
                       <img src="{{ article.thumb }}" alt="{{ article.name }}" class="card-img-top img-fluid" style="object-fit: cover; height: 200px;"/>
+                      {% endif %}
                       <div class="card-body">
                         <h5 class="card-title h6">{{ article.name }}</h5>
                         <p class="card-text small text-muted mb-0">{{ article.description }}</p>
