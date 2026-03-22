@@ -5553,6 +5553,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 	protected function validateWorksheetNames( &$reader ) {
 		$allowed_worksheets = array(
+			'Topics',
+			'Articles',
 			'Categories',
 			'CategoryFilters',
 			'CategorySEOKeywords',
