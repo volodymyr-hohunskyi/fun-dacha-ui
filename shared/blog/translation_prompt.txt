@@ -1,0 +1,20 @@
+Translate the content in the file `blog_articles.json` from Russian to Ukrainian.
+
+The file contains a JSON object with multiple tables. Only the `oc_blog_description` array needs translation.
+
+For each object in `oc_blog_description`, translate these fields to Ukrainian:
+- `title`
+- `description` (preserve all HTML tags as-is, only translate the text)
+- `meta_title`
+- `meta_description`
+- `meta_keyword` (skip if empty)
+- `tag` (skip if empty)
+
+Do NOT change:
+- `blog_id`, `language_id` — keep as-is
+- All other tables (`oc_blog`, `oc_blog_to_store`, `oc_seo_url`, etc.) — keep as-is
+- Any HTML markup inside `description` — preserve exactly
+
+Some articles may already be in Ukrainian — leave them unchanged.
+
+Return the complete JSON file with translations applied.
