@@ -3830,6 +3830,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				$topic_name_to_id[$d['name']] = $t['topic_id'];
 			}
 		}
+		$languages = $this->model_localisation_language->getLanguages();
 		$default_language_id = (int) $this->config->get( 'config_language_id' );
 		$k = $data->getHighestRow();
 		for ($i = 1; $i < $k; $i += 1) {
@@ -3850,37 +3851,41 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$author = $this->getCell( $data, $i, 6, 'Fun Dacha' );
 			$status = (int) $this->getCell( $data, $i, 7, 1 );
 			$store_id = (int) $this->getCell( $data, $i, 8, 0 );
-			$language_id = (int) $this->getCell( $data, $i, 9, $default_language_id );
 			$meta_title = $this->getCell( $data, $i, 10, '' );
 			$meta_description = $this->getCell( $data, $i, 11, '' );
 			$meta_keyword = $this->getCell( $data, $i, 12, '' );
 			$tag = $this->getCell( $data, $i, 13, '' );
 			$seo_keyword = trim( $this->getCell( $data, $i, 15, '' ) );
-			if (!$language_id) {
-				$language_id = $default_language_id;
-			}
 			if ($seo_keyword == '') {
 				$seo_keyword = 'article-' . $i;
+			}
+			$desc_data = array(
+				'image' => $image,
+				'name' => $name,
+				'description' => $description,
+				'tag' => $tag,
+				'meta_title' => $meta_title,
+				'meta_description' => $meta_description,
+				'meta_keyword' => $meta_keyword,
+			);
+			$article_descriptions = array();
+			$article_seo_url = array();
+			foreach ($languages as $lang) {
+				$lid = (int) $lang['language_id'];
+				$article_descriptions[$lid] = $desc_data;
+				$article_seo_url[$store_id][$lid] = $seo_keyword;
+			}
+			if (empty( $article_descriptions )) {
+				$article_descriptions[$default_language_id] = $desc_data;
+				$article_seo_url[$store_id][$default_language_id] = $seo_keyword;
 			}
 			$article_data = array(
 				'topic_id' => $topic_id,
 				'author' => $author ? $author : 'Fun Dacha',
 				'status' => $status,
-				'article_description' => array(
-					$language_id => array(
-						'image' => $image,
-						'name' => $name,
-						'description' => $description,
-						'tag' => $tag,
-						'meta_title' => $meta_title,
-						'meta_description' => $meta_description,
-						'meta_keyword' => $meta_keyword,
-					),
-				),
+				'article_description' => $article_descriptions,
 				'article_store' => array( $store_id ),
-				'article_seo_url' => array(
-					$store_id => array( $language_id => $seo_keyword ),
-				),
+				'article_seo_url' => $article_seo_url,
 			);
 			$this->model_cms_article->addArticle( $article_data );
 		}
