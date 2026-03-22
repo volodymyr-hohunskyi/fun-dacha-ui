@@ -2,8 +2,9 @@
 """
 Replace product images from shared/images/products to image/catalog/products.
 Reads products_import.xlsx Products sheet for model->image mapping.
-Source: shared/images/products/{model}.jpg (try model first) or {basename}
-Dest: image/catalog/products/{basename}
+Source: shared/images/products/{model}.jpg
+Dest: image/catalog/products/{basename} (from products_import image_name)
+Note: image_name now uses model as filename (catalog/products/p401840.jpg)
 """
 
 from pathlib import Path
@@ -190,11 +191,8 @@ def main():
     for model in models:
         catalog_path = mapping.get(model)
         if not catalog_path:
-            # Infer: p401840 -> catalog/products/p400840.jpg
-            s = model.replace("p402", "p400").replace("p401", "p400")
-            catalog_path = f"catalog/products/{s}.jpg"
-        else:
-            catalog_path = catalog_path.replace("\\", "/")
+            catalog_path = f"catalog/products/{model}.jpg"
+        catalog_path = catalog_path.replace("\\", "/")
         items.append((model, catalog_path))
 
     CATALOG_PRODUCTS.mkdir(parents=True, exist_ok=True)
