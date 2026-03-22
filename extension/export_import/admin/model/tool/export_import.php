@@ -3820,7 +3820,16 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			return;
 		}
 		$this->load->model( 'cms/topic' );
+		$this->load->model( 'cms/article' );
 		$this->load->model( 'localisation/language' );
+		$articles = $this->db->query( "SELECT article_id FROM `" . DB_PREFIX . "article`" );
+		foreach ($articles->rows as $row) {
+			$this->model_cms_article->deleteArticle( (int) $row['article_id'] );
+		}
+		$topics = $this->db->query( "SELECT topic_id FROM `" . DB_PREFIX . "topic`" );
+		foreach ($topics->rows as $row) {
+			$this->model_cms_topic->deleteTopic( (int) $row['topic_id'] );
+		}
 		$languages = $this->model_localisation_language->getLanguages();
 		$default_language_id = (int) $this->config->get( 'config_language_id' );
 		$existing_names = array();
