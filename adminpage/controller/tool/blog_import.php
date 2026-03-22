@@ -72,7 +72,7 @@ class BlogImport extends \Opencart\System\Engine\Controller {
 			}
 			$article_data = [
 				'topic_id' => $topic_id,
-				'author' => $author ?: 'Fun Dacha',
+				'author' => $author ?: 'Гогунська Людмила',
 				'status' => $status ?: 1,
 				'article_description' => [
 					$language_id => [

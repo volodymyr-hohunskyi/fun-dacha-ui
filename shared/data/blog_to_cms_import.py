@@ -132,7 +132,7 @@ def main() -> None:
         if image and not image.startswith("catalog/"):
             image = "catalog/blog/" + Path(image).name if "blog" in image else image
 
-        author = "Fun Dacha" if blog.get("author_id") == 0 else ""
+        author = "Гогунська Людмила" if blog.get("author_id") == 0 else ""
         status = 1 if blog.get("status", 1) else 0
         date_added = blog.get("date_added", "")
 

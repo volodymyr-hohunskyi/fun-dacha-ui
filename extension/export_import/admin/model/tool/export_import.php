@@ -3924,7 +3924,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			}
 			$description = $this->getCell( $data, $i, 4, '' );
 			$image = $this->getCell( $data, $i, 5, '' );
-			$author = $this->getCell( $data, $i, 6, 'Fun Dacha' );
+			$author = $this->getCell( $data, $i, 6, 'Гогунська Людмила' );
 			$status = (int) $this->getCell( $data, $i, 7, 1 );
 			$store_id = (int) $this->getCell( $data, $i, 8, 0 );
 			$meta_title = $this->getCell( $data, $i, 10, '' );
@@ -3957,7 +3957,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			}
 			$article_data = array(
 				'topic_id' => $topic_id,
-				'author' => $author ? $author : 'Fun Dacha',
+				'author' => $author ? $author : 'Гогунська Людмила',
 				'status' => $status,
 				'article_description' => $article_descriptions,
 				'article_store' => array( $store_id ),
