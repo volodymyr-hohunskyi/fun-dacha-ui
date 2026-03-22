@@ -37,6 +37,7 @@ JOHNNYS_DIR = BASE_IMAGES / "johnnys"
 IMAGE_CATALOG = Path(__file__).resolve().parent.parent.parent / "image" / "catalog" / "categories"
 DATA_DIR = Path(__file__).resolve().parent
 DB_PREFIX = "oc_"
+MAX_CATEGORY_ID = 329  # Categories >= 330 are excluded from Johnny's mapping
 
 # Johnny's slug -> display name (for matching)
 JOHNNYS_SLUG_TO_NAME = {
@@ -240,7 +241,7 @@ def run_from_products_import(dry_run: bool) -> None:
         print("No Categories in products_import.xlsx or file not found")
         return
 
-    our_ids = set(parent_from_excel.keys())
+    our_ids = {k for k in parent_from_excel if int(k) <= MAX_CATEGORY_ID}
     name_to_johnnys = build_name_to_johnnys()
     for k, v in NAME_TO_SLUG_EXTRA.items():
         name_to_johnnys[normalize(k)] = v
@@ -288,12 +289,17 @@ def run_from_products_import(dry_run: bool) -> None:
     _apply_and_report(matched, unmatched_ours, unmatched_johnnys, dry_run, sq_dir, bn_dir)
 
 
+def _filter_ids(ids: set[str]) -> set[str]:
+    """Exclude category_id >= 330."""
+    return {i for i in ids if int(i) <= MAX_CATEGORY_ID}
+
+
 def run_with_mapping(mapping_path: Path, dry_run: bool) -> None:
     """Use category_mapping.csv. Banner->c{id}_banner.jpg, square->c{id}.jpg.
     Child without mapping inherits parent's image.
     Uses products_import.xlsx for real parent_id when available."""
     mapping = load_mapping(mapping_path)
-    our_ids = get_our_category_ids_from_files()
+    our_ids = _filter_ids(get_our_category_ids_from_files())
     products_path = DATA_DIR / "products_import.xlsx"
     parent_from_excel, _ = load_categories_from_products_import(products_path)
     parent_map = {k: str(v) for k, v in parent_from_excel.items() if v != 0}

@@ -28,14 +28,3 @@ UPDATE `oc_category` SET `image` = 'catalog/categories/c280.jpg' WHERE `category
 UPDATE `oc_category` SET `image` = 'catalog/categories/c281.jpg' WHERE `category_id` = 281;
 UPDATE `oc_category` SET `image` = 'catalog/categories/c282.jpg' WHERE `category_id` = 282;
 UPDATE `oc_category` SET `image` = 'catalog/categories/c290.jpg' WHERE `category_id` = 290;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c330.jpg' WHERE `category_id` = 330;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c331.jpg' WHERE `category_id` = 331;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c332.jpg' WHERE `category_id` = 332;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c400.jpg' WHERE `category_id` = 400;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c401.jpg' WHERE `category_id` = 401;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c402.jpg' WHERE `category_id` = 402;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c403.jpg' WHERE `category_id` = 403;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c405.jpg' WHERE `category_id` = 405;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c406.jpg' WHERE `category_id` = 406;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c407.jpg' WHERE `category_id` = 407;
-UPDATE `oc_category` SET `image` = 'catalog/categories/c500.jpg' WHERE `category_id` = 500;
