@@ -12,6 +12,8 @@ Usage:
 
     # Option B: Edit shared/data/category_mapping.csv - set johnnys_slug for each
     #   our_category_id. Run: python3 shared/data/map_category_images.py --use-mapping
+
+    # Use --square to take images from johnnys_square/ (400x400) instead of johnnys/ (banner)
 """
 
 from __future__ import annotations
@@ -23,7 +25,14 @@ import shutil
 import unicodedata
 from pathlib import Path
 
-JOHNNYS_DIR = Path(__file__).resolve().parent.parent / "category_images" / "johnnys"
+BASE_IMAGES = Path(__file__).resolve().parent.parent / "category_images"
+
+
+def _johnnys_dir(square: bool) -> Path:
+    return BASE_IMAGES / ("johnnys_square" if square else "johnnys")
+
+
+JOHNNYS_DIR = BASE_IMAGES / "johnnys"
 IMAGE_CATALOG = Path(__file__).resolve().parent.parent.parent / "image" / "catalog" / "categories"
 DATA_DIR = Path(__file__).resolve().parent
 DB_PREFIX = "oc_"
@@ -145,10 +154,11 @@ def load_mapping(path: Path) -> list[dict]:
     return rows
 
 
-def run_with_mapping(mapping_path: Path, dry_run: bool) -> None:
+def run_with_mapping(mapping_path: Path, dry_run: bool, use_square: bool = False) -> None:
     """Use category_mapping.csv - explicit our_category_id -> johnnys_slug."""
     mapping = load_mapping(mapping_path)
     our_ids = get_our_category_ids_from_files()
+    johnnys_dir = _johnnys_dir(use_square)
     matched = []
     mapped_ours = set()
     johnnys_used = set()
@@ -157,7 +167,7 @@ def run_with_mapping(mapping_path: Path, dry_run: bool) -> None:
         cid, slug = row["category_id"], row["slug"]
         if not cid or not slug:
             continue
-        src = JOHNNYS_DIR / f"{slug}.jpg"
+        src = johnnys_dir / f"{slug}.jpg"
         if src.exists():
             matched.append({"category_id": cid, "name": f"(id={cid})", "slug": slug, "src": src})
             mapped_ours.add(cid)
@@ -165,10 +175,12 @@ def run_with_mapping(mapping_path: Path, dry_run: bool) -> None:
 
     unmatched_ours = [{"category_id": i} for i in sorted(our_ids, key=int) if i not in mapped_ours]
     unmatched_johnnys = set(JOHNNYS_SLUG_TO_NAME.keys()) - johnnys_used
-    _apply_and_report(matched, unmatched_ours, unmatched_johnnys, dry_run)
+    _apply_and_report(matched, unmatched_ours, unmatched_johnnys, dry_run, johnnys_dir)
 
 
-def _apply_and_report(matched: list, unmatched_ours: list, unmatched_johnnys: set, dry_run: bool) -> None:
+def _apply_and_report(
+    matched: list, unmatched_ours: list, unmatched_johnnys: set, dry_run: bool, johnnys_dir: Path
+) -> None:
     print("=== MATCHED (will replace) ===")
     IMAGE_CATALOG.mkdir(parents=True, exist_ok=True)
     sql_updates = []
@@ -194,7 +206,7 @@ def _apply_and_report(matched: list, unmatched_ours: list, unmatched_johnnys: se
     print("\n=== JOHNNY'S IMAGES NOT USED ===")
     for slug in sorted(unmatched_johnnys):
         name = JOHNNYS_SLUG_TO_NAME.get(slug, slug)
-        f = JOHNNYS_DIR / f"{slug}.jpg"
+        f = johnnys_dir / f"{slug}.jpg"
         status = " (has image)" if f.exists() else " (no image)"
         print(f"  {slug}: {name}{status}")
 
@@ -209,6 +221,7 @@ def main() -> None:
     ap.add_argument("--our-csv", default=None, help="Path to our categories CSV")
     ap.add_argument("--use-mapping", action="store_true", help="Use category_mapping.csv")
     ap.add_argument("--dry-run", action="store_true", help="Do not copy files or write SQL")
+    ap.add_argument("--square", action="store_true", help="Use square images from johnnys_square/")
     args = ap.parse_args()
 
     if args.use_mapping:
@@ -216,7 +229,7 @@ def main() -> None:
         if not mapping_path.exists():
             print(f"Not found: {mapping_path}")
             return
-        run_with_mapping(mapping_path, args.dry_run)
+        run_with_mapping(mapping_path, args.dry_run, args.square)
         return
 
     our_csv = args.our_csv or str(DATA_DIR / "our_categories.csv")
@@ -225,12 +238,14 @@ def main() -> None:
     if not our_path.exists():
         print("Our categories file not found. Use --use-mapping with category_mapping.csv")
         print("Or run: php shared/data/export_our_categories.php")
-        if JOHNNYS_DIR.exists():
+        d = _johnnys_dir(args.square)
+        if d.exists():
             print("\nAvailable Johnny's images:")
-            for f in sorted(JOHNNYS_DIR.glob("*.jpg")):
+            for f in sorted(d.glob("*.jpg")):
                 print(f"  - {f.name}")
         return
 
+    johnnys_dir = _johnnys_dir(args.square)
     our_cats = load_our_categories(our_path)
     name_to_johnnys = build_name_to_johnnys()
     matched = []
@@ -245,7 +260,7 @@ def main() -> None:
         if not slug and " " in name:
             slug = name_to_johnnys.get(normalize(name.split()[0]))
         if slug:
-            src = JOHNNYS_DIR / f"{slug}.jpg"
+            src = johnnys_dir / f"{slug}.jpg"
             if src.exists():
                 matched.append({"category_id": cid, "name": name, "slug": slug, "src": src})
                 our_matched_ids.add(cid)
@@ -253,7 +268,7 @@ def main() -> None:
 
     unmatched_ours = [c for c in our_cats if c["category_id"] not in our_matched_ids]
     unmatched_johnnys = set(JOHNNYS_SLUG_TO_NAME.keys()) - johnnys_matched
-    _apply_and_report(matched, unmatched_ours, unmatched_johnnys, args.dry_run)
+    _apply_and_report(matched, unmatched_ours, unmatched_johnnys, args.dry_run, johnnys_dir)
 
 
 if __name__ == "__main__":

@@ -4,10 +4,12 @@ Download category images from Johnny's Selected Seeds vegetables page.
 Each category page has a banner image (catbanner) - we fetch and save them.
 
 Usage:
-    python3 shared/data/download_johnnys_category_images.py
+    python3 shared/data/download_johnnys_category_images.py          # banner (wide)
+    python3 shared/data/download_johnnys_category_images.py --square  # square 400x400
 
 Output:
-    shared/category_images/johnnys/ - downloaded images named by slug (beans.jpg, tomatoes.jpg, etc.)
+    shared/category_images/johnnys/      - banner images (beans.jpg, etc.)
+    shared/category_images/johnnys_square/ - square images (beans.jpg, etc.)
 """
 
 from __future__ import annotations
@@ -75,11 +77,12 @@ JOHNNYS_SLUGS = [
     "zucchini",
 ]
 
-OUTPUT_DIR = Path(__file__).resolve().parent.parent / "category_images" / "johnnys"
+BASE_DIR = Path(__file__).resolve().parent.parent / "category_images"
 BASE_URL = "https://www.johnnyseeds.com/vegetables/"
 IMG_PATTERN = re.compile(
     r'src="(https://www\.johnnyseeds\.com/dw/image[^"]*images/catbanner/(?:vegetables/)?[^"?]+\.jpg)'
 )
+SQUARE_PARAMS = "?sw=400&sh=400"
 
 
 def fetch_image_url(slug: str) -> str | None:
@@ -114,17 +117,24 @@ def download_image(url: str, dest: Path) -> bool:
 
 
 def main() -> None:
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading {len(JOHNNYS_SLUGS)} category images to {OUTPUT_DIR}")
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--square", action="store_true", help="Download square 400x400 images")
+    args = ap.parse_args()
+
+    output_dir = BASE_DIR / ("johnnys_square" if args.square else "johnnys")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    print(f"Downloading {len(JOHNNYS_SLUGS)} category images to {output_dir}")
 
     results = {}
     for i, slug in enumerate(JOHNNYS_SLUGS, 1):
-        # File name: slugs like "brussels-sprouts" -> "brussels-sprouts.jpg"
         safe_name = slug.replace("/", "-")
-        dest = OUTPUT_DIR / f"{safe_name}.jpg"
+        dest = output_dir / f"{safe_name}.jpg"
 
         print(f"[{i}/{len(JOHNNYS_SLUGS)}] {slug}...", end=" ")
         url = fetch_image_url(slug)
+        if url and args.square:
+            url = url + SQUARE_PARAMS
         if url:
             if download_image(url, dest):
                 print(f"OK -> {dest.name}")
