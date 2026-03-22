@@ -3811,6 +3811,82 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	protected function uploadArticles( &$reader, $incremental ) {
+		$data = $reader->getSheetByName( 'Articles' );
+		if ($data == null) {
+			return;
+		}
+		if (!class_exists('\Opencart\Admin\Model\Cms\Article')) {
+			return;
+		}
+		$this->load->model( 'cms/article' );
+		$this->load->model( 'cms/topic' );
+		$this->load->model( 'localisation/language' );
+		$topic_name_to_id = array();
+		$existing_topics = $this->model_cms_topic->getTopics();
+		foreach ($existing_topics as $t) {
+			$descs = $this->model_cms_topic->getDescriptions( $t['topic_id'] );
+			foreach ($descs as $lid => $d) {
+				$topic_name_to_id[$d['name']] = $t['topic_id'];
+			}
+		}
+		$default_language_id = (int) $this->config->get( 'config_language_id' );
+		$k = $data->getHighestRow();
+		for ($i = 1; $i < $k; $i += 1) {
+			$topic_name = trim( $this->getCell( $data, $i, 2, '' ) );
+			if ($topic_name == '') {
+				continue;
+			}
+			$topic_id = isset( $topic_name_to_id[$topic_name] ) ? $topic_name_to_id[$topic_name] : 0;
+			if (!$topic_id) {
+				continue;
+			}
+			$name = $this->getCell( $data, $i, 3, '' );
+			if ($name == '') {
+				continue;
+			}
+			$description = $this->getCell( $data, $i, 4, '' );
+			$image = $this->getCell( $data, $i, 5, '' );
+			$author = $this->getCell( $data, $i, 6, 'Fun Dacha' );
+			$status = (int) $this->getCell( $data, $i, 7, 1 );
+			$store_id = (int) $this->getCell( $data, $i, 8, 0 );
+			$language_id = (int) $this->getCell( $data, $i, 9, $default_language_id );
+			$meta_title = $this->getCell( $data, $i, 10, '' );
+			$meta_description = $this->getCell( $data, $i, 11, '' );
+			$meta_keyword = $this->getCell( $data, $i, 12, '' );
+			$tag = $this->getCell( $data, $i, 13, '' );
+			$seo_keyword = trim( $this->getCell( $data, $i, 15, '' ) );
+			if (!$language_id) {
+				$language_id = $default_language_id;
+			}
+			if ($seo_keyword == '') {
+				$seo_keyword = 'article-' . $i;
+			}
+			$article_data = array(
+				'topic_id' => $topic_id,
+				'author' => $author ? $author : 'Fun Dacha',
+				'status' => $status,
+				'article_description' => array(
+					$language_id => array(
+						'image' => $image,
+						'name' => $name,
+						'description' => $description,
+						'tag' => $tag,
+						'meta_title' => $meta_title,
+						'meta_description' => $meta_description,
+						'meta_keyword' => $meta_keyword,
+					),
+				),
+				'article_store' => array( $store_id ),
+				'article_seo_url' => array(
+					$store_id => array( $language_id => $seo_keyword ),
+				),
+			);
+			$this->model_cms_article->addArticle( $article_data );
+		}
+	}
+
+
 	protected function getCell(&$worksheet,$row,$col,$default_val='') {
 //		$col -= 1; // we use 1-based, PHPExcel uses 0-based column index, PhpSpreadsheet now uses 1-based column index
 		$row += 1; // we use 0-based, PhpSpreadsheet uses 1-based row index
@@ -6061,6 +6137,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$this->uploadAttributes( $reader, $incremental );
 			$this->uploadCustomers( $reader, $incremental, $available_customer_ids );
 			$this->uploadAddresses( $reader, $incremental, $available_customer_ids );
+			$this->uploadArticles( $reader, $incremental );
 			return true;
 		} catch (Exception $e) {
 			$errstr = $e->getMessage();
