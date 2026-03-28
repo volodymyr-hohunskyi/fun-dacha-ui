@@ -1,5 +1,7 @@
 <?php
 namespace Opencart\Catalog\Controller\Extension\Opencart\Module;
+
+use Opencart\Catalog\Controller\Product\Thumb;
 /**
  * Class Featured
  *
@@ -37,11 +39,13 @@ class Featured extends \Opencart\System\Engine\Controller {
 				}
 			}
 
+			[$thumb_w, $thumb_h] = Thumb::listThumbDimensions($this->config);
+
 			foreach ($products as $product) {
 				if ($product['image']) {
-					$image = $this->model_tool_image->resize(html_entity_decode($product['image'], ENT_QUOTES, 'UTF-8'), $setting['width'], $setting['height']);
+					$image = $this->model_tool_image->resize(html_entity_decode($product['image'], ENT_QUOTES, 'UTF-8'), $thumb_w, $thumb_h);
 				} else {
-					$image = $this->model_tool_image->resize('placeholder.png', $setting['width'], $setting['height']);
+					$image = $this->model_tool_image->resize('placeholder.png', $thumb_w, $thumb_h);
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {

@@ -1,5 +1,7 @@
 <?php
 namespace Opencart\Catalog\Controller\Extension\Opencart\Module;
+
+use Opencart\Catalog\Controller\Product\Thumb;
 /**
  * Class Latest
  *
@@ -29,11 +31,13 @@ class Latest extends \Opencart\System\Engine\Controller {
 		$results = $this->model_extension_opencart_module_latest->getLatest($setting['limit']);
 
 		if ($results) {
+			[$thumb_w, $thumb_h] = Thumb::listThumbDimensions($this->config);
+
 			foreach ($results as $result) {
 				if ($result['image']) {
-					$image = $this->model_tool_image->resize(html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'), $setting['width'], $setting['height']);
+					$image = $this->model_tool_image->resize(html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'), $thumb_w, $thumb_h);
 				} else {
-					$image = $this->model_tool_image->resize('placeholder.png', $setting['width'], $setting['height']);
+					$image = $this->model_tool_image->resize('placeholder.png', $thumb_w, $thumb_h);
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {

@@ -21,6 +21,26 @@ namespace Opencart\Catalog\Controller\Product;
  */
 class Thumb extends \Opencart\System\Engine\Controller {
 	/**
+	 * Width/height for product-card thumbnails — matches category/search listings (store setting).
+	 *
+	 * @param object $config Registry config
+	 *
+	 * @return array{0: int, 1: int}
+	 */
+	public static function listThumbDimensions($config): array {
+		$w = (int)$config->get('config_image_product_width');
+		$h = (int)$config->get('config_image_product_height');
+		if ($w < 1) {
+			$w = 228;
+		}
+		if ($h < 1) {
+			$h = 228;
+		}
+
+		return [$w, $h];
+	}
+
+	/**
 	 * Index
 	 *
 	 * @param array<string, mixed> $data array of data

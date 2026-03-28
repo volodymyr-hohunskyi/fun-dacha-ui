@@ -267,6 +267,8 @@ class Category extends \Opencart\System\Engine\Controller {
 
 			$results = $this->model_catalog_product->getProducts($filter_data);
 
+			[$thumb_w, $thumb_h] = Thumb::listThumbDimensions($this->config);
+
 			foreach ($results as $result) {
 				$description = trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8')));
 
@@ -300,7 +302,7 @@ class Category extends \Opencart\System\Engine\Controller {
 
 				$product_data = [
 					'description' => $description,
-					'thumb'       => $this->model_tool_image->resize($image, $this->config->get('config_image_product_width'), $this->config->get('config_image_product_height')),
+					'thumb'       => $this->model_tool_image->resize($image, $thumb_w, $thumb_h),
 					'price'       => $price,
 					'special'     => $special,
 					'tax'         => $tax,

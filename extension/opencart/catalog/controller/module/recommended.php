@@ -1,6 +1,8 @@
 <?php
 namespace Opencart\Catalog\Controller\Extension\Opencart\Module;
 
+use Opencart\Catalog\Controller\Product\Thumb;
+
 class Recommended extends \Opencart\System\Engine\Controller {
 	public function index(array $setting): string {
 		$this->load->language('extension/opencart/module/recommended');
@@ -80,15 +82,17 @@ class Recommended extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		[$thumb_w, $thumb_h] = Thumb::listThumbDimensions($this->config);
+
 		// Render products
 		foreach ($product_ids as $product_id) {
 			$product_info = $this->model_catalog_product->getProduct((int)$product_id);
 
 			if ($product_info) {
 				if ($product_info['image']) {
-					$image = $this->model_tool_image->resize(html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'), $setting['width'] ?? 200, $setting['height'] ?? 200);
+					$image = $this->model_tool_image->resize(html_entity_decode($product_info['image'], ENT_QUOTES, 'UTF-8'), $thumb_w, $thumb_h);
 				} else {
-					$image = $this->model_tool_image->resize('placeholder.png', $setting['width'] ?? 200, $setting['height'] ?? 200);
+					$image = $this->model_tool_image->resize('placeholder.png', $thumb_w, $thumb_h);
 				}
 
 				if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
