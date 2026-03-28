@@ -509,6 +509,34 @@
   font-size: 0.78rem;
 }
 
+.ai-navigate-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.45rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+
+.ai-navigate-tags__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.38rem 0.55rem;
+  background: var(--ai-primary);
+  color: #fff !important;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.ai-navigate-tags__btn:hover {
+  background: var(--ai-primary-dark);
+  color: #fff !important;
+}
+
 .ai-navigate-cta {
   margin-top: 0.5rem;
 }

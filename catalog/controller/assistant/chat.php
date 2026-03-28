@@ -66,10 +66,17 @@ class Chat extends \Opencart\System\Engine\Controller {
 			? array_map('intval', $state['filterIds'])
 			: [];
 
+		$pageContext = [];
+
+		if (isset($input['context']) && is_array($input['context'])) {
+			$pageContext = $this->sanitizeAssistantPageContext($input['context']);
+		}
+
 		$result = $this->model_assistant_assistant->heuristicSearch(
 			$userMessage,
 			$catId,
-			$filterIds
+			$filterIds,
+			$pageContext
 		);
 
 		if (($result['assistantShortcut'] ?? '') === 'consult') {
@@ -248,5 +255,36 @@ class Chat extends \Opencart\System\Engine\Controller {
 		}
 
 		return (string) (int) $category_id;
+	}
+
+	/**
+	 * @param array<string, mixed> $ctx
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function sanitizeAssistantPageContext(array $ctx): array {
+		$out = [];
+
+		if (isset($ctx['route'])) {
+			$out['route'] = (string) $ctx['route'];
+		}
+
+		if (isset($ctx['category_id'])) {
+			$out['category_id'] = (int) $ctx['category_id'];
+		}
+
+		if (isset($ctx['product_id'])) {
+			$out['product_id'] = (int) $ctx['product_id'];
+		}
+
+		if (isset($ctx['path'])) {
+			$out['path'] = (string) $ctx['path'];
+		}
+
+		if (isset($ctx['filter_attr']) && is_string($ctx['filter_attr'])) {
+			$out['filter_attr'] = substr($ctx['filter_attr'], 0, 2000);
+		}
+
+		return $out;
 	}
 }

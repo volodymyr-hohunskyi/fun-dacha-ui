@@ -188,6 +188,181 @@ class Assistant extends \Opencart\System\Engine\Model {
 	}
 
 	/**
+	 * Match query against attribute group/name/value and product title (UA/EN).
+	 *
+	 * @param array<string, mixed> $p
+	 * @param array<int, string>   $tokens
+	 */
+	private function scoreProductAttributeMatch(array $p, string $needle, array $tokens): int {
+		$parts = [];
+
+		foreach ($p['attributes'] ?? [] as $a) {
+			if (!is_array($a)) {
+				continue;
+			}
+
+			$parts[] = mb_strtolower((string) ($a['group'] ?? ''));
+			$parts[] = mb_strtolower((string) ($a['name'] ?? ''));
+			$parts[] = mb_strtolower((string) ($a['value'] ?? ''));
+		}
+
+		$nameUk = mb_strtolower((string) ($p['name']['uk'] ?? ''));
+		$nameEn = mb_strtolower((string) ($p['name']['en'] ?? ''));
+		$hay    = $nameUk . ' ' . $nameEn . ' ' . implode(' ', $parts);
+		$score  = 0;
+
+		if ($needle !== '' && mb_strpos($hay, $needle) !== false) {
+			$score += 200 + mb_strlen($needle) * 3;
+		}
+
+		foreach ($tokens as $t) {
+			if (mb_strlen($t) < 2) {
+				continue;
+			}
+
+			if (mb_strpos($hay, $t) !== false) {
+				$score += 25 + mb_strlen($t) * 2;
+			}
+		}
+
+		return $score;
+	}
+
+	/**
+	 * Products whose attributes (or name) match the query, best scores first.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function searchProductsByAttributesSorted(string $query, ?int $categoryId): array {
+		$db = $this->getDb();
+		$q  = mb_strtolower(trim($query));
+
+		if ($q === '') {
+			return [];
+		}
+
+		$needle  = $q;
+		$tokens  = preg_split('/[\s,\-]+/u', $q);
+		$tokens  = array_values(array_filter($tokens, static fn($t) => is_string($t) && mb_strlen($t) > 1));
+
+		$scored = [];
+
+		foreach ($db['products'] ?? [] as $p) {
+			if (!is_array($p) || !isset($p['id'])) {
+				continue;
+			}
+
+			$cats = $p['categoryIds'] ?? [];
+
+			if ($categoryId !== null && !in_array($categoryId, $cats, true)) {
+				continue;
+			}
+
+			$score = $this->scoreProductAttributeMatch($p, $needle, $tokens);
+
+			if ($score > 0) {
+				$scored[(int) $p['id']] = ['p' => $p, 'score' => $score];
+			}
+		}
+
+		uasort(
+			$scored,
+			static function (array $a, array $b): int {
+				return $b['score'] <=> $a['score'];
+			}
+		);
+
+		return array_map(
+			static fn(array $x): array => $x['p'],
+			array_values($scored)
+		);
+	}
+
+	/**
+	 * @param array<int, array<string, mixed>> $a
+	 * @param array<int, array<string, mixed>> $b
+	 * @param array<int, array<string, mixed>> $c
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function mergeProductSearchResults(array $a, array $b, array $c): array {
+		$byId  = [];
+		$order = [];
+
+		foreach ([$a, $b, $c] as $list) {
+			foreach ($list as $p) {
+				if (!is_array($p) || !isset($p['id'])) {
+					continue;
+				}
+
+				$id = (int) $p['id'];
+
+				if (!isset($byId[$id])) {
+					$byId[$id]  = $p;
+					$order[]    = $id;
+				}
+			}
+		}
+
+		$out = [];
+
+		foreach ($order as $id) {
+			$out[] = $byId[$id];
+		}
+
+		return $out;
+	}
+
+	/**
+	 * If fewer than 5 products, append others from the same category (no duplicates).
+	 *
+	 * @param array<int, array<string, mixed>> $products
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function fillSearchResultsToFive(array $products, ?int $categoryId): array {
+		$products = array_values(array_filter($products));
+
+		if (count($products) >= 5) {
+			return array_slice($products, 0, 5);
+		}
+
+		$have = [];
+
+		foreach ($products as $p) {
+			$have[(int) $p['id']] = true;
+		}
+
+		$fillCat = $categoryId;
+
+		if (!$fillCat && $products) {
+			$fillCat = (int) (($products[0]['categoryIds'] ?? [])[0] ?? 0);
+		}
+
+		if ($fillCat <= 0) {
+			return $products;
+		}
+
+		$pool = $this->getProductsByFilters([], $fillCat);
+		$pool = $this->rankProducts($pool);
+
+		foreach ($pool as $p) {
+			if (count($products) >= 5) {
+				break;
+			}
+
+			$id = (int) $p['id'];
+
+			if (empty($have[$id])) {
+				$products[] = $p;
+				$have[$id]  = true;
+			}
+		}
+
+		return $products;
+	}
+
+	/**
 	 * @param array<int, int|string> $productIds
 	 *
 	 * @return array<int, array<string, mixed>>
@@ -262,7 +437,7 @@ class Assistant extends \Opencart\System\Engine\Model {
 	 *
 	 * @return array<string, mixed>
 	 */
-	public function heuristicSearch(string $query, $activeCategoryId, array $activeFilterIds): array {
+	public function heuristicSearch(string $query, $activeCategoryId, array $activeFilterIds, array $pageContext = []): array {
 		$q = mb_strtolower(trim($query));
 
 		if ($this->matchesIntent($q, ['оплат', 'заплатити', 'оплатити', 'способи оплати', 'payment', 'оплату'])) {
@@ -288,7 +463,7 @@ class Assistant extends \Opencart\System\Engine\Model {
 			return $navResult;
 		}
 
-		return $this->searchFlow($query, $q, $activeCategoryId, $activeFilterIds);
+		return $this->searchFlow($query, $q, $activeCategoryId, $activeFilterIds, $pageContext);
 	}
 
 	/**
@@ -341,27 +516,24 @@ class Assistant extends \Opencart\System\Engine\Model {
 		if ($this->matchesIntent($q, ['каталог', 'весь каталог', 'всі товари', 'всі категорії', 'показати все', 'catalog'])) {
 			$this->load->language('assistant/chat');
 			$emojis = $this->getCategoryEmojis();
-			$actions = [];
+			$items  = [];
 
 			foreach ($nav['categories'] ?? [] as $navCat) {
 				if (empty($navCat['url'])) {
 					continue;
 				}
 
-				$cid  = (int) ($navCat['categoryId'] ?? 0);
-				$emo  = $emojis[$cid] ?? '🌱';
-				$name = (string) ($navCat['name'] ?? '');
+				$cid = (int) ($navCat['categoryId'] ?? 0);
+				$emo = $emojis[$cid] ?? '🌱';
 
-				$actions[] = [
-					'type'  => 'navigateTo',
+				$items[] = [
 					'url'   => $navCat['url'],
-					'label' => trim($emo . ' ' . $name) . ' →',
+					'label' => $emo . ' →',
 				];
 			}
 
 			if (!empty($nav['catalog'])) {
-				$actions[] = [
-					'type'  => 'navigateTo',
+				$items[] = [
 					'url'   => $nav['catalog'],
 					'label' => $this->language->get('text_catalog_nav_all'),
 				];
@@ -369,7 +541,12 @@ class Assistant extends \Opencart\System\Engine\Model {
 
 			return [
 				'text'    => $this->language->get('text_catalog_nav_intro'),
-				'actions' => $actions,
+				'actions' => [
+					[
+						'type'  => 'navigateTags',
+						'items' => $items,
+					],
+				],
 			];
 		}
 
@@ -391,31 +568,186 @@ class Assistant extends \Opencart\System\Engine\Model {
 	}
 
 	/**
-	 * @param string|null    $activeCategoryId
-	 * @param array<int, int> $activeFilterIds
+	 * User named another culture or explicitly wants to leave current page context.
+	 */
+	private function userOverridesPageContext(string $q): bool {
+		if ($this->detectCategory($q) !== null) {
+			return true;
+		}
+
+		return $this->matchesIntent($q, [
+			'інша категор',
+			'інший розділ',
+			'інший товар',
+			'не тут',
+			'не це',
+			'не хочу',
+			'something else',
+			'other category',
+		]);
+	}
+
+	/**
+	 * @param array<string, mixed> $pageContext
+	 */
+	private function buildEffectiveSearchQuery(string $rawQuery, string $q, array $pageContext): string {
+		$effective = $rawQuery;
+
+		if ($this->userOverridesPageContext($q)) {
+			return $effective;
+		}
+
+		if (!empty($pageContext['filter_attr']) && is_string($pageContext['filter_attr'])) {
+			$fa         = preg_replace('/[,:]/u', ' ', $pageContext['filter_attr']);
+			$effective .= ' ' . $fa;
+		}
+
+		if (!empty($pageContext['product_id'])) {
+			$hint = $this->getProductAttributeHintString((int) $pageContext['product_id']);
+
+			if ($hint !== '') {
+				$effective .= ' ' . $hint;
+			}
+		}
+
+		return trim($effective);
+	}
+
+	private function getProductAttributeHintString(int $productId): string {
+		$db = $this->getDb();
+		$p  = $db['products'][(string) $productId] ?? null;
+
+		if (!$p) {
+			return '';
+		}
+
+		$parts = [];
+
+		foreach ($p['attributes'] ?? [] as $a) {
+			if (!is_array($a)) {
+				continue;
+			}
+
+			if (!empty($a['name'])) {
+				$parts[] = (string) $a['name'];
+			}
+
+			if (!empty($a['value'])) {
+				$parts[] = (string) $a['value'];
+			}
+		}
+
+		$s = trim(preg_replace('/\s+/u', ' ', implode(' ', $parts)));
+
+		if (mb_strlen($s) > 800) {
+			return mb_substr($s, 0, 800);
+		}
+
+		return $s;
+	}
+
+	/**
+	 * OC category id must exist in assistant_db indexes (same numeric ids as in JSON export).
+	 *
+	 * @param mixed $activeCategoryId
+	 * @param array<string, mixed> $pageContext
+	 */
+	private function resolveCategoryIdForSearch(string $q, $activeCategoryId, array $pageContext): ?int {
+		$detected = $this->detectCategory($q);
+
+		if ($detected !== null) {
+			return $detected;
+		}
+
+		if (!empty($pageContext['category_id'])) {
+			$c = (int) $pageContext['category_id'];
+
+			if ($c > 0 && $this->categoryIdExistsInAssistantDb($c)) {
+				return $c;
+			}
+		}
+
+		if ($activeCategoryId !== null && (int) $activeCategoryId > 0) {
+			$sid = (int) $activeCategoryId;
+
+			if ($this->categoryIdExistsInAssistantDb($sid)) {
+				return $sid;
+			}
+		}
+
+		return null;
+	}
+
+	private function categoryIdExistsInAssistantDb(int $id): bool {
+		if ($id <= 0) {
+			return false;
+		}
+
+		$db = $this->getDb();
+		$key = (string) $id;
+
+		return isset($db['categories'][$key])
+			|| isset($db['indexes']['productsByCategory'][$key]);
+	}
+
+	/**
+	 * @param string|null         $activeCategoryId
+	 * @param array<int, int>     $activeFilterIds
+	 * @param array<string, mixed> $pageContext
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function searchFlow(string $rawQuery, string $q, $activeCategoryId, array $activeFilterIds): array {
+	private function searchFlow(string $rawQuery, string $q, $activeCategoryId, array $activeFilterIds, array $pageContext = []): array {
 		$db = $this->getDb();
 
-		$categoryId = $activeCategoryId ?? $this->detectCategory($q);
+		$categoryId = $this->resolveCategoryIdForSearch($q, $activeCategoryId, $pageContext);
+		$effectiveQuery = $this->buildEffectiveSearchQuery($rawQuery, $q, $pageContext);
+
 		$newFilters = $this->detectFilters($q);
 		$filterIds  = array_values(array_unique(array_merge($activeFilterIds, $newFilters)));
 
-		$products = $this->getProductsByFilters($filterIds, $categoryId);
+		$fromFilters = $this->getProductsByFilters($filterIds, $categoryId);
 
-		if (!$products) {
-			$products = $this->searchProducts($rawQuery);
+		// 1) Attribute / title match (within active category when set). $effectiveQuery adds PDP + filter_attr context when appropriate.
+		$attrList = $this->searchProductsByAttributesSorted($effectiveQuery, $categoryId);
+
+		// 2) If nothing in category, search attributes globally (phrase like «Свіже споживання»).
+		if ($categoryId !== null && count($attrList) === 0) {
+			$attrList = $this->searchProductsByAttributesSorted($effectiveQuery, null);
 		}
 
-		if (!$products && $categoryId) {
-			$products = $this->getProductsByFilters([], $categoryId);
+		$attrList = $this->rankProducts($attrList);
+
+		$tokenProducts = $this->searchProducts($rawQuery);
+		$tokenProducts = $this->rankProducts($tokenProducts);
+
+		$fromFiltersRanked = $this->rankProducts($fromFilters);
+
+		$merged = $this->mergeProductSearchResults($attrList, $tokenProducts, $fromFiltersRanked);
+
+		if (!$merged) {
+			$merged = $fromFiltersRanked;
 		}
 
-		$products = $this->rankProducts($products);
-		$top        = array_slice($products, 0, 5);
-		$ids        = array_column($top, 'id');
+		if (!$merged && $categoryId) {
+			$merged = $this->rankProducts($this->getProductsByFilters([], $categoryId));
+		}
+
+		if (!$merged) {
+			$merged = $this->rankProducts($this->searchProducts($rawQuery));
+		}
+
+		$fillCat = $categoryId;
+
+		if (!$fillCat && $merged) {
+			$fillCat = (int) (($merged[0]['categoryIds'] ?? [])[0] ?? 0);
+		}
+
+		$merged = $this->fillSearchResultsToFive($merged, $fillCat > 0 ? $fillCat : null);
+
+		// Preserve merge order: attribute matches, then token index, then filters; no full re-sort.
+		$top = array_slice($merged, 0, 5);
+		$ids = array_column($top, 'id');
 
 		if (!$ids) {
 			return [

@@ -148,6 +148,18 @@
     return escHtml(u);
   }
 
+  /** Server-built route/category/product + optional client override after SPA-like nav. */
+  function getPageContext() {
+    var base = cfg.pageContext || {};
+    if (
+      window.aiAssistantPageContext &&
+      typeof window.aiAssistantPageContext === 'object'
+    ) {
+      return $.extend({}, base, window.aiAssistantPageContext);
+    }
+    return base;
+  }
+
   function renderMarkdown(text) {
     return escHtml(text)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -197,6 +209,9 @@
       }
       if (action.type === 'showArticle' && action.article) {
         $body.append(renderArticleCard(action.article));
+      }
+      if (action.type === 'navigateTags' && action.items && action.items.length) {
+        $body.append(renderNavigateTagRow(action.items));
       }
       if (action.type === 'navigateTo' && action.url) {
         $body.append(renderNavigateCta(action.url, action.label));
@@ -345,6 +360,21 @@
     );
   }
 
+  function renderNavigateTagRow(items) {
+    var $row = $('<div class="ai-navigate-tags" role="group"></div>');
+    (items || []).forEach(function (item) {
+      if (!item || !item.url) {
+        return;
+      }
+      var $a = $('<a></a>')
+        .addClass('ai-navigate-tags__btn')
+        .attr('href', String(item.url).replace(/&amp;/g, '&'))
+        .text(item.label || '→');
+      $row.append($a);
+    });
+    return $row;
+  }
+
   function renderNavigateCta(url, label) {
     return $('<div class="ai-navigate-cta"></div>').html(
       '<a href="' +
@@ -386,7 +416,11 @@
     });
     if (types.indexOf('showProducts') >= 0) {
       renderQuickReplies('products');
-    } else if (types.indexOf('navigateTo') >= 0 || types.indexOf('showInfo') >= 0) {
+    } else if (
+      types.indexOf('navigateTo') >= 0 ||
+      types.indexOf('navigateTags') >= 0 ||
+      types.indexOf('showInfo') >= 0
+    ) {
       renderQuickReplies('info');
     } else {
       renderQuickReplies('general');
@@ -425,7 +459,7 @@
       url: cfg.ajaxUrl,
       method: 'POST',
       contentType: 'application/json; charset=utf-8',
-      data: JSON.stringify({ message: text }),
+      data: JSON.stringify({ message: text, context: getPageContext() }),
       dataType: 'json',
       success: function (resp) {
         setPanelLoading(false);
