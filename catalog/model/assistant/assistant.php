@@ -363,13 +363,12 @@ class Assistant extends \Opencart\System\Engine\Model {
 	}
 
 	/**
-	 * Build product/category filter_attr query segment from user text + top products (matches OC category filter chips).
-	 *
-	 * @param array<int, int> $productIds Assistant DB product ids (same as oc product_id in export).
+	 * Build product/category filter_attr query segment from the user message (matches OC category filter chips).
+	 * Only values that appear in the query are included — not every attribute from suggested products.
 	 *
 	 * @return string comma-separated attribute_id:base64 pairs, or empty
 	 */
-	public function buildFilterAttrForCategoryBrowse(int $categoryId, string $rawQuery, array $productIds): string {
+	public function buildFilterAttrForCategoryBrowse(int $categoryId, string $rawQuery): string {
 		if ($categoryId <= 0) {
 			return '';
 		}
@@ -411,38 +410,23 @@ class Assistant extends \Opencart\System\Engine\Model {
 				continue;
 			}
 
+			// Query contains this chip text (e.g. «червоний» → Колір «Червоний»).
 			if (mb_strlen($lk) >= 2 && mb_strpos($q, $lk) !== false) {
+				$selected[] = $pair;
+
+				continue;
+			}
+
+			// Partial typing: chip label contains the query (e.g. «червон» → «Червоний»). Min length 4
+			// avoids matching common 3-letter prefixes like «від» across many chips.
+			if ($q !== '' && mb_strlen($q) >= 4 && mb_strpos($lk, $q) !== false) {
 				$selected[] = $pair;
 			}
 		}
 
-		$db = $this->getDb();
-
-		foreach ($productIds as $pid) {
-			$p = $db['products'][(string) $pid] ?? null;
-
-			if (!$p) {
-				continue;
-			}
-
-			foreach ($p['attributes'] ?? [] as $a) {
-				if (!is_array($a)) {
-					continue;
-				}
-
-				$v = trim((string) ($a['value'] ?? ''));
-
-				if ($v === '') {
-					continue;
-				}
-
-				$lk = mb_strtolower($v);
-
-				if (isset($valueByNormalized[$lk])) {
-					$selected[] = $valueByNormalized[$lk];
-				}
-			}
-		}
+		// Do not merge attributes from suggested products into filter_attr: that adds every chip
+		// that appears on those cards (стиглість, призначення, …) even when the user only
+		// typed one word such as «червоний».
 
 		$seen  = [];
 		$parts = [];
@@ -869,7 +853,7 @@ class Assistant extends \Opencart\System\Engine\Model {
 				$catUrl  = $this->navUrls['categoriesById'][(string) $categoryId] ?? '';
 
 				if ($catUrl) {
-					$fa = $this->buildFilterAttrForCategoryBrowse($categoryId, $rawQuery, $ids);
+					$fa = $this->buildFilterAttrForCategoryBrowse($categoryId, $rawQuery);
 
 					if ($fa !== '' && stripos($catUrl, 'filter_attr=') === false) {
 						$sep = (strpos($catUrl, '?') === false)
@@ -923,10 +907,10 @@ class Assistant extends \Opencart\System\Engine\Model {
 			'tomat'   => 100,
 			// Cabbage 120
 			'капуст' => 120,
-			// Pepper 130 — UA + RU
-			'перець' => 130,
-			'перец'  => 130,
-			'pepper' => 130,
+			// Pepper 140 (OC root «Перець»; 130 is «Редис» in assistant_db)
+			'перець' => 140,
+			'перец'  => 140,
+			'pepper' => 140,
 			// Eggplant 150
 			'баклажан' => 150,
 			// Onion 160
@@ -934,10 +918,10 @@ class Assistant extends \Opencart\System\Engine\Model {
 			// Carrot 170
 			'морков' => 170,
 			'морква' => 170,
-			// Beet / radish family 180 — so «редис» / «редька» map here, not to random search hits
-			'редиск' => 180,
-			'редис'  => 180,
-			'редька' => 180,
+			// Radish / daikon 130; beet (буряк) 180
+			'редиск' => 130,
+			'редис'  => 130,
+			'редька' => 130,
 			'буряк'  => 180,
 			// Melons / squash
 			'кавун'  => 190,
