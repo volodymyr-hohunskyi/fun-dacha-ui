@@ -1,5 +1,14 @@
 <div class="product-thumb">
-  <div class="image"><a href="{{ href }}"><img src="{{ thumb }}" alt="{{ name }}" title="{{ name }}" class="img-fluid" loading="lazy"/></a></div>
+  <div class="image">
+    <a href="{{ href }}"><img src="{{ thumb }}" alt="{{ name }}" title="{{ name }}" class="img-fluid" loading="lazy"/></a>
+    <div class="product-thumb__cart">
+      <form method="post" data-oc-toggle="ajax" data-oc-load="{{ cart }}" data-oc-target="#cart" action="{{ cart_add }}">
+        <input type="hidden" name="product_id" value="{{ product_id }}"/>
+        <input type="hidden" name="quantity" value="{{ minimum }}"/>
+        <button type="submit" class="btn btn-primary text-white add-to-cart-btn" aria-label="{{ button_cart }}" title="{{ button_cart }}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></button>
+      </form>
+    </div>
+  </div>
   <div class="content">
     <div class="description">
       <h4><a href="{{ href }}">{{ name }}</a></h4>
@@ -24,13 +33,6 @@
           {% endfor %}
         </div>
       {% endif %}
-    </div>
-    <div class="button w-100 d-flex">
-      <form method="post" data-oc-toggle="ajax" data-oc-load="{{ cart }}" data-oc-target="#cart" action="{{ cart_add }}" class="flex-fill">
-        <input type="hidden" name="product_id" value="{{ product_id }}"/>
-        <input type="hidden" name="quantity" value="{{ minimum }}"/>
-        <button type="submit" class="btn btn-primary text-white add-to-cart-btn" aria-label="{{ button_cart }}" title="{{ button_cart }}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></button>
-      </form>
     </div>
   </div>
 </div>

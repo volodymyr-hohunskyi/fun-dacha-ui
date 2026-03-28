@@ -820,11 +820,12 @@ footer.freshgo-footer {
 }
 
 .product-thumb .image {
+  position: relative;
   text-align: center;
   flex-shrink: 0;
   width: 100%;
   line-height: 0;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
   background: #f5f5f5;
 }
@@ -855,7 +856,7 @@ footer.freshgo-footer {
 }
 
 .product-thumb .description {
-  padding: 15px;
+  padding: 10px 12px 12px;
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -864,34 +865,33 @@ footer.freshgo-footer {
   font-weight: bold;
 }
 
-/* Product card: CTA in flow with inset padding (no absolute overlap) */
-.product-thumb .button {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: flex-end;
-  width: 100%;
-  padding: 0 12px 12px;
-  box-sizing: border-box;
+/* Add to cart: top-right over image */
+.product-thumb__cart {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  margin: 0;
 }
 
-.product-thumb .button form {
-  flex: 0 0 auto;
-  min-width: 0;
+.product-thumb__cart form {
+  margin: 0;
 }
 
-.product-thumb .button .btn-primary.add-to-cart-btn {
-  width: 2.75rem;
-  height: 2.75rem;
+.product-thumb__cart .btn-primary.add-to-cart-btn {
+  width: 2.5rem;
+  height: 2.5rem;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.product-thumb .button .btn-primary.add-to-cart-btn i {
-  font-size: 1.1rem;
+.product-thumb__cart .btn-primary.add-to-cart-btn i {
+  font-size: 1.05rem;
 }
 
 @media (min-width: 960px) {
@@ -912,9 +912,6 @@ footer.freshgo-footer {
     min-width: 0;
     display: flex;
     flex-direction: column;
-  }
-  .product-list .product-thumb .button {
-    padding: 0 15px 15px;
   }
 }
 .rating .fa-stack {
