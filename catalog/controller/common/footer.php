@@ -87,17 +87,19 @@ class Footer extends \Opencart\System\Engine\Controller {
 			$this->model_tool_online->addOnline(oc_get_ip(), $this->customer->getId(), $url, $referer);
 		}
 
-		$data['bootstrap'] = 'catalog/view/javascript/bootstrap/js/bootstrap.bundle.min.js';
-		$data['scripts'] = $this->document->getScripts('footer');
 		$data['cookie'] = $this->load->controller('common/cookie');
 
 		$route = isset($this->request->get['route']) ? (string) $this->request->get['route'] : '';
 
+		// Load assistant widget before getScripts('footer') so chat.js from addScript() is included.
 		if ($route === 'assistant/page') {
 			$data['assistant_widget'] = '';
 		} else {
 			$data['assistant_widget'] = $this->load->controller('assistant/widget');
 		}
+
+		$data['bootstrap'] = 'catalog/view/javascript/bootstrap/js/bootstrap.bundle.min.js';
+		$data['scripts']   = $this->document->getScripts('footer');
 
 		return $this->load->view('common/footer', $data);
 	}
