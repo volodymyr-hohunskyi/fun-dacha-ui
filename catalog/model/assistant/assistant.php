@@ -269,6 +269,15 @@ class Assistant extends \Opencart\System\Engine\Model {
 			return $this->getInfoResponse('delivery');
 		}
 
+		// Welcome intent button «Консультація» / EN «Product advice» — filled in controller (assistant/chat).
+		if ($this->matchesIntent($q, ['консультац', 'consultation', 'product advice', 'порада', 'порад'])) {
+			return [
+				'text'               => '',
+				'actions'            => [],
+				'assistantShortcut'  => 'consult',
+			];
+		}
+
 		$navResult = $this->matchNavigationIntent($q);
 
 		if ($navResult !== null) {
@@ -436,24 +445,64 @@ class Assistant extends \Opencart\System\Engine\Model {
 	}
 
 	private function detectCategory(string $q): ?int {
+		// Longer / more specific keywords first (uksort) so e.g. «огурець» wins over loose substrings.
 		$map = [
-			'томат' => 100, 'помідор' => 100,
-			'огірок' => 110, 'огірки' => 110,
+			// Cucumbers 110 — Ukrainian + Russian + common typos
+			'огурчик'  => 110,
+			'огурець'  => 110,
+			'огірки'   => 110,
+			'огірця'   => 110,
+			'огірці'   => 110,
+			'огірок'   => 110,
+			'огурец'   => 110,
+			'огурок'   => 110,
+			'cucumber' => 110,
+			// Tomatoes 100
+			'помідор' => 100,
+			'томат'   => 100,
+			'tomat'   => 100,
+			// Cabbage 120
 			'капуст' => 120,
-			'перец' => 130, 'перець' => 130,
+			// Pepper 130 — UA + RU
+			'перець' => 130,
+			'перец'  => 130,
+			'pepper' => 130,
+			// Eggplant 150
 			'баклажан' => 150,
+			// Onion 160
 			'цибул' => 160,
-			'морков' => 170, 'морква' => 170,
-			'буряк' => 180,
-			'кавун' => 190,
-			'диня'  => 200,
+			// Carrot 170
+			'морков' => 170,
+			'морква' => 170,
+			// Beet / radish family 180 — so «редис» / «редька» map here, not to random search hits
+			'редиск' => 180,
+			'редис'  => 180,
+			'редька' => 180,
+			'буряк'  => 180,
+			// Melons / squash
+			'кавун'  => 190,
+			'диня'   => 200,
 			'гарбуз' => 210,
-			'кабачок' => 220, 'кабачки' => 220,
-			'зелен' => 240,
-			'базил' => 250, 'петрушк' => 250, 'кріп' => 250,
-			'квіт' => 330, 'квіти' => 330,
+			'кабачок' => 220,
+			'кабачки' => 220,
+			// Greens / herbs 240–250
+			'зелен'   => 240,
+			'петрушк' => 250,
+			'базил'   => 250,
+			'кріп'    => 250,
+			// Flowers 330
+			'квіти' => 330,
+			'квіт'  => 330,
+			// Fertilizer 400
 			'добрив' => 400,
 		];
+
+		uksort(
+			$map,
+			static function (string $a, string $b): int {
+				return mb_strlen($b) <=> mb_strlen($a);
+			}
+		);
 
 		foreach ($map as $kw => $catId) {
 			if (mb_strpos($q, $kw) !== false) {
