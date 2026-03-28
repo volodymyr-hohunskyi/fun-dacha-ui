@@ -619,7 +619,6 @@ footer.freshgo-footer {
   border-radius: 4px;
 }
 .product-thumb .image {
-  position: relative;
   text-align: center;
   flex-shrink: 0;
   width: 100%;
@@ -657,17 +656,51 @@ footer.freshgo-footer {
 .product-thumb .description h4 {
   font-weight: bold;
 }
-/* Add to cart: top-right over image */
+
+/* Price row: amounts left, cart bottom-right */
+.product-thumb__price-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.product-thumb__prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.product-thumb__current {
+  font-weight: 700;
+  color: #212529;
+}
+
+.product-thumb__sale {
+  font-weight: 700;
+  color: #c62828;
+}
+
+.product-thumb__was {
+  font-weight: 400;
+  color: #6c757d;
+  text-decoration: line-through;
+  font-size: 0.9em;
+}
+
 .product-thumb__cart {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 2;
+  flex-shrink: 0;
   margin: 0;
 }
+
 .product-thumb__cart form {
   margin: 0;
 }
+
 .product-thumb__cart .btn-primary.add-to-cart-btn {
   width: 2.5rem;
   height: 2.5rem;
@@ -677,8 +710,8 @@ footer.freshgo-footer {
   justify-content: center;
   border-radius: 10px;
   box-sizing: border-box;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
+
 .product-thumb__cart .btn-primary.add-to-cart-btn i {
   font-size: 1.05rem;
 }
