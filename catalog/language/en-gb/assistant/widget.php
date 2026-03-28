@@ -1,0 +1,17 @@
+<?php
+$_['text_assistant']       = 'Garden assistant';
+$_['text_open']            = 'Open assistant';
+$_['text_close']           = 'Close';
+$_['text_welcome']         = 'Hello! Do you need advice?';
+$_['text_welcome_sub']     = 'Ask me about seeds and plant care.';
+$_['text_intent_consult']  = 'Product advice';
+$_['text_intent_payment']  = 'Payment help';
+$_['text_intent_delivery'] = 'Delivery help';
+$_['text_placeholder']     = 'Type your question…';
+$_['text_send']            = 'Send';
+$_['text_suggestions']     = 'Quick suggestions';
+$_['text_callback']        = 'Request a call';
+$_['text_loading']         = 'Thinking…';
+$_['text_error']           = 'Something went wrong. Please try again.';
+$_['text_start_over']      = 'Start over';
+$_['text_reset_done']      = 'Starting fresh! How can I help?';

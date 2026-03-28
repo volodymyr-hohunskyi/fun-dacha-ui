@@ -91,6 +91,8 @@ class Footer extends \Opencart\System\Engine\Controller {
 		$data['scripts'] = $this->document->getScripts('footer');
 		$data['cookie'] = $this->load->controller('common/cookie');
 
+		$data['assistant_widget'] = $this->load->controller('assistant/widget');
+
 		return $this->load->view('common/footer', $data);
 	}
 }
