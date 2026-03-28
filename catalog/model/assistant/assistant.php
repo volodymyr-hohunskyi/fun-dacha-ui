@@ -363,6 +363,109 @@ class Assistant extends \Opencart\System\Engine\Model {
 	}
 
 	/**
+	 * Build product/category filter_attr query segment from user text + top products (matches OC category filter chips).
+	 *
+	 * @param array<int, int> $productIds Assistant DB product ids (same as oc product_id in export).
+	 *
+	 * @return string comma-separated attribute_id:base64 pairs, or empty
+	 */
+	public function buildFilterAttrForCategoryBrowse(int $categoryId, string $rawQuery, array $productIds): string {
+		if ($categoryId <= 0) {
+			return '';
+		}
+
+		$this->load->model('catalog/category');
+		$groups = $this->model_catalog_category->getAttributeFiltersForCategory($categoryId);
+
+		if (!$groups) {
+			return '';
+		}
+
+		$valueByNormalized = [];
+
+		foreach ($groups as $g) {
+			foreach ($g['filters'] ?? [] as $f) {
+				$val = trim((string) ($f['attribute_value'] ?? ''));
+
+				if ($val === '') {
+					continue;
+				}
+
+				$lk                        = mb_strtolower($val);
+				$valueByNormalized[$lk] = [
+					'attribute_id' => (int) $f['attribute_id'],
+					'text'         => $val,
+				];
+			}
+		}
+
+		if (!$valueByNormalized) {
+			return '';
+		}
+
+		$selected = [];
+		$q        = mb_strtolower(trim($rawQuery));
+
+		foreach ($valueByNormalized as $lk => $pair) {
+			if ($lk === '') {
+				continue;
+			}
+
+			if (mb_strlen($lk) >= 2 && mb_strpos($q, $lk) !== false) {
+				$selected[] = $pair;
+			}
+		}
+
+		$db = $this->getDb();
+
+		foreach ($productIds as $pid) {
+			$p = $db['products'][(string) $pid] ?? null;
+
+			if (!$p) {
+				continue;
+			}
+
+			foreach ($p['attributes'] ?? [] as $a) {
+				if (!is_array($a)) {
+					continue;
+				}
+
+				$v = trim((string) ($a['value'] ?? ''));
+
+				if ($v === '') {
+					continue;
+				}
+
+				$lk = mb_strtolower($v);
+
+				if (isset($valueByNormalized[$lk])) {
+					$selected[] = $valueByNormalized[$lk];
+				}
+			}
+		}
+
+		$seen  = [];
+		$parts = [];
+
+		foreach ($selected as $s) {
+			$k = $s['attribute_id'] . "\0" . $s['text'];
+
+			if (isset($seen[$k])) {
+				continue;
+			}
+
+			$seen[$k]  = true;
+			$parts[]   = $s['attribute_id'] . ':' . strtr(base64_encode($s['text']), '+/', '-_');
+
+			if (count($parts) >= 6) {
+				break;
+			}
+		}
+
+		return implode(',', $parts);
+	}
+
+	/**
 	 * @param array<int, int|string> $productIds
 	 *
 	 * @return array<int, array<string, mixed>>
@@ -515,20 +618,18 @@ class Assistant extends \Opencart\System\Engine\Model {
 
 		if ($this->matchesIntent($q, ['каталог', 'весь каталог', 'всі товари', 'всі категорії', 'показати все', 'catalog'])) {
 			$this->load->language('assistant/chat');
-			$emojis = $this->getCategoryEmojis();
-			$items  = [];
+			$items = [];
 
 			foreach ($nav['categories'] ?? [] as $navCat) {
 				if (empty($navCat['url'])) {
 					continue;
 				}
 
-				$cid = (int) ($navCat['categoryId'] ?? 0);
-				$emo = $emojis[$cid] ?? '🌱';
+				$name = trim((string) ($navCat['name'] ?? ''));
 
 				$items[] = [
 					'url'   => $navCat['url'],
-					'label' => $emo . ' →',
+					'label' => $name !== '' ? $name . ' →' : '→',
 				];
 			}
 
@@ -768,6 +869,15 @@ class Assistant extends \Opencart\System\Engine\Model {
 				$catUrl  = $this->navUrls['categoriesById'][(string) $categoryId] ?? '';
 
 				if ($catUrl) {
+					$fa = $this->buildFilterAttrForCategoryBrowse($categoryId, $rawQuery, $ids);
+
+					if ($fa !== '' && stripos($catUrl, 'filter_attr=') === false) {
+						$sep = (strpos($catUrl, '?') === false)
+							? '?'
+							: ((strpos($catUrl, '&amp;') !== false) ? '&amp;' : '&');
+						$catUrl .= $sep . 'filter_attr=' . rawurlencode($fa);
+					}
+
 					$actions[] = ['type' => 'navigateTo', 'url' => $catUrl, 'label' => 'Переглянути весь розділ «' . $catName . '» →'];
 				}
 			}
