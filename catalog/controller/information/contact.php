@@ -71,6 +71,7 @@ class Contact extends \Opencart\System\Engine\Controller {
 		}
 
 		$data['name'] = $this->customer->getFirstName();
+		$data['customer_phone'] = '';
 
 		// Captcha
 		$this->load->model('setting/extension');
@@ -107,6 +108,7 @@ class Contact extends \Opencart\System\Engine\Controller {
 
 		$required = [
 			'name'    => '',
+			'phone'   => '',
 			'enquiry' => ''
 		];
 
@@ -114,6 +116,10 @@ class Contact extends \Opencart\System\Engine\Controller {
 
 		if (!oc_validate_length($post_info['name'], 3, 32)) {
 			$json['error']['name'] = $this->language->get('error_name');
+		}
+
+		if (!oc_validate_length(trim((string)$post_info['phone']), 5, 32)) {
+			$json['error']['phone'] = $this->language->get('error_phone');
 		}
 
 		if (!oc_validate_length($post_info['enquiry'], 10, 3000)) {
@@ -150,7 +156,8 @@ class Contact extends \Opencart\System\Engine\Controller {
 				$mail->setFrom($this->config->get('config_email'));
 				$mail->setSender(html_entity_decode($post_info['name'], ENT_QUOTES, 'UTF-8'));
 				$mail->setSubject(html_entity_decode(sprintf($this->language->get('email_subject'), $post_info['name']), ENT_QUOTES, 'UTF-8'));
-				$mail->setText($post_info['enquiry']);
+				$body = $this->language->get('text_mail_phone') . ' ' . trim((string)$post_info['phone']) . "\n\n" . $post_info['enquiry'];
+				$mail->setText($body);
 				$mail->send();
 			}
 
