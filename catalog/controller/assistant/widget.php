@@ -54,6 +54,7 @@ class Widget extends \Opencart\System\Engine\Controller {
 			'productUrl'  => $data['product_url_tpl'],
 			'callbackUrl' => $data['callback_url'],
 			'lang'        => $data['lang_code'],
+			'pageContext' => $this->getAssistantPageContext(),
 			'i18n'        => [
 				'loading'   => $data['text_loading'],
 				'error'     => $data['text_error'],
@@ -66,11 +67,46 @@ class Widget extends \Opencart\System\Engine\Controller {
 		}
 
 		$data['assistant_config_json'] = json_encode($cfg, JSON_UNESCAPED_UNICODE);
-		$data['assistant_chat_js_ver']   = '8';
+		$data['assistant_chat_js_ver']   = '10';
 
 		$this->document->addStyle('catalog/view/stylesheet/assistant.css');
 		// chat.js is loaded from widget.twig (after inline config) so it always runs even if footer getScripts order differs.
 
 		return $this->load->view('assistant/widget', $data);
+	}
+
+	/**
+	 * Current storefront route + category / product / filters for assistant context (JSON to chat API).
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function getAssistantPageContext(): array {
+		$route = (string) ($this->request->get['route'] ?? '');
+		$ctx   = ['route' => $route];
+
+		if ($route === 'product/product' && isset($this->request->get['product_id'])) {
+			$ctx['product_id'] = (int) $this->request->get['product_id'];
+		}
+
+		if ($route === 'product/category' && isset($this->request->get['path'])) {
+			$path  = (string) $this->request->get['path'];
+			$parts = explode('_', $path);
+			$cid   = (int) array_pop($parts);
+
+			if ($cid > 0) {
+				$ctx['category_id'] = $cid;
+				$ctx['path']        = $path;
+			}
+		}
+
+		if (isset($this->request->get['filter_attr']) && is_string($this->request->get['filter_attr'])) {
+			$ctx['filter_attr'] = $this->request->get['filter_attr'];
+		}
+
+		if ($route === 'product/search' && isset($this->request->get['category_id'])) {
+			$ctx['category_id'] = (int) $this->request->get['category_id'];
+		}
+
+		return $ctx;
 	}
 }
