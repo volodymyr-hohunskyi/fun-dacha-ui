@@ -8,10 +8,11 @@ namespace Opencart\Catalog\Controller\Common;
 class HomeRecentlyViewed extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$setting = [
-			'limit'  => 6,
-			'width'  => 200,
-			'height' => 200,
-			'axis'   => 'horizontal',
+			'limit'       => 6,
+			'width'       => 200,
+			'height'      => 200,
+			'axis'        => 'horizontal',
+			'home_layout' => true,
 		];
 		$output = $this->load->controller('extension/opencart/module/recently_viewed', $setting);
 		return $output ? '<div class="home-recently-viewed-wrapper">' . $output . '</div>' : '';
