@@ -14,6 +14,7 @@ class HomeRecommended extends \Opencart\System\Engine\Controller {
 			'height'           => 200,
 			'axis'             => 'horizontal',
 			'heading_override' => $this->language->get('heading_title'),
+			'home_layout'      => true,
 		];
 		$output = $this->load->controller('extension/opencart/module/recommended', $setting);
 		return $output ? '<div class="home-recommended-wrapper">' . $output . '</div>' : '';
