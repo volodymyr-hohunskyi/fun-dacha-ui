@@ -170,7 +170,15 @@
 .ai-welcome__sub {
   font-size: 0.9rem;
   color: var(--ai-muted);
+  margin: 0 0 0.5rem;
+}
+
+.ai-welcome__hint {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--ai-muted);
   margin: 0 0 1rem;
+  opacity: 0.95;
 }
 
 .ai-intent-list {

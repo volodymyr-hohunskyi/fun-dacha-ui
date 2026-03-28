@@ -4,6 +4,7 @@ $_['text_open']            = 'Open assistant';
 $_['text_close']           = 'Close';
 $_['text_welcome']         = 'Hello! Do you need advice?';
 $_['text_welcome_sub']     = 'Ask me about seeds and plant care.';
+$_['text_search_hint']     = 'To narrow results, add words that match product attributes — e.g. early, yellow.';
 $_['text_intent_consult']  = 'Product advice';
 $_['text_intent_payment']  = 'Payment help';
 $_['text_intent_delivery'] = 'Delivery help';

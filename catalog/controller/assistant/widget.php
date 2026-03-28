@@ -33,6 +33,7 @@ class Widget extends \Opencart\System\Engine\Controller {
 		$data['text_close']            = $this->language->get('text_close');
 		$data['text_welcome']          = $this->language->get('text_welcome');
 		$data['text_welcome_sub']      = $this->language->get('text_welcome_sub');
+		$data['text_search_hint']      = $this->language->get('text_search_hint');
 		$data['text_intent_consult']     = $this->language->get('text_intent_consult');
 		$data['text_intent_payment']   = $this->language->get('text_intent_payment');
 		$data['text_intent_delivery']  = $this->language->get('text_intent_delivery');

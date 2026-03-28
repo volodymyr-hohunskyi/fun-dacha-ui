@@ -417,12 +417,6 @@ class Assistant extends \Opencart\System\Engine\Model {
 			}
 		}
 
-		$articleIdx = $this->findRelevantArticle($categoryId);
-
-		if ($articleIdx !== null) {
-			$actions[] = ['type' => 'showArticle', 'articleIndex' => $articleIdx];
-		}
-
 		return [
 			'text'       => 'Ось що знайшов для вас:',
 			'actions'    => $actions,
@@ -528,7 +522,8 @@ class Assistant extends \Opencart\System\Engine\Model {
 	private function getNextFilterGroup(int $categoryId, array $usedFilterIds): ?array {
 		$db               = $this->getDb();
 		$groupsByCategory = $db['indexes']['filtersByCategory'][(string) $categoryId] ?? [];
-		$priority         = [4 => 'Яка стиглість вам підходить?', 1 => 'Який колір плодів?', 2 => 'Де будете вирощувати?'];
+		// Group 4 (стиглість) intentionally omitted — too noisy in the widget; group 1–2 only.
+		$priority = [1 => 'Який колір плодів?', 2 => 'Де будете вирощувати?'];
 
 		foreach ($priority as $groupId => $question) {
 			if (!isset($groupsByCategory[(string) $groupId])) {
@@ -543,23 +538,5 @@ class Assistant extends \Opencart\System\Engine\Model {
 		}
 
 		return null;
-	}
-
-	private function findRelevantArticle(?int $categoryId): ?int {
-		if (!$categoryId) {
-			return null;
-		}
-
-		$db       = $this->getDb();
-		$topicMap = [100 => '2', 110 => '2', 130 => '2', 140 => '2'];
-		$topic    = $topicMap[$categoryId] ?? null;
-
-		if (!$topic) {
-			return null;
-		}
-
-		$indices = $db['blog']['articlesByTopic'][$topic] ?? [];
-
-		return $indices[0] ?? null;
 	}
 }
