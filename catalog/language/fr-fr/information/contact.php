@@ -8,7 +8,6 @@ $_['text_store']     = 'Nos magasins';
 $_['text_contact']   = 'Formulaire de contact';
 $_['text_address']   = 'Adresse';
 $_['text_telephone'] = 'Téléphone';
-$_['text_email']     = 'E-mail';
 $_['text_open']      = 'Horaires d\'ouverture';
 $_['text_comment']   = 'Commentaires';
 $_['text_message']   = '<p>Votre demande a été envoyée avec succès au propriétaire du magasin!</p>';

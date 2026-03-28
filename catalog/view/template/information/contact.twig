@@ -24,22 +24,12 @@
                 <a href="https://maps.google.com/maps?q={{ geocode|url_encode }}&hl={{ geocode_hl }}&t=m&z=15" target="_blank" class="btn btn-info"><i class="fa-solid fa-location-dot"></i> {{ button_map }}</a>
               {% endif %}
             </div>
-            {% if telephone or store_email %}
-              <div class="col-sm-3">
-                {% if telephone %}
-                  <strong>{{ text_telephone }}</strong>
-                  <br/>
-                  {{ telephone }}
-                  <br/>
-                  <br/>
-                {% endif %}
-                {% if store_email %}
-                  <strong>{{ text_email }}</strong>
-                  <br/>
-                  <a href="mailto:{{ store_email|e('html_attr') }}">{{ store_email }}</a>
-                  <br/>
-                  <br/>
-                {% endif %}
+            {% if telephone %}
+              <div class="col-sm-3"><strong>{{ text_telephone }}</strong>
+                <br/>
+                {{ telephone }}
+                <br/>
+                <br/>
               </div>
             {% endif %}
             <div class="col-sm-3">
