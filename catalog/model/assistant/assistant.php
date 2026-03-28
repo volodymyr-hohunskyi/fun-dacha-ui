@@ -334,10 +334,38 @@ class Assistant extends \Opencart\System\Engine\Model {
 			];
 		}
 
-		if ($this->matchesIntent($q, ['весь каталог', 'всі товари', 'всі категорії', 'показати все', 'catalog'])) {
+		if ($this->matchesIntent($q, ['каталог', 'весь каталог', 'всі товари', 'всі категорії', 'показати все', 'catalog'])) {
+			$this->load->language('assistant/chat');
+			$emojis = $this->getCategoryEmojis();
+			$actions = [];
+
+			foreach ($nav['categories'] ?? [] as $navCat) {
+				if (empty($navCat['url'])) {
+					continue;
+				}
+
+				$cid  = (int) ($navCat['categoryId'] ?? 0);
+				$emo  = $emojis[$cid] ?? '🌱';
+				$name = (string) ($navCat['name'] ?? '');
+
+				$actions[] = [
+					'type'  => 'navigateTo',
+					'url'   => $navCat['url'],
+					'label' => trim($emo . ' ' . $name) . ' →',
+				];
+			}
+
+			if (!empty($nav['catalog'])) {
+				$actions[] = [
+					'type'  => 'navigateTo',
+					'url'   => $nav['catalog'],
+					'label' => $this->language->get('text_catalog_nav_all'),
+				];
+			}
+
 			return [
-				'text'    => 'Переглядайте повний каталог насіння та товарів для саду:',
-				'actions' => [['type' => 'navigateTo', 'url' => $nav['catalog'] ?? '', 'label' => 'Відкрити каталог →']],
+				'text'    => $this->language->get('text_catalog_nav_intro'),
+				'actions' => $actions,
 			];
 		}
 
@@ -406,14 +434,6 @@ class Assistant extends \Opencart\System\Engine\Model {
 				if ($catUrl) {
 					$actions[] = ['type' => 'navigateTo', 'url' => $catUrl, 'label' => 'Переглянути весь розділ «' . $catName . '» →'];
 				}
-			}
-		}
-
-		if (count($top) >= 5 && $categoryId) {
-			$nextGroup = $this->getNextFilterGroup((int) $categoryId, $filterIds);
-
-			if ($nextGroup) {
-				$actions[] = ['type' => 'askFilter', 'groupId' => $nextGroup['id'], 'question' => $nextGroup['question']];
 			}
 		}
 
@@ -514,29 +534,4 @@ class Assistant extends \Opencart\System\Engine\Model {
 		return [];
 	}
 
-	/**
-	 * @param array<int, int> $usedFilterIds
-	 *
-	 * @return array<string, mixed>|null
-	 */
-	private function getNextFilterGroup(int $categoryId, array $usedFilterIds): ?array {
-		$db               = $this->getDb();
-		$groupsByCategory = $db['indexes']['filtersByCategory'][(string) $categoryId] ?? [];
-		// Group 4 (стиглість) intentionally omitted — too noisy in the widget; group 1–2 only.
-		$priority = [1 => 'Який колір плодів?', 2 => 'Де будете вирощувати?'];
-
-		foreach ($priority as $groupId => $question) {
-			if (!isset($groupsByCategory[(string) $groupId])) {
-				continue;
-			}
-
-			$groupFilterIds = $groupsByCategory[(string) $groupId];
-
-			if (!array_intersect($usedFilterIds, $groupFilterIds)) {
-				return ['id' => $groupId, 'question' => $question];
-			}
-		}
-
-		return null;
-	}
 }

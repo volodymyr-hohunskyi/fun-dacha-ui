@@ -170,15 +170,7 @@
 .ai-welcome__sub {
   font-size: 0.9rem;
   color: var(--ai-muted);
-  margin: 0 0 0.5rem;
-}
-
-.ai-welcome__hint {
-  font-size: 0.8rem;
-  line-height: 1.4;
-  color: var(--ai-muted);
   margin: 0 0 1rem;
-  opacity: 0.95;
 }
 
 .ai-intent-list {
@@ -263,9 +255,22 @@
 
 .ai-assistant-panel__footer {
   display: flex;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.65rem 1rem 0.75rem;
   border-top: 1px solid var(--ai-border);
+}
+
+.ai-assistant-panel__search-hint {
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: var(--ai-muted);
+}
+
+.ai-assistant-panel__footer-input-row {
+  display: flex;
+  gap: 0.5rem;
   align-items: flex-end;
 }
 
@@ -479,6 +484,10 @@
 
 .ai-navigate-cta {
   margin-top: 0.5rem;
+}
+
+.ai-message__body .ai-navigate-cta + .ai-navigate-cta {
+  margin-top: 0.35rem;
 }
 
 .ai-navigate-cta__btn {
