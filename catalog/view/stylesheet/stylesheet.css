@@ -47,6 +47,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #000 !important;
 }
 
+footer.freshgo-footer h5 {
+  color: #fff !important;
+}
+
 /* Section headings & card titles - black for consistency */
 .recently-viewed-section h3,
 .product-thumb .description h4,
@@ -710,7 +714,7 @@ footer.freshgo-footer {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #fff;
+  color: #fff !important;
   margin-bottom: 18px;
 }
 
