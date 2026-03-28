@@ -812,31 +812,46 @@ footer.freshgo-footer {
   border: 1px solid #ddd;
   position: relative;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 4px;
 }
 
 .product-thumb .image {
   text-align: center;
+  flex-shrink: 0;
 }
 
 .product-thumb .image a:hover {
   opacity: 0.8;
 }
 
+.product-thumb .content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
 .product-thumb .description {
   padding: 15px;
-  margin-bottom: 56px;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .product-thumb .description h4 {
   font-weight: bold;
 }
 
-/* Product card: add to cart — same brand CTA as product page */
+/* Product card: CTA in flow with inset padding (no absolute overlap) */
 .product-thumb .button {
   display: flex;
-  position: absolute;
+  flex-shrink: 0;
   width: 100%;
-  bottom: 0;
+  padding: 0 12px 12px;
+  box-sizing: border-box;
 }
 
 .product-thumb .button form {
@@ -846,28 +861,29 @@ footer.freshgo-footer {
 
 .product-thumb .button .btn-primary {
   width: 100%;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 0;
-  padding: 12px 16px;
+  border-radius: 10px;
+  padding: 12px 18px;
+  box-sizing: border-box;
 }
 
 @media (min-width: 960px) {
   .product-list .product-thumb {
-    display: flex;
+    flex-direction: row;
+    align-items: stretch;
   }
   .product-list .product-thumb .image {
     flex-direction: column;
-    margin-bottom: 0px;
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
   .product-list .product-thumb .content {
+    flex: 1 1 75%;
+    min-width: 0;
+    display: flex;
     flex-direction: column;
-    flex: 75%;
-    position: relative;
   }
   .product-list .product-thumb .button {
-    border-left: 1px solid #ddd;
-    width: calc(100% - 15px);
-    margin-left: 15px;
+    padding: 0 15px 15px;
   }
 }
 .rating .fa-stack {
