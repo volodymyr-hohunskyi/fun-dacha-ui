@@ -20,10 +20,6 @@ namespace Opencart\Catalog\Controller\Product;
  * @package Opencart\Catalog\Controller\Product
  */
 class Thumb extends \Opencart\System\Engine\Controller {
-	/** Catalog / product-card thumbnails — matches seed packet artwork proportion (~384×703). */
-	public const LIST_THUMB_WIDTH = 384;
-	public const LIST_THUMB_HEIGHT = 703;
-
 	/**
 	 * Index
 	 *
