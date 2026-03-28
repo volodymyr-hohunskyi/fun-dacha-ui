@@ -757,6 +757,14 @@ class ColumnLeft extends \Opencart\System\Engine\Controller {
 				];
 			}
 
+			if ($this->user->hasPermission('access', 'tool/assistant')) {
+				$maintenance[] = [
+					'name'     => $this->language->get('text_assistant'),
+					'href'     => $this->url->link('tool/assistant', 'user_token=' . $this->session->data['user_token']),
+					'children' => []
+				];
+			}
+
 			if ($maintenance) {
 				$system[] = [
 					'name'     => $this->language->get('text_maintenance'),

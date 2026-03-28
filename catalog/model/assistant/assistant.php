@@ -34,14 +34,57 @@ class Assistant extends \Opencart\System\Engine\Model {
 
 		if (!is_file($path)) {
 			self::$db = [];
-			return self::$db;
+		} else {
+			$json = file_get_contents($path);
+			$data = json_decode($json, true);
+			self::$db = is_array($data) ? $data : [];
 		}
 
-		$json = file_get_contents($path);
-		$data = json_decode($json, true);
-		self::$db = is_array($data) ? $data : [];
+		$overlayPath = DIR_STORAGE . 'assistant/assistant_info.json';
+
+		if (is_file($overlayPath)) {
+			$oj = file_get_contents($overlayPath);
+			$overlay = json_decode($oj, true);
+
+			if (is_array($overlay) && isset($overlay['info']) && is_array($overlay['info'])) {
+				if (!isset(self::$db['info']) || !is_array(self::$db['info'])) {
+					self::$db['info'] = [];
+				}
+
+				foreach ($overlay['info'] as $k => $v) {
+					if (is_array($v)) {
+						self::$db['info'][$k] = $v;
+					}
+				}
+			}
+		}
 
 		return self::$db;
+	}
+
+	/**
+	 * @param mixed $field
+	 */
+	private function resolveInfoLocalizedField($field, string $lang): string {
+		if (is_array($field)) {
+			if (isset($field[$lang])) {
+				return (string) $field[$lang];
+			}
+
+			if (isset($field['uk-ua'])) {
+				return (string) $field['uk-ua'];
+			}
+
+			if (isset($field['en-gb'])) {
+				return (string) $field['en-gb'];
+			}
+
+			$first = reset($field);
+
+			return is_string($first) ? $first : '';
+		}
+
+		return (string) $field;
 	}
 
 	public function getTopCategories(int $limit = 8): array {
@@ -239,11 +282,13 @@ class Assistant extends \Opencart\System\Engine\Model {
 	 * @return array<string, mixed>
 	 */
 	private function getInfoResponse(string $key): array {
-		$db = $this->getDb();
+		$db   = $this->getDb();
+		$lang = (string) ($this->config->get('config_language') ?: 'uk-ua');
 
 		if (isset($db['info'][$key])) {
-			$text = $db['info'][$key]['text'] ?? '';
-			$url  = $db['info'][$key]['url'] ?? '';
+			$node = $db['info'][$key];
+			$text = $this->resolveInfoLocalizedField($node['text'] ?? '', $lang);
+			$url  = $this->resolveInfoLocalizedField($node['url'] ?? '', $lang);
 		} else {
 			$text = $key === 'payment'
 				? 'Умови оплати дивіться в розділі інформації на сайті або зателефонуйте нам.'

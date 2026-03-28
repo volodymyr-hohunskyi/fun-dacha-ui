@@ -15,3 +15,4 @@ $_['text_loading']         = 'Thinking…';
 $_['text_error']           = 'Something went wrong. Please try again.';
 $_['text_start_over']      = 'Start over';
 $_['text_reset_done']      = 'Starting fresh! How can I help?';
+$_['text_open_full_page']  = 'Full page';

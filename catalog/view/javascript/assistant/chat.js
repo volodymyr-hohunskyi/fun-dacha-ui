@@ -438,19 +438,28 @@
     $loading = $('#ai-assistant-loading');
     $reset = $('#ai-assistant-reset');
 
-    $toggle.on('click', function () {
-      state.isOpen = !state.isOpen;
-      $panel.toggleClass('ai-assistant-panel--open', state.isOpen).attr('aria-hidden', !state.isOpen);
-      if (state.isOpen) {
-        $input.trigger('focus');
-        scrollBottom();
-      }
-    });
+    if (cfg.embedMode === 'full') {
+      state.isOpen = true;
+      $panel.addClass('ai-assistant-panel--open').attr('aria-hidden', false);
+    }
 
-    $close.on('click', function () {
-      state.isOpen = false;
-      $panel.removeClass('ai-assistant-panel--open').attr('aria-hidden', true);
-    });
+    if ($toggle.length) {
+      $toggle.on('click', function () {
+        state.isOpen = !state.isOpen;
+        $panel.toggleClass('ai-assistant-panel--open', state.isOpen).attr('aria-hidden', !state.isOpen);
+        if (state.isOpen) {
+          $input.trigger('focus');
+          scrollBottom();
+        }
+      });
+    }
+
+    if ($close.length) {
+      $close.on('click', function () {
+        state.isOpen = false;
+        $panel.removeClass('ai-assistant-panel--open').attr('aria-hidden', true);
+      });
+    }
 
     $(document).on('click', '.ai-intent-btn', function () {
       var msg = $(this).data('message') || $(this).text();

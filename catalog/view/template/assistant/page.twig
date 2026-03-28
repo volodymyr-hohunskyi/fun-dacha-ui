@@ -1,0 +1,20 @@
+{{ header }}
+<div id="assistant-page" class="container py-3">
+  <ul class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+    {% endfor %}
+  </ul>
+  <div class="row">
+    {{ column_left }}
+    <div id="content" class="col">{{ content_top }}
+      <h1 class="mb-3">{{ heading_title }}</h1>
+      <div class="ai-assistant-page-wrap">
+        {{ assistant_widget }}
+      </div>
+      {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+{{ footer }}

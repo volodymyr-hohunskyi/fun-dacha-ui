@@ -1,16 +1,23 @@
+{% if not assistant_embed %}
 <button type="button" id="ai-assistant-toggle" class="ai-assistant-trigger" aria-label="{{ text_open }}">
   <span class="ai-assistant-trigger__icon" aria-hidden="true">🌱</span>
   <span class="ai-assistant-trigger__label">{{ text_assistant }}</span>
 </button>
+{% endif %}
 
-<div id="ai-assistant-panel" class="ai-assistant-panel" aria-hidden="true" role="dialog" aria-modal="false" aria-label="{{ text_assistant }}">
+<div id="ai-assistant-panel" class="ai-assistant-panel{% if assistant_embed %} ai-assistant-panel--embedded ai-assistant-panel--open{% endif %}" {% if assistant_embed %}aria-hidden="false"{% else %}aria-hidden="true"{% endif %} role="dialog" aria-modal="false" aria-label="{{ text_assistant }}">
   <div class="ai-assistant-panel__header">
     <span class="ai-assistant-panel__title">🌱 {{ text_assistant }}</span>
+    {% if not assistant_embed %}
     <button type="button" class="ai-assistant-panel__close" id="ai-assistant-close" aria-label="{{ text_close }}">✕</button>
+    {% endif %}
   </div>
 
   <div class="ai-assistant-panel__toolbar">
     <button type="button" class="ai-assistant-panel__reset" id="ai-assistant-reset">{{ text_start_over }}</button>
+    {% if not assistant_embed and assistant_page_url %}
+    <a href="{{ assistant_page_url }}" class="ai-assistant-panel__fullpage">{{ text_open_full_page }}</a>
+    {% endif %}
   </div>
 
   <div class="ai-assistant-panel__body" id="ai-chat-scroll">

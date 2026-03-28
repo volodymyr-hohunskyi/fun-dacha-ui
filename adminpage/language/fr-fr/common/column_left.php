@@ -7,6 +7,7 @@ $_['text_attribute']           = 'Attributs';
 $_['text_attribute_group']     = 'Groupes d\'Attributs';
 $_['text_antifraud']           = 'Anti-Fraud';
 $_['text_antispam']            = 'Anti-Spam';
+$_['text_assistant']           = 'Assistant IA';
 $_['text_article']             = 'Articles';
 $_['text_topic']               = 'Sujets';
 $_['text_comment']             = 'Commentaires';

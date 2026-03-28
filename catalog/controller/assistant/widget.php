@@ -7,12 +7,19 @@ namespace Opencart\Catalog\Controller\Assistant;
  */
 class Widget extends \Opencart\System\Engine\Controller {
 	/**
+	 * @param array<string, mixed> $options embed: full-page layout; pageUrl: link shown in panel toolbar
+	 *
 	 * @return string
 	 */
-	public function index(): string {
+	public function index(array $options = []): string {
 		$this->load->language('assistant/widget');
 
 		$lang = $this->config->get('config_language');
+
+		$embed = !empty($options['embed']);
+
+		$data['assistant_embed']     = $embed;
+		$data['assistant_page_url']  = $this->url->link('assistant/page', 'language=' . $lang);
 
 		$data['ajax_url']        = $this->url->link('assistant/chat', 'language=' . $lang, true);
 		$data['reset_url']       = $this->url->link('assistant/chat.reset', 'language=' . $lang, true);
@@ -37,8 +44,9 @@ class Widget extends \Opencart\System\Engine\Controller {
 		$data['text_error']            = $this->language->get('text_error');
 		$data['text_start_over']       = $this->language->get('text_start_over');
 		$data['text_reset_done']       = $this->language->get('text_reset_done');
+		$data['text_open_full_page']   = $this->language->get('text_open_full_page');
 
-		$data['assistant_config_json'] = json_encode([
+		$cfg = [
 			'ajaxUrl'     => $data['ajax_url'],
 			'resetUrl'    => $data['reset_url'],
 			'imageBase'   => $data['image_base'],
@@ -50,7 +58,13 @@ class Widget extends \Opencart\System\Engine\Controller {
 				'error'     => $data['text_error'],
 				'resetDone' => $data['text_reset_done'],
 			],
-		], JSON_UNESCAPED_UNICODE);
+		];
+
+		if ($embed) {
+			$cfg['embedMode'] = 'full';
+		}
+
+		$data['assistant_config_json'] = json_encode($cfg, JSON_UNESCAPED_UNICODE);
 
 		$this->document->addStyle('catalog/view/stylesheet/assistant.css');
 		$this->document->addScript('catalog/view/javascript/assistant/chat.js', 'footer');

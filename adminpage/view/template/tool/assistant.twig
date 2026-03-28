@@ -1,0 +1,56 @@
+{{ header }}{{ column_left }}
+<div id="content">
+  <div class="page-header">
+    <div class="container-fluid">
+      <h1>{{ heading_title }}</h1>
+      <ol class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+          <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+  <div class="container-fluid">
+    {% if error_warning %}
+      <div class="alert alert-danger alert-dismissible"><i class="fa-solid fa-circle-exclamation"></i> {{ error_warning }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success alert-dismissible"><i class="fa-solid fa-check-circle"></i> {{ success }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+    {% endif %}
+    <div class="card mb-3">
+      <div class="card-header"><i class="fa-solid fa-robot"></i> {{ heading_title }}</div>
+      <div class="card-body">
+        <p class="text-muted small">{{ text_permission|raw }}</p>
+        <p class="text-muted">{{ text_help }}</p>
+        <form action="{{ action }}" method="post">
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-payment">{{ entry_payment }}</label>
+            <div class="col-sm-10">
+              <input type="number" name="assistant_payment_information_id" value="{{ assistant_payment_information_id }}" min="0" id="input-payment" class="form-control"/>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label class="col-sm-2 col-form-label" for="input-delivery">{{ entry_delivery }}</label>
+            <div class="col-sm-10">
+              <input type="number" name="assistant_delivery_information_id" value="{{ assistant_delivery_information_id }}" min="0" id="input-delivery" class="form-control"/>
+            </div>
+          </div>
+          <div class="text-end">
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> {{ button_save }}</button>
+          </div>
+        </form>
+        <hr/>
+        <p><strong>{{ text_overlay }}:</strong> <code>{{ overlay_path }}</code></p>
+        {% if overlay_exists %}
+          <p class="text-success mb-0">{{ overlay_mtime }}</p>
+        {% else %}
+          <p class="text-muted mb-0">—</p>
+        {% endif %}
+        <div class="mt-3">
+          <a href="{{ sync }}" class="btn btn-secondary"><i class="fa-solid fa-rotate"></i> {{ button_sync }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{{ footer }}
