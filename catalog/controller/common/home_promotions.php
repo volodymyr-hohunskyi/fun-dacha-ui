@@ -1,5 +1,8 @@
 <?php
 namespace Opencart\Catalog\Controller\Common;
+
+use Opencart\Catalog\Controller\Product\Thumb;
+
 /**
  * Home Promotions – products with discounts. Same product thumb widget as special.
  *
@@ -24,9 +27,9 @@ class HomePromotions extends \Opencart\System\Engine\Controller {
 
 		foreach ($results as $result) {
 			if ($result['image']) {
-				$image = $this->model_tool_image->resize(html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'), 200, 200);
+				$image = $this->model_tool_image->resize(html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'), Thumb::LIST_THUMB_WIDTH, Thumb::LIST_THUMB_HEIGHT);
 			} else {
-				$image = $this->model_tool_image->resize('placeholder.png', 200, 200);
+				$image = $this->model_tool_image->resize('placeholder.png', Thumb::LIST_THUMB_WIDTH, Thumb::LIST_THUMB_HEIGHT);
 			}
 			$price = false;
 			$special = false;
