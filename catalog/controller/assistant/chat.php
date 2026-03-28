@@ -72,6 +72,19 @@ class Chat extends \Opencart\System\Engine\Controller {
 			$filterIds
 		);
 
+		if (($result['assistantShortcut'] ?? '') === 'consult') {
+			$this->load->language('assistant/chat');
+			$result['text']    = $this->language->get('text_consult_intro');
+			$result['actions'] = [
+				[
+					'type'  => 'navigateTo',
+					'url'   => $this->url->link('information/contact', 'language=' . $this->config->get('config_language')),
+					'label' => $this->language->get('text_consult_cta'),
+				],
+			];
+			unset($result['assistantShortcut']);
+		}
+
 		if (array_key_exists('categoryId', $result)) {
 			$state['categoryId'] = $result['categoryId'];
 		}
@@ -140,7 +153,13 @@ class Chat extends \Opencart\System\Engine\Controller {
 		$catalog = $this->url->link('common/home', 'language=' . $lang);
 
 		if (!empty($db['categoryTree'][0]['id'])) {
-			$catalog = $this->url->link('product/category', 'language=' . $lang . '&path=' . (int) $db['categoryTree'][0]['id']);
+			$rootId = $this->resolveCategoryId((int) $db['categoryTree'][0]['id']);
+			if ($rootId > 0) {
+				$catalog = $this->url->link(
+					'product/category',
+					'language=' . $lang . '&path=' . $this->buildCategoryPathString($rootId)
+				);
+			}
 		}
 
 		$categories    = [];
@@ -154,7 +173,15 @@ class Chat extends \Opencart\System\Engine\Controller {
 				$kw[] = mb_strtolower(str_replace('-', ' ', (string) $cat['slug']));
 			}
 
-			$url = $this->url->link('product/category', 'language=' . $lang . '&path=' . (int) $cat['id']);
+			$resolvedId = $this->resolveCategoryId((int) $cat['id']);
+			if ($resolvedId > 0) {
+				$url = $this->url->link(
+					'product/category',
+					'language=' . $lang . '&path=' . $this->buildCategoryPathString($resolvedId)
+				);
+			} else {
+				$url = $catalog;
+			}
 
 			$categories[] = [
 				'categoryId' => (int) $cat['id'],
@@ -173,5 +200,53 @@ class Chat extends \Opencart\System\Engine\Controller {
 			'categories'     => $categories,
 			'categoriesById' => $categoriesById,
 		];
+	}
+
+	/**
+	 * Prefer a live category from the catalog; JSON ids may be stale vs oc_category.
+	 */
+	private function resolveCategoryId(int $candidate_id): int {
+		$this->load->model('catalog/category');
+
+		if ($candidate_id > 0) {
+			$info = $this->model_catalog_category->getCategory($candidate_id);
+
+			if ($info) {
+				return $candidate_id;
+			}
+		}
+
+		$roots = $this->model_catalog_category->getCategories(0);
+
+		if (!empty($roots[0]['category_id'])) {
+			return (int) $roots[0]['category_id'];
+		}
+
+		return 0;
+	}
+
+	/**
+	 * Full path segment for product/category (matches menu / oc_category_path).
+	 */
+	private function buildCategoryPathString(int $category_id): string {
+		if ($category_id <= 0) {
+			return '';
+		}
+
+		$query = $this->db->query(
+			"SELECT `path_id` FROM `" . DB_PREFIX . "category_path` WHERE `category_id` = '" . (int) $category_id . "' ORDER BY `level` ASC"
+		);
+
+		if ($query->num_rows) {
+			$ids = [];
+
+			foreach ($query->rows as $row) {
+				$ids[] = (int) $row['path_id'];
+			}
+
+			return implode('_', $ids);
+		}
+
+		return (string) (int) $category_id;
 	}
 }

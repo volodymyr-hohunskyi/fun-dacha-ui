@@ -41,9 +41,27 @@
   transition: background 0.2s ease, transform 0.15s ease;
 }
 
+/* Emoji ignores `color`; force a white glyph on the green pill */
+.ai-assistant-trigger__icon {
+  display: inline-block;
+  line-height: 1;
+  color: #fff;
+  filter: brightness(0) invert(1);
+  opacity: 0.98;
+}
+
+.ai-assistant-trigger__label {
+  color: #fff;
+}
+
 .ai-assistant-trigger:hover {
   background: var(--ai-primary-dark);
   transform: translateY(-1px);
+}
+
+.ai-assistant-trigger:hover .ai-assistant-trigger__icon {
+  filter: brightness(0) invert(1);
+  opacity: 1;
 }
 
 .ai-assistant-panel {
