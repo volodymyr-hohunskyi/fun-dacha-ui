@@ -868,21 +868,30 @@ footer.freshgo-footer {
 .product-thumb .button {
   display: flex;
   flex-shrink: 0;
+  justify-content: flex-end;
   width: 100%;
   padding: 0 12px 12px;
   box-sizing: border-box;
 }
 
 .product-thumb .button form {
-  flex: 1;
+  flex: 0 0 auto;
   min-width: 0;
 }
 
-.product-thumb .button .btn-primary {
-  width: 100%;
+.product-thumb .button .btn-primary.add-to-cart-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
-  padding: 12px 18px;
   box-sizing: border-box;
+}
+
+.product-thumb .button .btn-primary.add-to-cart-btn i {
+  font-size: 1.1rem;
 }
 
 @media (min-width: 960px) {
@@ -1257,9 +1266,9 @@ footer.freshgo-footer {
 #common-home .container,
 #common-home .hero-banner-inner,
 #common-home .popular-crops-section .container,
-#common-home .home-recommended-wrapper .container,
+#common-home .home-recommended-wrapper,
 #common-home .blog-carousel-section .container,
-#common-home .home-recently-viewed-wrapper .container,
+#common-home .home-recently-viewed-wrapper,
 #common-home .home-brands-section .container {
   padding-left: var(--home-content-padding-x);
   padding-right: var(--home-content-padding-x);

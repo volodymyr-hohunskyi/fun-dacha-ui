@@ -29,7 +29,7 @@
       <form method="post" data-oc-toggle="ajax" data-oc-load="{{ cart }}" data-oc-target="#cart" action="{{ cart_add }}" class="flex-fill">
         <input type="hidden" name="product_id" value="{{ product_id }}"/>
         <input type="hidden" name="quantity" value="{{ minimum }}"/>
-        <button type="submit" class="btn btn-primary text-white add-to-cart-btn w-100"><i class="fa-solid fa-cart-shopping me-2" aria-hidden="true"></i>{{ button_cart }}</button>
+        <button type="submit" class="btn btn-primary text-white add-to-cart-btn" aria-label="{{ button_cart }}" title="{{ button_cart }}"><i class="fa-solid fa-cart-shopping" aria-hidden="true"></i></button>
       </form>
     </div>
   </div>

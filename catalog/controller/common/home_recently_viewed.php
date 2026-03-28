@@ -14,6 +14,6 @@ class HomeRecentlyViewed extends \Opencart\System\Engine\Controller {
 			'axis'   => 'horizontal',
 		];
 		$output = $this->load->controller('extension/opencart/module/recently_viewed', $setting);
-		return $output ? '<div class="home-recently-viewed-wrapper"><div class="container">' . $output . '</div></div>' : '';
+		return $output ? '<div class="home-recently-viewed-wrapper">' . $output . '</div>' : '';
 	}
 }
