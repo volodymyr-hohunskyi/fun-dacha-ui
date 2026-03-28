@@ -66,7 +66,7 @@ class Widget extends \Opencart\System\Engine\Controller {
 		}
 
 		$data['assistant_config_json'] = json_encode($cfg, JSON_UNESCAPED_UNICODE);
-		$data['assistant_chat_js_ver']   = '7';
+		$data['assistant_chat_js_ver']   = '8';
 
 		$this->document->addStyle('catalog/view/stylesheet/assistant.css');
 		// chat.js is loaded from widget.twig (after inline config) so it always runs even if footer getScripts order differs.

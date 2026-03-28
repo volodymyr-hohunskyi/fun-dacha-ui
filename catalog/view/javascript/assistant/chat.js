@@ -142,6 +142,12 @@
       .replace(/"/g, '&quot;');
   }
 
+  /** OC url->link() already uses &amp;; avoid double-encoding in href. */
+  function escHref(url) {
+    var u = String(url || '').replace(/&amp;/g, '&');
+    return escHtml(u);
+  }
+
   function renderMarkdown(text) {
     return escHtml(text)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -205,6 +211,55 @@
     }
   }
 
+  function groupProductAttributes(attrs) {
+    var byGroup = {};
+    (attrs || []).forEach(function (a) {
+      var g = (a.group && String(a.group).trim()) || '__default__';
+      var n = (a.name && String(a.name).trim()) || '';
+      if (!n) {
+        return;
+      }
+      var v = a.value != null && a.value !== '' ? String(a.value) : '';
+      if (!byGroup[g]) {
+        byGroup[g] = {};
+      }
+      if (!byGroup[g][n]) {
+        byGroup[g][n] = [];
+      }
+      if (v && byGroup[g][n].indexOf(v) === -1) {
+        byGroup[g][n].push(v);
+      }
+    });
+    return byGroup;
+  }
+
+  function renderGroupedProductAttributes(attrs) {
+    var grouped = groupProductAttributes(attrs);
+    var keys = Object.keys(grouped);
+    if (!keys.length) {
+      return '';
+    }
+    var showGroupTitles = keys.length > 1;
+    var html = '';
+    keys.forEach(function (gKey) {
+      if (showGroupTitles && gKey !== '__default__') {
+        html +=
+          '<div class="ai-attr-group__heading">' + escHtml(gKey) + '</div>';
+      }
+      var rows = grouped[gKey];
+      Object.keys(rows).forEach(function (name) {
+        var vals = rows[name].join(', ');
+        html +=
+          '<div class="ai-attr-row"><b>' +
+          escHtml(name) +
+          ':</b> ' +
+          escHtml(vals) +
+          '</div>';
+      });
+    });
+    return html;
+  }
+
   function renderProductCarousel(products) {
     var $wrap = $('<div class="ai-product-carousel"></div>');
     products.forEach(function (p) {
@@ -214,17 +269,7 @@
       var stock = p.inStock
         ? '<span class="ai-badge ai-badge--in">В наявності</span>'
         : '<span class="ai-badge ai-badge--out">Уточнюйте наявність</span>';
-      var attrLines = (p.attributes || [])
-        .map(function (a) {
-          return (
-            '<span class="ai-attr"><b>' +
-            escHtml(a.name) +
-            ':</b> ' +
-            escHtml(a.value) +
-            '</span>'
-          );
-        })
-        .join('');
+      var attrLines = renderGroupedProductAttributes(p.attributes || []);
       var imgSrc = p.image ? cfg.imageBase + p.image : '';
       var productUrl = cfg.productUrl + String(p.id);
 
@@ -240,14 +285,16 @@
         escHtml(p.category || '') +
         '</div>' +
         '<div class="ai-product-card__attrs">' +
-        attrLines +
+        (attrLines
+          ? '<div class="ai-attr-groups">' + attrLines + '</div>'
+          : '') +
         '</div>' +
         stock +
         '<div class="ai-product-card__price">' +
         escHtml(price) +
         '</div>' +
         '<a href="' +
-        escHtml(productUrl) +
+        escHref(productUrl) +
         '" class="ai-product-card__cta">Детальніше →</a>' +
         '</div>';
 
@@ -293,7 +340,7 @@
         (article.summary && article.summary.length > 220 ? '…' : '') +
         '</div>' +
         '<a href="' +
-        escHtml(href) +
+        escHref(href) +
         '" class="ai-article-card__cta">Блог →</a>'
     );
   }
@@ -301,7 +348,7 @@
   function renderNavigateCta(url, label) {
     return $('<div class="ai-navigate-cta"></div>').html(
       '<a href="' +
-        escHtml(url) +
+        escHref(url) +
         '" class="ai-navigate-cta__btn">' +
         escHtml(label || 'Перейти →') +
         '</a>'

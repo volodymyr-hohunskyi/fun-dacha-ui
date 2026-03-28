@@ -404,6 +404,33 @@
   font-size: 0.72rem;
 }
 
+.ai-product-card__attrs {
+  margin-top: 0.3rem;
+}
+
+.ai-attr-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ai-attr-group__heading {
+  font-weight: 700;
+  font-size: 0.72rem;
+  color: var(--ai-text);
+  margin-top: 0.15rem;
+}
+
+.ai-attr-groups .ai-attr-group__heading:first-child {
+  margin-top: 0;
+}
+
+.ai-attr-row {
+  font-size: 0.72rem;
+  line-height: 1.35;
+  color: var(--ai-text);
+}
+
 .ai-product-card__price {
   font-weight: 700;
   margin-top: 0.35rem;

@@ -205,7 +205,11 @@ class Assistant extends \Opencart\System\Engine\Model {
 
 			$catId   = $p['categoryIds'][0] ?? null;
 			$catName = $catId ? ($db['categories'][(string) $catId]['name']['uk'] ?? '') : '';
-			$attrs   = array_slice($p['attributes'] ?? [], 0, 3);
+			$attrs   = $p['attributes'] ?? [];
+
+			if (count($attrs) > 60) {
+				$attrs = array_slice($attrs, 0, 60);
+			}
 
 			$cards[] = [
 				'id'         => $p['id'],
