@@ -48,6 +48,10 @@ h1, h2, h3, h4, h5, h6 {
   color: #000 !important;
 }
 
+footer.freshgo-footer h5 {
+  color: #fff !important;
+}
+
 /* Section headings & card titles - black for consistency */
 .recently-viewed-section h3,
 .product-thumb .description h4,
@@ -503,7 +507,7 @@ footer.freshgo-footer {
   font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #fff;
+  color: #fff !important;
   margin-bottom: 18px;
 }
 
@@ -623,7 +627,7 @@ footer.freshgo-footer {
   flex-shrink: 0;
   width: 100%;
   line-height: 0;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
   background: #f5f5f5;
 }
@@ -655,6 +659,18 @@ footer.freshgo-footer {
 }
 .product-thumb .description h4 {
   font-weight: bold;
+}
+
+.product-thumb .description > p {
+  margin: 0 0 0.5rem;
+  line-height: 1.45;
+  min-height: calc(1.45em * 3);
+  max-height: calc(1.45em * 3);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 /* Price row: amounts left, cart bottom-right */
