@@ -26,7 +26,6 @@
         <div class="ai-welcome__icon" aria-hidden="true">🌱</div>
         <p class="ai-welcome__text">{{ text_welcome }}</p>
         <p class="ai-welcome__sub">{{ text_welcome_sub }}</p>
-        <p class="ai-welcome__hint">{{ text_search_hint }}</p>
         <div class="ai-intent-list">
           <button type="button" class="ai-intent-btn" data-intent="consult" data-message="{{ text_intent_consult }}">{{ text_intent_consult }}</button>
           <button type="button" class="ai-intent-btn" data-intent="payment" data-message="{{ text_intent_payment }}">{{ text_intent_payment }}</button>
@@ -39,9 +38,12 @@
   <div class="ai-assistant-panel__quick-replies" id="ai-quick-replies" aria-label="{{ text_suggestions }}"></div>
 
   <div class="ai-assistant-panel__footer">
-    <label class="visually-hidden" for="ai-chat-input">{{ text_placeholder }}</label>
-    <textarea id="ai-chat-input" class="ai-assistant-panel__input" rows="1" placeholder="{{ text_placeholder }}" autocomplete="off"></textarea>
-    <button type="button" id="ai-chat-send" class="ai-assistant-panel__send">{{ text_send }}</button>
+    <p class="ai-assistant-panel__search-hint" id="ai-search-hint" aria-live="polite">{{ text_search_hint }}</p>
+    <div class="ai-assistant-panel__footer-input-row">
+      <label class="visually-hidden" for="ai-chat-input">{{ text_placeholder }}</label>
+      <textarea id="ai-chat-input" class="ai-assistant-panel__input" rows="1" placeholder="{{ text_placeholder }}" autocomplete="off"></textarea>
+      <button type="button" id="ai-chat-send" class="ai-assistant-panel__send">{{ text_send }}</button>
+    </div>
   </div>
 
   <div class="ai-assistant-panel__callback">
