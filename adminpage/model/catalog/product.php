@@ -1918,9 +1918,19 @@ class Product extends \Opencart\System\Engine\Model {
 	public function getOptions(int $product_id): array {
 		$product_option_data = [];
 
-		$product_option_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option` `po` LEFT JOIN `" . DB_PREFIX . "option` `o` ON (`po`.`option_id` = `o`.`option_id`) LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id`) WHERE `po`.`product_id` = '" . (int)$product_id . "' AND `od`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' ORDER BY `o`.`sort_order` ASC");
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$product_option_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option` `po` LEFT JOIN `" . DB_PREFIX . "option` `o` ON (`po`.`option_id` = `o`.`option_id`) LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id` AND `od`.`language_id` = '" . $language_id . "') WHERE `po`.`product_id` = '" . (int)$product_id . "' ORDER BY `o`.`sort_order` ASC");
 
 		foreach ($product_option_query->rows as $product_option) {
+			if (empty($product_option['name'])) {
+				$fallback = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "option_description` WHERE `option_id` = '" . (int)$product_option['option_id'] . "' ORDER BY `language_id` ASC LIMIT 1");
+
+				if ($fallback->num_rows) {
+					$product_option['name'] = $fallback->row['name'];
+				}
+			}
+
 			$value = $product_option['value'];
 
 			if ($product_option['type'] == 'date' && $value) {

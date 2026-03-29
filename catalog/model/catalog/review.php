@@ -105,7 +105,25 @@ class Review extends \Opencart\System\Engine\Model {
 			$limit = 100;
 		}
 
-		$query = $this->db->query("SELECT `r`.`review_id`, `r`.`author`, `r`.`rating`, `r`.`text`, `r`.`date_added`, `r`.`product_id`, `p`.`image`, `pd`.`name` AS `product_name` FROM `" . DB_PREFIX . "review` `r` INNER JOIN `" . DB_PREFIX . "product` `p` ON (`r`.`product_id` = `p`.`product_id`) INNER JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p`.`product_id` = `p2s`.`product_id`) INNER JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `r`.`status` = '1' AND `p`.`status` = '1' AND `p`.`date_available` <= NOW() AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' ORDER BY `r`.`date_added` DESC LIMIT " . (int)$limit);
+		// One review per product: newest approved review by date_added, tie-break by review_id.
+		$sql = "SELECT `r`.`review_id`, `r`.`author`, `r`.`rating`, `r`.`text`, `r`.`date_added`, `r`.`product_id`, `p`.`image`, `pd`.`name` AS `product_name` ";
+		$sql .= "FROM `" . DB_PREFIX . "review` `r` ";
+		$sql .= "INNER JOIN ( ";
+		$sql .= "SELECT `r2`.`product_id`, MAX(`r2`.`review_id`) AS `review_id` ";
+		$sql .= "FROM `" . DB_PREFIX . "review` `r2` ";
+		$sql .= "INNER JOIN ( SELECT `product_id`, MAX(`date_added`) AS `max_date` FROM `" . DB_PREFIX . "review` WHERE `status` = '1' GROUP BY `product_id` ) `md` ";
+		$sql .= "ON (`r2`.`product_id` = `md`.`product_id` AND `r2`.`date_added` = `md`.`max_date` AND `r2`.`status` = '1') ";
+		$sql .= "GROUP BY `r2`.`product_id` ";
+		$sql .= ") `latest` ON (`r`.`review_id` = `latest`.`review_id`) ";
+		$sql .= "INNER JOIN `" . DB_PREFIX . "product` `p` ON (`r`.`product_id` = `p`.`product_id`) ";
+		$sql .= "INNER JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p`.`product_id` = `p2s`.`product_id`) ";
+		$sql .= "INNER JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) ";
+		$sql .= "WHERE `r`.`status` = '1' AND `p`.`status` = '1' AND `p`.`date_available` <= NOW() ";
+		$sql .= "AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' ";
+		$sql .= "AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' ";
+		$sql .= "ORDER BY `r`.`date_added` DESC LIMIT " . (int)$limit;
+
+		$query = $this->db->query($sql);
 
 		$rows = $query->rows;
 		$seen = [];

@@ -127,9 +127,21 @@ class Option extends \Opencart\System\Engine\Model {
 	 * $option_info = $this->model_catalog_option->getOption($option_id);
 	 */
 	public function getOption(int $option_id): array {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option` `o` LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id`) WHERE `o`.`option_id` = '" . (int)$option_id . "' AND `od`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+		$language_id = (int)$this->config->get('config_language_id');
 
-		return $query->row;
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option` `o` LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id` AND `od`.`language_id` = '" . $language_id . "') WHERE `o`.`option_id` = '" . (int)$option_id . "'");
+
+		$row = $query->row;
+
+		if ($row && empty($row['name'])) {
+			$fallback = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "option_description` WHERE `option_id` = '" . (int)$option_id . "' ORDER BY `language_id` ASC LIMIT 1");
+
+			if ($fallback->num_rows) {
+				$row['name'] = $fallback->row['name'];
+			}
+		}
+
+		return $row ? $row : [];
 	}
 
 	/**
@@ -407,9 +419,21 @@ class Option extends \Opencart\System\Engine\Model {
 	 * $option_value_info = $this->model_catalog_option->getValue($option_value_id);
 	 */
 	public function getValue(int $option_value_id): array {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option_value` `ov` LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id`) WHERE `ov`.`option_value_id` = '" . (int)$option_value_id . "' AND `ovd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+		$language_id = (int)$this->config->get('config_language_id');
 
-		return $query->row;
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option_value` `ov` LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id` AND `ovd`.`language_id` = '" . $language_id . "') WHERE `ov`.`option_value_id` = '" . (int)$option_value_id . "'");
+
+		$row = $query->row;
+
+		if ($row && empty($row['name'])) {
+			$fallback = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `option_value_id` = '" . (int)$option_value_id . "' ORDER BY `language_id` ASC LIMIT 1");
+
+			if ($fallback->num_rows) {
+				$row['name'] = $fallback->row['name'];
+			}
+		}
+
+		return $row ? $row : [];
 	}
 
 	/**
@@ -428,9 +452,23 @@ class Option extends \Opencart\System\Engine\Model {
 	 * $option_values = $this->model_catalog_option->getValues($option_id);
 	 */
 	public function getValues(int $option_id): array {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option_value` `ov` LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id`) WHERE `ov`.`option_id` = '" . (int)$option_id . "' AND `ovd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' ORDER BY `ov`.`sort_order`, `ovd`.`name`");
+		$language_id = (int)$this->config->get('config_language_id');
 
-		return $query->rows;
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "option_value` `ov` LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id` AND `ovd`.`language_id` = '" . $language_id . "') WHERE `ov`.`option_id` = '" . (int)$option_id . "' ORDER BY `ov`.`sort_order`, `ovd`.`name`");
+
+		$rows = $query->rows;
+
+		foreach ($rows as $k => $row) {
+			if (empty($row['name'])) {
+				$fallback = $this->db->query("SELECT `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `option_value_id` = '" . (int)$row['option_value_id'] . "' ORDER BY `language_id` ASC LIMIT 1");
+
+				if ($fallback->num_rows) {
+					$rows[$k]['name'] = $fallback->row['name'];
+				}
+			}
+		}
+
+		return $rows;
 	}
 
 	/**
