@@ -1233,6 +1233,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		if (version_compare(VERSION,'4.0.1.0','>=')) {
 			$sql .= "TRUNCATE TABLE `".DB_PREFIX."product_viewed`;\n";
 		}
+		$sql .= "TRUNCATE TABLE `".DB_PREFIX."product_option`;\n";
+		$sql .= "TRUNCATE TABLE `".DB_PREFIX."product_option_value`;\n";
 		$this->multiquery( $sql );
 	}
 
@@ -1974,7 +1976,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$option_ids = array();
 		foreach ($query->rows as $row) {
 			$option_id = $row['option_id'];
-			$name = htmlspecialchars_decode( $row['name'] );
+			$name = trim( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
 			if ($name === '') {
 				continue;
 			}
@@ -2071,14 +2073,14 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			if ($i==0) {
 				continue;
 			}
-			$product_id = trim($this->getCell($data,$i,$j++));
+			$product_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++) );
 			if ($product_id=='') {
 				continue;
 			}
 			if ($this->config->get( 'export_import_settings_use_option_id' )) {
-				$option_id = $this->getCell($data,$i,$j++,'');
+				$option_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++,'') );
 			} else {
-				$option_name = $this->getCell($data,$i,$j++);
+				$option_name = trim( (string) $this->getCell($data,$i,$j++) );
 				$option_id = isset($option_ids[$option_name]) ? $option_ids[$option_name] : '';
 			}
 			if ($option_id=='') {
@@ -2116,7 +2118,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		foreach ($query->rows as $row) {
 			$option_id = $row['option_id'];
 			$option_value_id = $row['option_value_id'];
-			$name = htmlspecialchars_decode( $row['name'] );
+			$name = trim( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
 			if ($name === '') {
 				continue;
 			}
@@ -2134,7 +2136,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		foreach ($query->rows as $row) {
 			$product_option_id = $row['product_option_id'];
 			$option_id = $row['option_id'];
-			$product_option_ids[$option_id] = $product_option_id;
+			$product_option_ids[(int)$option_id] = $product_option_id;
 		}
 		return $product_option_ids;
 	}
@@ -2241,24 +2243,25 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			if ($i==0) {
 				continue;
 			}
-			$product_id = trim($this->getCell($data,$i,$j++));
+			$product_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++) );
 			if ($product_id=='') {
 				continue;
 			}
 			if ($this->config->get( 'export_import_settings_use_option_id' )) {
-				$option_id = $this->getCell($data,$i,$j++,'');
+				$option_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++,'') );
 			} else {
-				$option_name = $this->getCell($data,$i,$j++);
+				$option_name = trim( (string) $this->getCell($data,$i,$j++) );
 				$option_id = isset($option_ids[$option_name]) ? $option_ids[$option_name] : '';
 			}
 			if ($option_id=='') {
 				continue;
 			}
+			$option_id_int = (int)$option_id;
 			if ($this->config->get( 'export_import_settings_use_option_value_id' )) {
-				$option_value_id = $this->getCell($data,$i,$j++,'');
+				$option_value_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++,'') );
 			} else {
-				$option_value_name = $this->getCell($data,$i,$j++);
-				$option_value_id = isset($option_value_ids[$option_id][$option_value_name]) ? $option_value_ids[$option_id][$option_value_name] : '';
+				$option_value_name = trim( (string) $this->getCell($data,$i,$j++) );
+				$option_value_id = isset($option_value_ids[$option_id_int][$option_value_name]) ? $option_value_ids[$option_id_int][$option_value_name] : '';
 			}
 			if ($option_value_id=='') {
 				continue;
@@ -2286,7 +2289,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$product_option_value['points_prefix'] = $points_prefix;
 			$product_option_value['weight'] = $weight;
 			$product_option_value['weight_prefix'] = $weight_prefix;
-			$product_option_value['product_option_id'] = isset($product_option_ids[$option_id]) ? $product_option_ids[$option_id] : 0;
+			$product_option_value['product_option_id'] = isset($product_option_ids[$option_id_int]) ? $product_option_ids[$option_id_int] : 0;
 			if (($incremental) && ($product_id != $previous_product_id)) {
 				$old_product_option_value_ids = $this->deleteProductOptionValue( $product_id );
 				if (isset($unlisted_product_ids[$product_id])) {
@@ -2934,7 +2937,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				continue;
 			}
 			$j = 1;
-			$option_id = trim($this->getCell($data,$i,$j++));
+			$option_id = $this->normalizeNumericIdCell($this->getCell($data,$i,$j++));
 			if ($option_id=='') {
 				continue;
 			}
@@ -3031,11 +3034,11 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				continue;
 			}
 			$j = 1;
-			$option_value_id = trim($this->getCell($data,$i,$j++));
+			$option_value_id = $this->normalizeNumericIdCell($this->getCell($data,$i,$j++));
 			if ($option_value_id=='') {
 				continue;
 			}
-			$option_id = trim($this->getCell($data,$i,$j++));
+			$option_id = $this->normalizeNumericIdCell($this->getCell($data,$i,$j++));
 			if ($option_id=='') {
 				continue;
 			}
@@ -4142,6 +4145,28 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	/**
+	 * PhpSpreadsheet returns floats for numeric cells (e.g. 1.0, 92001.0). trim() does not accept floats (PHP 8+).
+	 * Normalizing to string integer keys keeps ProductOptions and ProductOptionValues validation/upload consistent.
+	 */
+	protected function normalizeNumericIdCell( $val ) {
+		if ($val === null || $val === '') {
+			return '';
+		}
+		if (is_float($val) || is_int($val)) {
+			return (string)(int)$val;
+		}
+		$s = trim((string)$val);
+		if ($s === '') {
+			return '';
+		}
+		if (preg_match('/^-?\d+$/', $s)) {
+			return (string)(int)$s;
+		}
+		return $s;
+	}
+
+
 	protected function validateHeading( &$data, &$expected, &$multilingual ) {
 		$default_language_code = $this->config->get('config_language');
 		$heading = array();
@@ -4982,13 +5007,13 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						$options[$option_id][$option_value_id] = true;
 					}
 				} else {
-					$option_value_name = is_null($row['option_value_name']) ? null : htmlspecialchars_decode($row['option_value_name']);
-					if (!is_null($option_value_name)) {
+					$option_value_name = is_null($row['option_value_name']) ? null : trim( htmlspecialchars_decode( $row['option_value_name'], ENT_QUOTES ) );
+					if (!is_null($option_value_name) && $option_value_name !== '') {
 						$options[$option_id][$option_value_name] = true;
 					}
 				}
 			} else {
-				$option_name = is_null($row['option_name']) ? '' : htmlspecialchars_decode($row['option_name']);
+				$option_name = is_null($row['option_name']) ? '' : trim( htmlspecialchars_decode( $row['option_name'], ENT_QUOTES ) );
 				if (!isset($options[$option_name])) {
 					$options[$option_name] = array();
 				}
@@ -4998,8 +5023,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						$options[$option_name][$option_value_id] = true;
 					}
 				} else {
-					$option_value_name = is_null($row['option_value_name']) ? null : htmlspecialchars_decode($row['option_value_name']);
-					if (!is_null($option_value_name)) {
+					$option_value_name = is_null($row['option_value_name']) ? null : trim( htmlspecialchars_decode( $row['option_value_name'], ENT_QUOTES ) );
+					if (!is_null($option_value_name) && $option_value_name !== '') {
 						$options[$option_name][$option_value_name] = true;
 					}
 				}
@@ -5018,12 +5043,12 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$i = 0;
 		$k = $data->getHighestRow();
 		for ($i=1; $i<$k; $i+=1) {
-			$product_id = trim($this->getCell($data,$i,1));
+			$product_id = $this->normalizeNumericIdCell($this->getCell($data,$i,1));
 			if ($product_id=="") {
 				continue;
 			}
 			if ($export_import_settings_use_option_id) {
-				$option_id = trim($this->getCell($data,$i,2));
+				$option_id = $this->normalizeNumericIdCell($this->getCell($data,$i,2));
 				if ($option_id=="") {
 					if (!$has_missing_options) {
 						$msg = str_replace( '%1', 'ProductOptions', $this->language->get( 'error_missing_option_id' ) );
@@ -5043,7 +5068,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				}
 				$product_options[$product_id][$option_id] = true;
 			} else {
-				$option_name = trim($this->getCell($data,$i,2));
+				$option_name = trim((string)$this->getCell($data,$i,2));
 				if ($option_name=="") {
 					if (!$has_missing_options) {
 						$msg = str_replace( '%1', 'ProductOptions', $this->language->get( 'error_missing_option_name' ) );
@@ -5075,12 +5100,12 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$i = 0;
 		$k = $data->getHighestRow();
 		for ($i=1; $i<$k; $i+=1) {
-			$product_id = trim($this->getCell($data,$i,1));
+			$product_id = $this->normalizeNumericIdCell($this->getCell($data,$i,1));
 			if ($product_id=="") {
 				continue;
 			}
 			if ($export_import_settings_use_option_id) {
-				$option_id = trim($this->getCell($data,$i,2));
+				$option_id = $this->normalizeNumericIdCell($this->getCell($data,$i,2));
 				if ($option_id=="") {
 					if (!$has_missing_options) {
 						$msg = str_replace( '%1', 'ProductOptionValues', $this->language->get( 'error_missing_option_id' ) );
@@ -5109,7 +5134,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					continue;
 				}
 				if ($export_import_settings_use_option_value_id) {
-					$option_value_id = trim($this->getCell($data,$i,3));
+					$option_value_id = $this->normalizeNumericIdCell($this->getCell($data,$i,3));
 					if ($option_value_id=="") {
 						if (!$has_missing_option_values) {
 							$msg = str_replace( '%1', 'ProductOptionValues', $this->language->get( 'error_missing_option_value_id' ) );
@@ -5129,7 +5154,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						continue;
 					}
 				} else {
-					$option_value_name = trim($this->getCell($data,$i,3));
+					$option_value_name = trim((string)$this->getCell($data,$i,3));
 					if ($option_value_name=="") {
 						if (!$has_missing_option_values) {
 							$msg = str_replace( '%1', 'ProductOptionValues', $this->language->get( 'error_missing_option_value_name' ) );
@@ -5150,7 +5175,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					}
 				}
 			} else {
-				$option_name = trim($this->getCell($data,$i,2));
+				$option_name = trim((string)$this->getCell($data,$i,2));
 				if ($option_name=="") {
 					if (!$has_missing_options) {
 						$msg = str_replace( '%1', 'ProductOptionValues', $this->language->get( 'error_missing_option_name' ) );
@@ -5179,7 +5204,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					continue;
 				}
 				if ($export_import_settings_use_option_value_id) {
-					$option_value_id = trim($this->getCell($data,$i,3));
+					$option_value_id = $this->normalizeNumericIdCell($this->getCell($data,$i,3));
 					if ($option_value_id=="") {
 						if (!$has_missing_option_values) {
 							$msg = str_replace( '%1', 'ProductOptionValues', $this->language->get( 'error_missing_option_value_id' ) );
@@ -5199,7 +5224,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						continue;
 					}
 				} else {
-					$option_value_name = trim($this->getCell($data,$i,3));
+					$option_value_name = trim((string)$this->getCell($data,$i,3));
 					if ($option_value_name=="") {
 						if (!$has_missing_option_values) {
 							$msg = str_replace( '%1', 'ProductOptionValues', $this->language->get( 'error_missing_option_value_name' ) );
@@ -5250,7 +5275,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			}
 			for ( $i = 1; $i < $k; $i += 1 ) {
 				$j = 1;
-				$option_id = trim( $this->getCell( $data, $i, $j++ ) );
+				$option_id = $this->normalizeNumericIdCell( $this->getCell( $data, $i, $j++ ) );
 				if ( $option_id === '' ) {
 					continue;
 				}
@@ -5295,11 +5320,11 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 		for ( $i = 1; $i < $k; $i += 1 ) {
 			$j = 1;
-			$option_value_id = trim( $this->getCell( $data, $i, $j++ ) );
+			$option_value_id = $this->normalizeNumericIdCell( $this->getCell( $data, $i, $j++ ) );
 			if ( $option_value_id === '' ) {
 				continue;
 			}
-			$option_id = trim( $this->getCell( $data, $i, $j++ ) );
+			$option_id = $this->normalizeNumericIdCell( $this->getCell( $data, $i, $j++ ) );
 			if ( $option_id === '' ) {
 				continue;
 			}
