@@ -1297,6 +1297,7 @@ footer.freshgo-footer {
 #common-home .hero-banner-inner,
 #common-home .popular-crops-section .container,
 #common-home .home-recommended-wrapper,
+#common-home .home-reviews-carousel-section .container,
 #common-home .blog-carousel-section .container,
 #common-home .home-recently-viewed-wrapper,
 #common-home .home-brands-section .container {
@@ -1317,6 +1318,7 @@ footer.freshgo-footer {
 #common-home .popular-crops-section {
   padding-top: var(--home-section-spacing);
 }
+#common-home .home-reviews-carousel-section,
 #common-home .blog-carousel-section,
 #common-home .home-recommended-wrapper,
 #common-home .home-recently-viewed-wrapper,
@@ -1443,6 +1445,57 @@ footer.freshgo-footer {
 }
 .blog-carousel-card:hover .card-title {
   color: var(--color-primary) !important;
+}
+
+/* Home reviews carousel — same layout rules as blog carousel */
+.home-reviews-carousel-section,
+.home-reviews-carousel-section .container,
+.home-reviews-carousel-section .carousel,
+.home-reviews-carousel-section .carousel-inner,
+.home-reviews-carousel-section .carousel-item,
+.home-reviews-carousel-section .row,
+#carousel-home-reviews,
+#carousel-home-reviews .carousel-inner,
+#carousel-home-reviews .carousel-item,
+#carousel-home-reviews .row {
+  border: none !important;
+  box-shadow: none !important;
+}
+.home-reviews-carousel-section .carousel-inner,
+.home-reviews-carousel-section .carousel-item,
+.home-reviews-carousel-section .row {
+  background-color: transparent !important;
+}
+.home-reviews-carousel-section h3 {
+  color: #000 !important;
+}
+.home-review-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.home-review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+.home-review-card__thumb {
+  object-fit: cover;
+  height: 160px;
+  width: 100%;
+}
+.home-review-card__product-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #000 !important;
+  margin-bottom: 0.35rem;
+  display: block;
+}
+.home-review-card:hover .home-review-card__product-title {
+  color: var(--color-primary) !important;
+}
+.home-review-card .rating .fa-stack {
+  width: 18px;
 }
 
 /* Category filter widget - left sidebar on product list - all black */

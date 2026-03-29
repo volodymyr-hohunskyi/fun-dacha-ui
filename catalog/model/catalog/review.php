@@ -89,4 +89,24 @@ class Review extends \Opencart\System\Engine\Model {
 
 		return (int)$query->row['total'];
 	}
+
+	/**
+	 * Latest approved reviews store-wide (for homepage carousel).
+	 *
+	 * @param int $limit Max rows (capped)
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function getLatestReviews(int $limit = 25): array {
+		if ($limit < 1) {
+			$limit = 25;
+		}
+		if ($limit > 100) {
+			$limit = 100;
+		}
+
+		$query = $this->db->query("SELECT `r`.`review_id`, `r`.`author`, `r`.`rating`, `r`.`text`, `r`.`date_added`, `r`.`product_id`, `p`.`image`, `pd`.`name` AS `product_name` FROM `" . DB_PREFIX . "review` `r` INNER JOIN `" . DB_PREFIX . "product` `p` ON (`r`.`product_id` = `p`.`product_id`) INNER JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p`.`product_id` = `p2s`.`product_id`) INNER JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `r`.`status` = '1' AND `p`.`status` = '1' AND `p`.`date_available` <= NOW() AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' ORDER BY `r`.`date_added` DESC LIMIT " . (int)$limit);
+
+		return $query->rows;
+	}
 }

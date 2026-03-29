@@ -119,6 +119,7 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 				$this->load->controller('common/popular_crops'),
 				$this->load->controller('common/home_recommended'),
 				$this->load->controller('common/why_our_seeds'),
+				$this->load->controller('common/home_reviews_carousel'),
 				$this->load->controller('common/blog_carousel'),
 				$this->load->controller('common/home_recently_viewed'),
 				$this->load->controller('common/home_brands'),
