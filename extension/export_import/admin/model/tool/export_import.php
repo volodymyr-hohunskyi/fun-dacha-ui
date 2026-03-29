@@ -4111,7 +4111,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$k = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $data->getHighestColumn() );
 		$i = 0;
 		for ($j=1; $j <= $k; $j+=1) {
-			$entry = $this->getCell($data,$i,$j);
+			$entry = trim( (string) $this->getCell($data,$i,$j) );
 			$bracket_start = strripos( $entry, '(', 0 );
 			if ($bracket_start === false) {
 				if (in_array( $entry, $multilingual )) {

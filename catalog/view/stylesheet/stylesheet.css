@@ -1,14 +1,17 @@
 @charset "UTF-8";
 /* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
 :root {
-  --color-primary: #7AB80F;
-  --color-primary-dark: #6aa00d;
-  --color-primary-light: #8bc71a;
+  --color-primary: #207D43;
+  --color-primary-dark: #1a6a38;
+  --color-primary-light: #2d9554;
+  /* Bootstrap 5 — links, badges, focus rings use --bs-primary */
+  --bs-primary: #207D43;
+  --bs-primary-rgb: 32, 125, 67;
   --color-secondary: #8B5E3C;
   --color-neutral-bg: #f7f7f7;
   --color-white: #FFFFFF;
-  --font-heading: Cairo, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-  --font-body: Cairo, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  --font-heading: "Bebas Neue", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Bebas Neue", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --weight-heading-bold: 700;
   --weight-heading-semibold: 600;
   --weight-body-regular: 400;
@@ -722,7 +725,7 @@ div.required .col-form-label:before, div.required .form-label:before {
     text-align: right;
   }
 }
-/* footer - FreshGo reference: dark teal #0F3B47, bright lime #7AB80F */
+/* footer — dark teal + brand primary */
 footer.freshgo-footer {
   flex-shrink: 0;
   margin-top: auto;
@@ -751,15 +754,15 @@ footer.freshgo-footer {
 }
 
 .freshgo-footer-newsletter-btn {
-  background-color: #7AB80F !important;
-  border-color: #7AB80F !important;
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
   padding: 12px 28px;
   font-weight: 600;
 }
 
 .freshgo-footer-newsletter-btn:hover {
-  background-color: #6aa00d !important;
-  border-color: #6aa00d !important;
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
   color: #fff !important;
 }
 
@@ -787,7 +790,7 @@ footer.freshgo-footer {
 }
 
 .freshgo-footer-content a:hover {
-  color: #7AB80F;
+  color: var(--color-primary);
 }
 
 .freshgo-footer-store-name {
@@ -809,7 +812,7 @@ footer.freshgo-footer {
 }
 
 .freshgo-footer-social a:hover {
-  background: #7AB80F;
+  background: var(--color-primary);
   color: #fff;
 }
 
@@ -829,7 +832,7 @@ footer.freshgo-footer {
 }
 
 .freshgo-footer-bottom a:hover {
-  color: #7AB80F;
+  color: var(--color-primary);
 }
 
 /* breadcrumb */
@@ -1125,7 +1128,7 @@ footer.freshgo-footer {
   opacity: 0.85;
 }
 
-/* PDP: volume / pack tiers (effective price = sale × volume discount) */
+/* PDP: volume / pack tiers */
 .pdp-volume-pricing__list {
   display: flex;
   flex-direction: column;
@@ -1138,7 +1141,6 @@ footer.freshgo-footer {
   border-radius: 6px;
   background: #fafafa;
 }
-
 .pdp-volume-tier--volume {
   background: #fff;
 }
@@ -1161,14 +1163,16 @@ footer.freshgo-footer {
   align-items: baseline;
   gap: 0.5rem 0.75rem;
 }
+.pdp-volume-tier__row--deal {
+  margin-top: 0.15rem;
+}
+.pdp-volume-tier__row--single .pdp-volume-tier__unit-now {
+  font-size: 1.125rem;
+}
 
 .pdp-volume-tier__row--base .pdp-volume-tier__unit-base {
   font-weight: 600;
   color: #333;
-}
-
-.pdp-volume-tier__row--deal {
-  margin-top: 0.15rem;
 }
 
 .pdp-volume-tier__pct {
@@ -1183,16 +1187,12 @@ footer.freshgo-footer {
   color: #1a1a1a;
 }
 
-.pdp-volume-tier__row--single .pdp-volume-tier__unit-now {
-  font-size: 1.125rem;
-}
-
 .pdp-volume-tier__save {
   margin-top: 0.35rem;
   font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: #2e7d32;
+  color: var(--color-primary);
 }
 
 /* Product page: Johnny’s-style detail blocks (Quick facts, shipping, guarantee, growing, pack size) */
@@ -1235,6 +1235,7 @@ footer.freshgo-footer {
   margin-bottom: 0;
 }
 
+/* PDP Фасування: pack quantity boxes (imported radio option, three values) */
 .pdp-pack-choice-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1263,8 +1264,8 @@ footer.freshgo-footer {
 }
 
 .pdp-pack-choice-box--active {
-  border-color: #2e7d32;
-  box-shadow: 0 0 0 1px #2e7d32;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 1px var(--color-primary);
 }
 
 .pdp-pack-choice-box__title {
