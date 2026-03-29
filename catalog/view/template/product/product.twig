@@ -97,6 +97,15 @@
                 {% endfor %}
               {% endif %}
             </ul>
+            <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-pack-inline">
+              <h2 id="pdp-heading-pack-inline" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
+              <div class="pdp-detail-section__body">
+                <p class="mb-0">{{ text_pdp_size_intro }}</p>
+                {% if text_pdp_size_future %}
+                  <p class="mb-0 mt-2 text-muted small">{{ text_pdp_size_future }}</p>
+                {% endif %}
+              </div>
+            </section>
           {% endif %}
           <div id="product">
             <form id="form-product">
@@ -283,7 +292,9 @@
             <h2 id="pdp-heading-characteristics" class="pdp-detail-section__title">{{ text_pdp_characteristics }}</h2>
             <div class="pdp-quick-facts">
               {% for attribute_group in attribute_groups %}
-                <h3 class="pdp-detail-subheading">{{ attribute_group.name }}</h3>
+                {% if attribute_group.name|lower|trim != text_pdp_characteristics|lower|trim %}
+                  <h3 class="pdp-detail-subheading">{{ attribute_group.name }}</h3>
+                {% endif %}
                 <dl class="row pdp-dl mb-3">
                   {% for attribute in attribute_group.attribute %}
                     <dt class="col-sm-4 col-lg-3 pdp-dl__dt">{{ attribute.name }}</dt>
@@ -294,20 +305,6 @@
             </div>
           </section>
         {% endif %}
-
-        <section class="pdp-detail-section" aria-labelledby="pdp-heading-shipping">
-          <h2 id="pdp-heading-shipping" class="pdp-detail-section__title">{{ text_pdp_shipping_heading }}</h2>
-          <div class="pdp-detail-section__body">
-            <p class="mb-0">{{ text_pdp_shipping }}</p>
-          </div>
-        </section>
-
-        <section class="pdp-detail-section" aria-labelledby="pdp-heading-guarantee">
-          <h2 id="pdp-heading-guarantee" class="pdp-detail-section__title">{{ text_pdp_guarantee_heading }}</h2>
-          <div class="pdp-detail-section__body">
-            <p class="mb-0">{{ text_pdp_guarantee }}</p>
-          </div>
-        </section>
 
         {% if description %}
           <section class="pdp-detail-section" aria-labelledby="pdp-heading-growing">
@@ -325,13 +322,17 @@
           </section>
         {% endif %}
 
-        <section class="pdp-detail-section" aria-labelledby="pdp-heading-size">
-          <h2 id="pdp-heading-size" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
+        <section class="pdp-detail-section" aria-labelledby="pdp-heading-shipping">
+          <h2 id="pdp-heading-shipping" class="pdp-detail-section__title">{{ text_pdp_shipping_heading }}</h2>
           <div class="pdp-detail-section__body">
-            <p class="mb-0">{{ text_pdp_size_intro }}</p>
-            {% if text_pdp_size_future %}
-              <p class="mb-0 mt-2 text-muted small">{{ text_pdp_size_future }}</p>
-            {% endif %}
+            <p class="mb-0">{{ text_pdp_shipping }}</p>
+          </div>
+        </section>
+
+        <section class="pdp-detail-section" aria-labelledby="pdp-heading-guarantee">
+          <h2 id="pdp-heading-guarantee" class="pdp-detail-section__title">{{ text_pdp_guarantee_heading }}</h2>
+          <div class="pdp-detail-section__body">
+            <p class="mb-0">{{ text_pdp_guarantee }}</p>
           </div>
         </section>
       </div>
