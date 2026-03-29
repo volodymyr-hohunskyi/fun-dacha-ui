@@ -1969,19 +1969,32 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function getOptionIds() {
+		$default_language_id = (int)$this->getDefaultLanguageId();
 		$language_ids = $this->getRelevantLanguageIds();
-		$sql  = "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` ";
-		$sql .= "WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $language_ids ) ) . ")";
-		$query = $this->db->query( $sql );
 		$option_ids = array();
+
+		// Prefer default-language labels (matches typical spreadsheet / admin); add other languages only for names missing from the map.
+		$query = $this->db->query( "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` WHERE `language_id` = '" . $default_language_id . "'" );
 		foreach ($query->rows as $row) {
-			$option_id = $row['option_id'];
 			$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
 			if ($name === '') {
 				continue;
 			}
-			$option_ids[$name] = $option_id;
+			$option_ids[$name] = (int)$row['option_id'];
 		}
+
+		$other_language_ids = array_values( array_diff( array_map( 'intval', $language_ids ), array( $default_language_id ) ) );
+		if (!empty( $other_language_ids )) {
+			$query = $this->db->query( "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $other_language_ids ) ) . ")" );
+			foreach ($query->rows as $row) {
+				$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
+				if ($name === '' || isset( $option_ids[$name] )) {
+					continue;
+				}
+				$option_ids[$name] = (int)$row['option_id'];
+			}
+		}
+
 		return $option_ids;
 	}
 
@@ -2086,6 +2099,9 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			} else {
 				$option_name = $this->normalizeOptionLabelForLookup( $this->getCell($data,$i,$j++) );
 				if ($option_name === '' || !isset($option_ids[$option_name])) {
+					if ($option_name !== '' && $this->config->get( 'config_error_log' )) {
+						$this->log->write( 'Export/Import: ProductOptions row skipped: unknown option name "' . $option_name . '" for product_id ' . $product_id . ' (check Catalog → Options spelling vs sheet, or default language description).' );
+					}
 					continue;
 				}
 				$option_id = (int)$option_ids[$option_name];
@@ -2117,20 +2133,33 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function getOptionValueIds() {
+		$default_language_id = (int)$this->getDefaultLanguageId();
 		$language_ids = $this->getRelevantLanguageIds();
-		$sql  = "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` ";
-		$sql .= "WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $language_ids ) ) . ")";
-		$query = $this->db->query( $sql );
 		$option_value_ids = array();
+
+		$query = $this->db->query( "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `language_id` = '" . $default_language_id . "'" );
 		foreach ($query->rows as $row) {
 			$option_id = (int)$row['option_id'];
-			$option_value_id = $row['option_value_id'];
 			$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
 			if ($name === '') {
 				continue;
 			}
-			$option_value_ids[$option_id][$name] = $option_value_id;
+			$option_value_ids[$option_id][$name] = (int)$row['option_value_id'];
 		}
+
+		$other_language_ids = array_values( array_diff( array_map( 'intval', $language_ids ), array( $default_language_id ) ) );
+		if (!empty( $other_language_ids )) {
+			$query = $this->db->query( "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $other_language_ids ) ) . ")" );
+			foreach ($query->rows as $row) {
+				$option_id = (int)$row['option_id'];
+				$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
+				if ($name === '' || isset( $option_value_ids[$option_id][$name] )) {
+					continue;
+				}
+				$option_value_ids[$option_id][$name] = (int)$row['option_value_id'];
+			}
+		}
+
 		return $option_value_ids;
 	}
 
@@ -2286,6 +2315,9 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			} else {
 				$option_value_name = $this->normalizeOptionLabelForLookup( $this->getCell($data,$i,$j++) );
 				if ($option_value_name === '' || !isset($option_value_ids[$option_id_int][$option_value_name])) {
+					if ($option_value_name !== '' && $this->config->get( 'config_error_log' )) {
+						$this->log->write( 'Export/Import: ProductOptionValues row skipped: unknown option_value "' . $option_value_name . '" for product_id ' . $product_id . ' option_id ' . $option_id_int . ' (must match option value names under Catalog → Options for that option).' );
+					}
 					continue;
 				}
 				$option_value_id = (int)$option_value_ids[$option_id_int][$option_value_name];
@@ -6473,13 +6505,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				continue;
 			}
 		}
-		if ($exist_product_options) {
-			if (!$exist_product_option_values) {
-				// ProductOptionValues worksheet also expected after a ProductOptions worksheet
-				$this->log->write( $this->language->get('error_product_option_values_3') );
-				$ok = false;
-			}
-		}
+		// ProductOptionValues is optional: select/radio/checkbox/image options need rows there,
+		// but text/date/file options can be imported from ProductOptions alone; upload handlers no-op if a sheet is missing.
 		if ($exist_attribute_groups) {
 			if (!$exist_attributes) {
 				// Attributes worksheet also expected after an AttributeGroups worksheet

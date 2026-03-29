@@ -21,9 +21,14 @@ class Product extends \Opencart\System\Engine\Model {
 	public function __construct(\Opencart\System\Engine\Registry $registry) {
 		$this->registry = $registry;
 
+		$customer_group_id = (int)$this->config->get('config_customer_group_id');
+
 		// Storing some sub queries so that we are not typing them out multiple times.
-		$this->statement['discount'] = "(SELECT (CASE WHEN `pd2`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`pd2`.`price` / 100))) WHEN `pd2`.`type` = 'S' THEN (`p`.`price` - `pd2`.`price`) ELSE `pd2`.`price` END) FROM `" . DB_PREFIX . "product_discount` `pd2` WHERE `pd2`.`product_id` = `p`.`product_id` AND `pd2`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `pd2`.`quantity` = '1' AND `pd2`.`special` = '0' AND ((`pd2`.`date_start` = '0000-00-00' OR `pd2`.`date_start` < NOW()) AND (`pd2`.`date_end` = '0000-00-00' OR `pd2`.`date_end` > NOW())) ORDER BY `pd2`.`priority` ASC, `pd2`.`price` ASC LIMIT 1) AS `discount`";
-		$this->statement['special'] = "(SELECT (CASE WHEN `ps`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`ps`.`price` / 100))) WHEN `ps`.`type` = 'S' THEN (`p`.`price` - `ps`.`price`) ELSE `ps`.`price` END) FROM `" . DB_PREFIX . "product_discount` `ps` WHERE `ps`.`product_id` = `p`.`product_id` AND `ps`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `ps`.`quantity` = '1' AND `ps`.`special` = '1' AND ((`ps`.`date_start` = '0000-00-00' OR `ps`.`date_start` < NOW()) AND (`ps`.`date_end` = '0000-00-00' OR `ps`.`date_end` > NOW())) ORDER BY `ps`.`priority` ASC, `ps`.`price` ASC LIMIT 1) AS `special_price`";
+		$this->statement['discount'] = "(SELECT (CASE WHEN `pd2`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`pd2`.`price` / 100))) WHEN `pd2`.`type` = 'S' THEN (`p`.`price` - `pd2`.`price`) ELSE `pd2`.`price` END) FROM `" . DB_PREFIX . "product_discount` `pd2` WHERE `pd2`.`product_id` = `p`.`product_id` AND `pd2`.`customer_group_id` = '" . $customer_group_id . "' AND `pd2`.`quantity` = '1' AND `pd2`.`special` = '0' AND ((`pd2`.`date_start` = '0000-00-00' OR `pd2`.`date_start` < NOW()) AND (`pd2`.`date_end` = '0000-00-00' OR `pd2`.`date_end` > NOW())) ORDER BY `pd2`.`priority` ASC, `pd2`.`price` ASC LIMIT 1) AS `discount`";
+		// Sale price: OC 4.1+ often uses product_discount with special=1; imports / older data use product_special.
+		$special_from_discount = "(SELECT (CASE WHEN `ps`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`ps`.`price` / 100))) WHEN `ps`.`type` = 'S' THEN (`p`.`price` - `ps`.`price`) ELSE `ps`.`price` END) FROM `" . DB_PREFIX . "product_discount` `ps` WHERE `ps`.`product_id` = `p`.`product_id` AND `ps`.`customer_group_id` = '" . $customer_group_id . "' AND `ps`.`quantity` = '1' AND `ps`.`special` = '1' AND ((`ps`.`date_start` = '0000-00-00' OR `ps`.`date_start` < NOW()) AND (`ps`.`date_end` = '0000-00-00' OR `ps`.`date_end` > NOW())) ORDER BY `ps`.`priority` ASC, `ps`.`price` ASC LIMIT 1)";
+		$special_from_table = "(SELECT `psp`.`price` FROM `" . DB_PREFIX . "product_special` `psp` WHERE `psp`.`product_id` = `p`.`product_id` AND `psp`.`customer_group_id` = '" . $customer_group_id . "' AND ((`psp`.`date_start` = '0000-00-00' OR `psp`.`date_start` < NOW()) AND (`psp`.`date_end` = '0000-00-00' OR `psp`.`date_end` > NOW())) ORDER BY `psp`.`priority` ASC, `psp`.`price` ASC LIMIT 1)";
+		$this->statement['special'] = "(COALESCE(" . $special_from_discount . ", " . $special_from_table . ")) AS `special_price`";
 		$this->statement['reward'] = "(SELECT `pr`.`points` FROM `" . DB_PREFIX . "product_reward` `pr` WHERE `pr`.`product_id` = `p`.`product_id` AND `pr`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "') AS `reward`";
 		$this->statement['review'] = "(SELECT COUNT(*) FROM `" . DB_PREFIX . "review` `r` WHERE `r`.`product_id` = `p`.`product_id` AND `r`.`status` = '1' GROUP BY `r`.`product_id`) AS `reviews`";
 	}
@@ -824,7 +829,9 @@ class Product extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_catalog_product->getSpecials();
 	 */
 	public function getSpecials(array $data = []): array {
-		$sql = "SELECT *, `p`.`price`, `ps`.`price` as `special`, " . $this->statement['discount'] . ", " . $this->statement['reward'] . ", " . $this->statement['review'] . " FROM (SELECT DISTINCT * FROM `" . DB_PREFIX . "product_discount` WHERE `customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `quantity` = '1' AND `special` = '1' AND ((`date_start` = '0000-00-00' OR `date_start` < NOW()) AND (`date_end` = '0000-00-00' OR `date_end` > NOW())) GROUP BY `product_id` ORDER BY `priority` ASC) `ps` LEFT JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`ps`.`product_id` = `p2s`.`product_id`) LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p2s`.`product_id` = `p`.`product_id`) LEFT JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()";
+		$cg = (int)$this->config->get('config_customer_group_id');
+
+		$sql = "SELECT DISTINCT *, `pd`.`name`, `p`.`image`, " . $this->statement['discount'] . ", " . $this->statement['special'] . ", " . $this->statement['reward'] . ", " . $this->statement['review'] . " FROM `" . DB_PREFIX . "product_to_store` `p2s` LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()) LEFT JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND (EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_discount` `pdsp` WHERE `pdsp`.`product_id` = `p`.`product_id` AND `pdsp`.`customer_group_id` = '" . $cg . "' AND `pdsp`.`quantity` = '1' AND `pdsp`.`special` = '1' AND (`pdsp`.`date_start` = '0000-00-00' OR `pdsp`.`date_start` < NOW()) AND (`pdsp`.`date_end` = '0000-00-00' OR `pdsp`.`date_end` > NOW())) OR EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_special` `psp` WHERE `psp`.`product_id` = `p`.`product_id` AND `psp`.`customer_group_id` = '" . $cg . "' AND (`psp`.`date_start` = '0000-00-00' OR `psp`.`date_start` < NOW()) AND (`psp`.`date_end` = '0000-00-00' OR `psp`.`date_end` > NOW())))";
 
 		$sort_data = [
 			'pd.name',
@@ -838,7 +845,7 @@ class Product extends \Opencart\System\Engine\Model {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
 				$sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
 			} elseif ($data['sort'] == 'p.price') {
-				$sql .= " ORDER BY (CASE WHEN `special` IS NOT NULL THEN `special` WHEN `discount` IS NOT NULL THEN `discount` ELSE `p`.`price` END)";
+				$sql .= " ORDER BY (CASE WHEN `special_price` IS NOT NULL THEN `special_price` WHEN `discount` IS NOT NULL THEN `discount` ELSE `p`.`price` END)";
 			} else {
 				$sql .= " ORDER BY " . $data['sort'];
 			}
@@ -871,9 +878,11 @@ class Product extends \Opencart\System\Engine\Model {
 		if (!$product_data) {
 			$query = $this->db->query($sql);
 
-			$product_data = $query->rows;
+			$product_data = $this->normalizeProductListRows($query->rows);
 
 			$this->cache->set('product.' . $key, $product_data);
+		} else {
+			$product_data = $this->normalizeProductListRows($product_data);
 		}
 
 		return (array)$product_data;
@@ -893,7 +902,9 @@ class Product extends \Opencart\System\Engine\Model {
 	 * $special_total = $this->model_catalog_product->getTotalSpecials();
 	 */
 	public function getTotalSpecials(): int {
-		$query = $this->db->query("SELECT COUNT(`ps`.`product_id`) AS `total` FROM (SELECT DISTINCT * FROM `" . DB_PREFIX . "product_discount` WHERE `customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `quantity` = '1' AND `special` = '1' AND ((`date_end` = '0000-00-00' OR `date_end` > NOW()) AND (`date_start` = '0000-00-00' OR `date_start` < NOW())) GROUP BY `product_id`) `ps` LEFT JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`ps`.`product_id` = `p2s`.`product_id`) LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p2s`.`product_id` = `p`.`product_id`) WHERE `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()");
+		$cg = (int)$this->config->get('config_customer_group_id');
+
+		$query = $this->db->query("SELECT COUNT(DISTINCT `p`.`product_id`) AS `total` FROM `" . DB_PREFIX . "product_to_store` `p2s` LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()) LEFT JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND (EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_discount` `pdsp` WHERE `pdsp`.`product_id` = `p`.`product_id` AND `pdsp`.`customer_group_id` = '" . $cg . "' AND `pdsp`.`quantity` = '1' AND `pdsp`.`special` = '1' AND (`pdsp`.`date_start` = '0000-00-00' OR `pdsp`.`date_start` < NOW()) AND (`pdsp`.`date_end` = '0000-00-00' OR `pdsp`.`date_end` > NOW())) OR EXISTS (SELECT 1 FROM `" . DB_PREFIX . "product_special` `psp` WHERE `psp`.`product_id` = `p`.`product_id` AND `psp`.`customer_group_id` = '" . $cg . "' AND (`psp`.`date_start` = '0000-00-00' OR `psp`.`date_start` < NOW()) AND (`psp`.`date_end` = '0000-00-00' OR `psp`.`date_end` > NOW())))");
 
 		if (isset($query->row['total'])) {
 			return (int)$query->row['total'];

@@ -983,6 +983,12 @@ class Product extends \Opencart\System\Engine\Controller {
 							'points' => round($product_option_value['points']),
 							'weight' => round($product_option_value['weight']),
 						] + $product_option_value;
+					} else {
+						$product_option_value_data[] = [
+							'name'   => '#' . (int)$product_option_value['option_value_id'],
+							'points' => round($product_option_value['points'] ?? 0),
+							'weight' => round($product_option_value['weight'] ?? 0),
+						] + $product_option_value;
 					}
 				}
 			}
@@ -1031,6 +1037,11 @@ class Product extends \Opencart\System\Engine\Controller {
 					if ($option_value_info) {
 						$product_option_value_data[] = [
 							'name'  => $option_value_info['name'],
+							'price' => (float)$product_option_value['price'] ? $product_option_value['price'] : false,
+						] + $product_option_value;
+					} else {
+						$product_option_value_data[] = [
+							'name'  => '#' . (int)$product_option_value['option_value_id'],
 							'price' => (float)$product_option_value['price'] ? $product_option_value['price'] : false,
 						] + $product_option_value;
 					}
