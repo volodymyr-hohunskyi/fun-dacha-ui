@@ -32,7 +32,7 @@ $_['text_pdp_guarantee']         = 'Si un problème survient, contactez-nous : c
 $_['text_pdp_growing_heading']   = 'Culture';
 $_['text_pdp_size_heading']      = 'Conditionnement';
 $_['text_pdp_size_intro']        = 'Un seul conditionnement standard est proposé pour l’instant.';
-$_['text_pdp_size_future']       = 'Bientôt : petits et grands formats, offres « 10+1 » et remise sur les commandes en volume.';
+$_['text_pdp_size_future']       = '';
 
 // Boutons
 $_['button_wishlist']            = 'Ajouter à la liste de souhaits';

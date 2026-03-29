@@ -328,8 +328,10 @@
         <section class="pdp-detail-section" aria-labelledby="pdp-heading-size">
           <h2 id="pdp-heading-size" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
           <div class="pdp-detail-section__body">
-            <p class="mb-2">{{ text_pdp_size_intro }}</p>
-            <p class="mb-0 text-muted small">{{ text_pdp_size_future }}</p>
+            <p class="mb-0">{{ text_pdp_size_intro }}</p>
+            {% if text_pdp_size_future %}
+              <p class="mb-0 mt-2 text-muted small">{{ text_pdp_size_future }}</p>
+            {% endif %}
           </div>
         </section>
       </div>

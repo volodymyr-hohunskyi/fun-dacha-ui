@@ -34,7 +34,7 @@ $_['text_pdp_guarantee']         = 'We want you to be happy with your seeds and 
 $_['text_pdp_growing_heading']   = 'Growing information';
 $_['text_pdp_size_heading']      = 'Pack size';
 $_['text_pdp_size_intro']        = 'Only one standard pack is available for this product right now.';
-$_['text_pdp_size_future']       = 'Coming later: small and large packs, “10+1” bundle-style offers, and 10% off volume orders.';
+$_['text_pdp_size_future']       = '';
 
 // Buttons
 $_['button_wishlist']            = 'Add to Wish List';
