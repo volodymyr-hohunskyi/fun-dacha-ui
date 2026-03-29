@@ -312,13 +312,6 @@
             <div class="pdp-detail-section__body pdp-growing-text">
               {{ description }}
             </div>
-            {% if tags %}
-              <p class="mt-3 mb-0 small text-muted">{{ text_tags }}
-                {% for tag in tags %}
-                  <a href="{{ tag.href }}">{{ tag.tag }}</a>{% if not loop.last %}, {% endif %}
-                {% endfor %}
-              </p>
-            {% endif %}
           </section>
         {% endif %}
 
