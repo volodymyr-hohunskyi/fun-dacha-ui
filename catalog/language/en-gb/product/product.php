@@ -34,6 +34,7 @@ $_['text_pdp_guarantee']         = 'We want you to be happy with your seeds and 
 $_['text_pdp_growing_heading']   = 'Growing information';
 $_['text_pdp_size_heading']      = 'Pack size';
 $_['text_pdp_size_intro']        = 'Only one standard pack is available for this product right now.';
+$_['text_pdp_size_intro_pack']   = 'Only one standard pack is available for this product right now (%s).';
 $_['text_pdp_size_future']       = '';
 $_['text_pdp_pack_title_1']      = '1 pack';
 $_['text_pdp_pack_title_2']      = '2 packs';

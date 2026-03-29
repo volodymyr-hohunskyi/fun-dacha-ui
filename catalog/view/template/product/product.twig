@@ -79,11 +79,11 @@
               {% if not special %}
                 <li><h2 class="mb-0"><span class="product-price-regular">{{ price }}</span></h2></li>
               {% else %}
-                <li class="mb-1">
+                <li class="mb-1 product-price-block__row product-price-block__row--sale">
                   <span class="product-price-sale-label">{{ text_special_offer }}</span>
-                  <span class="product-price-sale">{{ special }}</span>
+                  <span class="product-price-sale price-display__sale">{{ special }}</span>
                 </li>
-                <li class="mb-0"><span class="product-price-was">{{ price }}</span></li>
+                <li class="mb-0 product-price-block__row product-price-block__row--was"><span class="product-price-was price-display__was">{{ price }}</span></li>
               {% endif %}
               {% if points %}
                 <li>{{ text_points }} {{ points }}</li>
@@ -108,7 +108,7 @@
                   </div>
                   <input type="hidden" form="form-product" name="option[{{ pdp_pack_product_option_id }}]" id="pdp-pack-option-input" value="{{ pdp_pack_default_product_option_value_id }}" />
                 {% else %}
-                  <p class="mb-0">{{ text_pdp_size_intro }}</p>
+                  <p class="mb-0">{{ pdp_size_intro ?: text_pdp_size_intro }}</p>
                   {% if text_pdp_size_future %}
                     <p class="mb-0 mt-2 text-muted small">{{ text_pdp_size_future }}</p>
                   {% endif %}

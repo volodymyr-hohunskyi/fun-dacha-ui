@@ -456,6 +456,8 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$this->applyPdpPackDisplay($data);
 
+			$data['pdp_size_intro'] = $this->buildPdpSinglePackIntro($data['pdp_pack_unit_label'] ?? '');
+
 			$data['related'] = $this->load->controller('product/related');
 
 			$data['tags'] = [];
@@ -663,6 +665,103 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Single-pack Фасування line: "(1 грам)" / "(35 штук)" from attribute unit (гр / шт).
+	 */
+	private function buildPdpSinglePackIntro(string $unit_label): string {
+		$unit_label = trim($unit_label);
+
+		if ($unit_label === '') {
+			return '';
+		}
+
+		$lang = (string)$this->config->get('config_language');
+
+		if (preg_match('/(\d+)\s*гр\.?/ui', $unit_label, $m)) {
+			$n = (int)$m[1];
+
+			if ($lang === 'uk-ua') {
+				$phrase = $this->formatUkrainianGramsPhrase($n);
+			} elseif ($lang === 'fr-fr') {
+				$phrase = $this->formatFrenchGramsPhrase($n);
+			} else {
+				$phrase = $this->formatEnglishGramsPhrase($n);
+			}
+
+			return sprintf($this->language->get('text_pdp_size_intro_pack'), $phrase);
+		}
+
+		if (preg_match('/(\d+)\s*шт\.?/ui', $unit_label, $m)) {
+			$n = (int)$m[1];
+
+			if ($lang === 'uk-ua') {
+				$phrase = $this->formatUkrainianPiecesPhrase($n);
+			} elseif ($lang === 'fr-fr') {
+				$phrase = $this->formatFrenchPiecesPhrase($n);
+			} else {
+				$phrase = $this->formatEnglishPiecesPhrase($n);
+			}
+
+			return sprintf($this->language->get('text_pdp_size_intro_pack'), $phrase);
+		}
+
+		return sprintf($this->language->get('text_pdp_size_intro_pack'), $unit_label);
+	}
+
+	private function formatUkrainianGramsPhrase(int $n): string {
+		$mod100 = $n % 100;
+		$mod10 = $n % 10;
+
+		if ($mod100 >= 11 && $mod100 <= 14) {
+			return $n . ' грамів';
+		}
+
+		if ($mod10 === 1) {
+			return $n . ' грам';
+		}
+
+		if ($mod10 >= 2 && $mod10 <= 4) {
+			return $n . ' грами';
+		}
+
+		return $n . ' грамів';
+	}
+
+	private function formatUkrainianPiecesPhrase(int $n): string {
+		$mod100 = $n % 100;
+		$mod10 = $n % 10;
+
+		if ($mod100 >= 11 && $mod100 <= 14) {
+			return $n . ' штук';
+		}
+
+		if ($mod10 === 1) {
+			return $n . ' штука';
+		}
+
+		if ($mod10 >= 2 && $mod10 <= 4) {
+			return $n . ' штуки';
+		}
+
+		return $n . ' штук';
+	}
+
+	private function formatEnglishGramsPhrase(int $n): string {
+		return $n === 1 ? '1 gram' : $n . ' grams';
+	}
+
+	private function formatEnglishPiecesPhrase(int $n): string {
+		return $n === 1 ? '1 piece' : $n . ' pieces';
+	}
+
+	private function formatFrenchGramsPhrase(int $n): string {
+		return $n === 1 ? '1 gramme' : $n . ' grammes';
+	}
+
+	private function formatFrenchPiecesPhrase(int $n): string {
+		return $n === 1 ? '1 pièce' : $n . ' pièces';
 	}
 	
 	/**

@@ -39,7 +39,7 @@
                 <td>{% if not product.special %}
                     {{ product.price }}
                   {% else %}
-                    <span class="price-new">{{ product.special }}</span> <span class="price-old">{{ product.price }}</span>
+                    <span class="price-new price-display__sale">{{ product.special }}</span> <span class="price-old price-display__was">{{ product.price }}</span>
                   {% endif %}</td>
               {% endfor %}
             </tr>

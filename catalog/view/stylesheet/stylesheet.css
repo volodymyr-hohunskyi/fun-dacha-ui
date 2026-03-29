@@ -960,7 +960,7 @@ footer.freshgo-footer {
 
 .product-thumb__current {
   font-weight: 700;
-  color: #212529;
+  color: #000;
 }
 
 .product-thumb__sale {
@@ -969,9 +969,10 @@ footer.freshgo-footer {
 }
 
 .product-thumb__was {
-  font-weight: 400;
-  color: #6c757d;
+  font-weight: 600;
+  color: #000;
   text-decoration: line-through;
+  text-decoration-thickness: 1px;
   font-size: 0.9em;
 }
 
@@ -1042,13 +1043,28 @@ footer.freshgo-footer {
   color: #444;
 }
 
+.price-display__sale,
 .price-new {
-  font-weight: 600;
+  color: #c62828;
+  font-weight: 700;
 }
 
+.price-display__was,
 .price-old {
-  color: #dc512c;
+  color: #000;
+  font-weight: 600;
   text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+
+.cart-price-cell .price-display__sale {
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+.cart-price-cell .price-display__was {
+  display: inline-block;
+  font-size: 0.9em;
 }
 
 /* Cart table & product page: compact +/- controls */
@@ -1122,10 +1138,10 @@ footer.freshgo-footer {
 .product-price-block .product-price-was {
   display: inline-block;
   color: #000;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: line-through;
   font-size: 1rem;
-  opacity: 0.85;
+  text-decoration-thickness: 1px;
 }
 
 /* PDP: volume / pack tiers */

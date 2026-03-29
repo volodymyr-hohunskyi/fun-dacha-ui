@@ -122,6 +122,8 @@ class Cart extends \Opencart\System\Engine\Controller {
 		$product_count = count($products);
 		$data['heading_title'] = sprintf($this->language->get('text_items'), $product_count);
 
+		$this->load->model('catalog/product');
+
 		foreach ($products as $product) {
 			if ($product['option']) {
 				foreach ($product['option'] as $key => $option) {
@@ -155,12 +157,23 @@ class Cart extends \Opencart\System\Engine\Controller {
 				}
 			}
 
+			$price_was = '';
+
+			if ($price_status && empty($product['option'])) {
+				$pinfo = $this->model_catalog_product->getProduct((int)$product['product_id']);
+
+				if ($pinfo && (float)$pinfo['special'] > 0) {
+					$price_was = $this->currency->format($this->tax->calculate((float)$pinfo['price'], (int)$pinfo['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				}
+			}
+
 			$data['products'][] = [
 				'thumb'        => $this->model_tool_image->resize($product['image'], $this->config->get('config_image_cart_width'), $this->config->get('config_image_cart_height')),
 				'subscription' => $subscription,
 				'stock'        => $product['stock_status'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
 				'minimum'      => !$product['minimum_status'] ? sprintf($this->language->get('error_minimum'), $product['minimum']) : 0,
 				'price'        => $price_status ? $product['price_text'] : '',
+				'price_was'    => $price_was,
 				'total'        => $price_status ? $product['total_text'] : '',
 				'href'         => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product['product_id']),
 				'remove'       => $this->url->link('checkout/cart.remove', 'language=' . $this->config->get('config_language') . '&key=' . $product['cart_id'])

@@ -167,10 +167,12 @@ class Option extends \Opencart\System\Engine\Model {
 	 * $results = $this->model_catalog_option->getOptions($filter_data);
 	 */
 	public function getOptions(array $data = []): array {
-		$sql = "SELECT * FROM `" . DB_PREFIX . "option` `o` LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id`) WHERE `od`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'";
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$sql = "SELECT `o`.*, COALESCE(`od`.`name`, (SELECT `name` FROM `" . DB_PREFIX . "option_description` WHERE `option_id` = `o`.`option_id` ORDER BY `language_id` ASC LIMIT 1)) AS `name` FROM `" . DB_PREFIX . "option` `o` LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id` AND `od`.`language_id` = '" . $language_id . "')";
 
 		if (!empty($data['filter_name'])) {
-			$sql .= " AND LCASE(`od`.`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "'";
+			$sql .= " WHERE `o`.`option_id` IN (SELECT `option_id` FROM `" . DB_PREFIX . "option_description` WHERE LCASE(`name`) LIKE '" . $this->db->escape(oc_strtolower($data['filter_name']) . '%') . "')";
 		}
 
 		$sort_data = [
@@ -180,9 +182,13 @@ class Option extends \Opencart\System\Engine\Model {
 		];
 
 		if (isset($data['sort']) && in_array($data['sort'], $sort_data)) {
-			$sql .= " ORDER BY " . $data['sort'];
+			if ($data['sort'] === 'od.name') {
+				$sql .= " ORDER BY `name`";
+			} else {
+				$sql .= " ORDER BY " . $data['sort'];
+			}
 		} else {
-			$sql .= " ORDER BY `od`.`name`";
+			$sql .= " ORDER BY `name`";
 		}
 
 		if (isset($data['order']) && ($data['order'] == 'DESC')) {

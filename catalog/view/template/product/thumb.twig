@@ -12,8 +12,8 @@
             {% if not special %}
               <span class="product-thumb__current">{{ price }}</span>
             {% else %}
-              <span class="product-thumb__sale">{{ special }}</span>
-              <span class="product-thumb__was">{{ price }}</span>
+              <span class="product-thumb__sale price-display__sale">{{ special }}</span>
+              <span class="product-thumb__was price-display__was">{{ price }}</span>
             {% endif %}
           {% endif %}
         </div>

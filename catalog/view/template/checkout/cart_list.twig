@@ -71,7 +71,7 @@
             <td class="text-center" style="padding-left: 10px; padding-right: 10px;">
               <a href="{{ product.remove }}" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i class="fa-solid fa-circle-xmark"></i></a>
             </td>
-            <td class="text-end">{{ product.price }}</td>
+            <td class="text-end cart-price-cell">{% if product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
             <td class="text-end">{{ product.total }}</td>
           </tr>
         {% endfor %}

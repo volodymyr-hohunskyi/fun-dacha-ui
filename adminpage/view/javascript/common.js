@@ -354,7 +354,7 @@ $(document).on('click', '[data-oc-toggle=\'image\']', function(e) {
             var $dropdown = $('#' + $(element).attr('data-oc-target'));
 
             this.timer = null;
-            this.items = [];
+            this.items = {};
 
             $.extend(this, option);
 
@@ -368,7 +368,7 @@ $(document).on('click', '[data-oc-toggle=\'image\']', function(e) {
                 if (!e.relatedTarget || !$(e.relatedTarget).hasClass('dropdown-item')) {
                     this.timer = setTimeout(function(object) {
                         object.removeClass('show');
-                    }, 50, $dropdown);
+                    }, 150, $dropdown);
                 }
             });
 
@@ -377,14 +377,33 @@ $(document).on('click', '[data-oc-toggle=\'image\']', function(e) {
                 element.request();
             });
 
+            // Keep focus on the input until click runs (avoids dropdown closing before selection)
+            $dropdown.on('mousedown', 'a.dropdown-item', function(e) {
+                e.preventDefault();
+            });
+
             // Click
             $dropdown.on('click', 'a', function(e) {
                 e.preventDefault();
 
-                var value = $(this).attr('href');
+                var raw = $(this).attr('data-value');
 
-                if (element.items[value] !== undefined) {
-                    element.select(element.items[value]);
+                if (raw === undefined) {
+                    raw = $(this).attr('href');
+                }
+
+                var item = element.items[raw];
+
+                if (item === undefined && raw !== undefined && raw !== '') {
+                    item = element.items[String(raw)];
+                }
+
+                if (item === undefined && raw !== undefined && raw !== '') {
+                    item = element.items[Number(raw)];
+                }
+
+                if (item !== undefined) {
+                    element.select(item);
 
                     $dropdown.removeClass('show');
                 }
@@ -413,13 +432,17 @@ $(document).on('click', '[data-oc-toggle=\'image\']', function(e) {
                 var i = 0, j = 0;
 
                 if (json.length) {
+                    this.items = {};
+
                     for (i = 0; i < json.length; i++) {
-                        // update element items
-                        this.items[json[i]['value']] = json[i];
+                        var itemKey = String(json[i]['value']);
+
+                        // update element items (string keys so lookup matches data-value / href)
+                        this.items[itemKey] = json[i];
 
                         if (!json[i]['category']) {
                             // ungrouped items
-                            html += '<li><a href="' + json[i]['value'] + '" class="dropdown-item">' + json[i]['label'] + '</a></li>';
+                            html += '<li><a href="#" data-value="' + itemKey + '" class="dropdown-item">' + json[i]['label'] + '</a></li>';
                         } else {
                             // grouped items
                             name = json[i]['category'];
@@ -436,7 +459,9 @@ $(document).on('click', '[data-oc-toggle=\'image\']', function(e) {
                         html += '<li><h6 class="dropdown-header">' + name + '</h6></li>';
 
                         for (j = 0; j < category[name].length; j++) {
-                            html += '<li><a href="' + category[name][j]['value'] + '" class="dropdown-item">' + category[name][j]['label'] + '</a></li>';
+                            var groupKey = String(category[name][j]['value']);
+
+                            html += '<li><a href="#" data-value="' + groupKey + '" class="dropdown-item">' + category[name][j]['label'] + '</a></li>';
                         }
                     }
 
