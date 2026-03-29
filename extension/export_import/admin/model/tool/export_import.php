@@ -1706,6 +1706,30 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	/**
+	 * product_discount.special: 1 = sale/special row (storefront red price); 0 = volume / non-special tier.
+	 * Accepts TRUE/YES/1/on, Excel booleans, empty handled by caller defaults.
+	 */
+	protected function parseProductDiscountSpecialFlag( $value ): int {
+		if ($value === null || $value === '') {
+			return 0;
+		}
+		if (is_bool($value)) {
+			return $value ? 1 : 0;
+		}
+		if (is_numeric($value)) {
+			return ((float)$value != 0.0) ? 1 : 0;
+		}
+		$s = strtoupper(trim((string)$value));
+
+		if (in_array($s, ['TRUE', 'YES', 'Y', 'ON', 'ENABLED', 'X'], true)) {
+			return 1;
+		}
+
+		return 0;
+	}
+
+
 	protected function storeDiscountIntoDatabase( &$discount, &$old_product_discount_ids, &$customer_group_ids ) {
 		$product_id = $discount['product_id'];
 		$name = $discount['customer_group'];
@@ -1715,8 +1739,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$price = $discount['price'];
 		if (version_compare(VERSION,'4.1.0.0','>=')) {
 			$type = $discount['type'];
-			$special = $discount['special'];
-			$special = ((strtoupper($special)=="TRUE") || (strtoupper($special)=="YES") || (strtoupper($special)=="ENABLED")) ? 1 : 0;
+			$special = $this->parseProductDiscountSpecialFlag($discount['special'] ?? '');
 		}
 		$date_start = $discount['date_start'];
 		$date_end = $discount['date_end'];
@@ -1823,7 +1846,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$price = $this->getCell($data,$i,$j++,'0');
 			if (version_compare(VERSION,'4.1.0.0','>=')) {
 				$type = $this->getCell($data,$i,$j++,'P');
-				$special = $this->getCell($data,$i,$j++,'false');
+				$special = trim((string)$this->getCell($data,$i,$j++,''));
+				if ($special === '') {
+					$special = ((int)$quantity === 1) ? 'true' : 'false';
+				}
 			}
 			$date_start = $this->getCell($data,$i,$j++,'0000-00-00');
 			$date_end = $this->getCell($data,$i,$j++,'0000-00-00');
@@ -2065,6 +2091,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			return;
 		}
 
+		$sheet_uses_option_id = $this->resolveUseOptionIdFromProductOptionsSheet( $data );
+
 		// if incremental then find current product IDs else delete all old product options
 		if ($incremental) {
 			$unlisted_product_ids = $available_product_ids;
@@ -2072,7 +2100,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$this->deleteProductOptions();
 		}
 
-		if (!$this->config->get( 'export_import_settings_use_option_id' )) {
+		if (!$sheet_uses_option_id) {
 			$option_ids = $this->getOptionIds();
 		}
 
@@ -2090,7 +2118,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			if ($product_id=='') {
 				continue;
 			}
-			if ($this->config->get( 'export_import_settings_use_option_id' )) {
+			if ($sheet_uses_option_id) {
 				$option_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++,'') );
 				if ($option_id === '') {
 					continue;
@@ -2260,6 +2288,9 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			return;
 		}
 
+		$sheet_uses_option_id = $this->resolveUseOptionIdFromProductOptionValuesSheet( $data );
+		$sheet_uses_option_value_id = $this->resolveUseOptionValueIdFromProductOptionValuesSheet( $data );
+
 		// if incremental then find current product IDs else delete all old product option values
 		if ($incremental) {
 			$unlisted_product_ids = $available_product_ids;
@@ -2267,10 +2298,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$this->deleteProductOptionValues();
 		}
 
-		if (!$this->config->get( 'export_import_settings_use_option_id' )) {
+		if (!$sheet_uses_option_id) {
 			$option_ids = $this->getOptionIds();
 		}
-		if (!$this->config->get( 'export_import_settings_use_option_value_id' )) {
+		if (!$sheet_uses_option_value_id) {
 			$option_value_ids = $this->getOptionValueIds();
 		}
 
@@ -2289,7 +2320,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			if ($product_id=='') {
 				continue;
 			}
-			if ($this->config->get( 'export_import_settings_use_option_id' )) {
+			if ($sheet_uses_option_id) {
 				$option_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++,'') );
 				if ($option_id === '') {
 					continue;
@@ -2306,7 +2337,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				continue;
 			}
 			$option_id = $option_id_int;
-			if ($this->config->get( 'export_import_settings_use_option_value_id' )) {
+			if ($sheet_uses_option_value_id) {
 				$option_value_id = $this->normalizeNumericIdCell( $this->getCell($data,$i,$j++,'') );
 				if ($option_value_id === '') {
 					continue;
@@ -4243,6 +4274,91 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	/**
+	 * Column B of ProductOptions: use numeric option_id vs option name. Header row overrides admin toggles.
+	 *
+	 * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet|null $data
+	 */
+	protected function resolveUseOptionIdFromProductOptionsSheet( $data ) {
+		if ( $data === null ) {
+			return (bool) $this->config->get( 'export_import_settings_use_option_id' );
+		}
+		$h = strtolower( trim( (string) $this->getCell( $data, 0, 2 ) ) );
+		if ( $h === 'option_id' ) {
+			return true;
+		}
+		if ( $h === 'option' ) {
+			return false;
+		}
+		return (bool) $this->config->get( 'export_import_settings_use_option_id' );
+	}
+
+
+	/**
+	 * Column B of ProductOptionValues: option_id vs option name.
+	 *
+	 * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet|null $data
+	 */
+	protected function resolveUseOptionIdFromProductOptionValuesSheet( $data ) {
+		if ( $data === null ) {
+			return (bool) $this->config->get( 'export_import_settings_use_option_id' );
+		}
+		$h = strtolower( trim( (string) $this->getCell( $data, 0, 2 ) ) );
+		if ( $h === 'option_id' ) {
+			return true;
+		}
+		if ( $h === 'option' ) {
+			return false;
+		}
+		return (bool) $this->config->get( 'export_import_settings_use_option_id' );
+	}
+
+
+	/**
+	 * Column C of ProductOptionValues: option_value_id vs option_value label.
+	 *
+	 * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet|null $data
+	 */
+	protected function resolveUseOptionValueIdFromProductOptionValuesSheet( $data ) {
+		if ( $data === null ) {
+			return (bool) $this->config->get( 'export_import_settings_use_option_value_id' );
+		}
+		$h = strtolower( trim( (string) $this->getCell( $data, 0, 3 ) ) );
+		if ( $h === 'option_value_id' ) {
+			return true;
+		}
+		if ( $h === 'option_value' ) {
+			return false;
+		}
+		return (bool) $this->config->get( 'export_import_settings_use_option_value_id' );
+	}
+
+
+	/**
+	 * Prefer ProductOptions, then ProductOptionValues, for merge + validateOptionColumns.
+	 */
+	protected function resolveUseOptionIdFromWorkbookForOptionValidation( &$reader ) {
+		$data = $reader->getSheetByName( 'ProductOptions' );
+		if ( $data !== null ) {
+			return $this->resolveUseOptionIdFromProductOptionsSheet( $data );
+		}
+		$data = $reader->getSheetByName( 'ProductOptionValues' );
+		if ( $data !== null ) {
+			return $this->resolveUseOptionIdFromProductOptionValuesSheet( $data );
+		}
+		return (bool) $this->config->get( 'export_import_settings_use_option_id' );
+	}
+
+
+	protected function resolveUseOptionValueIdFromWorkbookForOptionValidation( &$reader ) {
+		$data = $reader->getSheetByName( 'ProductOptionValues' );
+		if ( $data !== null ) {
+			return $this->resolveUseOptionValueIdFromProductOptionValuesSheet( $data );
+		}
+		return (bool) $this->config->get( 'export_import_settings_use_option_value_id' );
+	}
+
+
 	protected function validateHeading( &$data, &$expected, &$multilingual ) {
 		$default_language_code = $this->config->get('config_language');
 		$heading = array();
@@ -4454,7 +4570,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		if ($data==null) {
 			return true;
 		}
-		if ($this->config->get('export_import_settings_use_option_id')) {
+		if ($this->resolveUseOptionIdFromProductOptionsSheet( $data )) {
 			$expected_heading = array( "product_id", "option_id", "default_option_value", "required" );
 		} else {
 			$expected_heading = array( "product_id", "option", "default_option_value", "required" );
@@ -4469,14 +4585,14 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		if ($data==null) {
 			return true;
 		}
-		if ($this->config->get('export_import_settings_use_option_id')) {
-			if ($this->config->get('export_import_settings_use_option_value_id')) {
+		if ($this->resolveUseOptionIdFromProductOptionValuesSheet( $data )) {
+			if ($this->resolveUseOptionValueIdFromProductOptionValuesSheet( $data )) {
 				$expected_heading = array( "product_id", "option_id", "option_value_id", "quantity", "subtract", "price", "price_prefix", "points", "points_prefix", "weight", "weight_prefix" );
 			} else {
 				$expected_heading = array( "product_id", "option_id", "option_value", "quantity", "subtract", "price", "price_prefix", "points", "points_prefix", "weight", "weight_prefix" );
 			}
 		} else {
-			if ($this->config->get('export_import_settings_use_option_value_id')) {
+			if ($this->resolveUseOptionValueIdFromProductOptionValuesSheet( $data )) {
 				$expected_heading = array( "product_id", "option", "option_value_id", "quantity", "subtract", "price", "price_prefix", "points", "points_prefix", "weight", "weight_prefix" );
 			} else {
 				$expected_heading = array( "product_id", "option", "option_value", "quantity", "subtract", "price", "price_prefix", "points", "points_prefix", "weight", "weight_prefix" );
@@ -5062,8 +5178,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	protected function validateOptionColumns( &$reader ) {
 		// get all existing options and option values
 		$ok = true;
-		$export_import_settings_use_option_id = $this->config->get('export_import_settings_use_option_id');
-		$export_import_settings_use_option_value_id = $this->config->get('export_import_settings_use_option_value_id');
+		$export_import_settings_use_option_id = $this->resolveUseOptionIdFromWorkbookForOptionValidation( $reader );
+		$export_import_settings_use_option_value_id = $this->resolveUseOptionValueIdFromWorkbookForOptionValidation( $reader );
 		$language_id = $this->getDefaultLanguageId();
 		$sql  = "SELECT od.option_id, od.name AS option_name, ovd.option_value_id, ovd.name AS option_value_name ";
 		$sql .= "FROM `".DB_PREFIX."option_description` od ";
@@ -6745,7 +6861,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$pri = (int) self::SALES_CALENDAR_PRODUCT_DISCOUNT_PRIORITY;
 			if (version_compare( VERSION, '4.1.0.0', '>=' )) {
 				$sql = "INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`,`customer_group_id`,`quantity`,`priority`,`price`,`type`,`special`,`date_start`,`date_end`) VALUES (";
-				$sql .= "'" . $product_id . "','" . $customer_group_id . "','1','" . $pri . "','" . (float) $price . "','P','0','" . $ds . "','" . $de . "')";
+				$sql .= "'" . $product_id . "','" . $customer_group_id . "','1','" . $pri . "','" . (float) $price . "','P','1','" . $ds . "','" . $de . "')";
 			} else {
 				$sql = "INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`,`customer_group_id`,`quantity`,`priority`,`price`,`date_start`,`date_end`) VALUES (";
 				$sql .= "'" . $product_id . "','" . $customer_group_id . "','1','" . $pri . "','" . (float) $price . "','" . $ds . "','" . $de . "')";
