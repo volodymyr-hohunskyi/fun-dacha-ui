@@ -1958,13 +1958,17 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function getOptionIds() {
-		$language_id = $this->getDefaultLanguageId();
-		$sql  = "SELECT option_id, name FROM `".DB_PREFIX."option_description` WHERE language_id='".(int)$language_id."'";
+		$language_ids = $this->getRelevantLanguageIds();
+		$sql  = "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` ";
+		$sql .= "WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $language_ids ) ) . ")";
 		$query = $this->db->query( $sql );
 		$option_ids = array();
 		foreach ($query->rows as $row) {
 			$option_id = $row['option_id'];
-			$name = htmlspecialchars_decode($row['name']);
+			$name = htmlspecialchars_decode( $row['name'] );
+			if ($name === '') {
+				continue;
+			}
 			$option_ids[$name] = $option_id;
 		}
 		return $option_ids;
@@ -2095,15 +2099,18 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function getOptionValueIds() {
-		$language_id = $this->getDefaultLanguageId();
-		$sql  = "SELECT option_id, option_value_id, name FROM `".DB_PREFIX."option_value_description` ";
-		$sql .= "WHERE language_id='".(int)$language_id."'";
+		$language_ids = $this->getRelevantLanguageIds();
+		$sql  = "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` ";
+		$sql .= "WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $language_ids ) ) . ")";
 		$query = $this->db->query( $sql );
 		$option_value_ids = array();
 		foreach ($query->rows as $row) {
 			$option_id = $row['option_id'];
 			$option_value_id = $row['option_value_id'];
-			$name = htmlspecialchars_decode($row['name']);
+			$name = htmlspecialchars_decode( $row['name'] );
+			if ($name === '') {
+				continue;
+			}
 			$option_value_ids[$option_id][$name] = $option_value_id;
 		}
 		return $option_value_ids;
