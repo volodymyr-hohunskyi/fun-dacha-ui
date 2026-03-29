@@ -373,62 +373,6 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 
 			$data['discounts'] = [];
-			$data['pdp_volume_tiers'] = [];
-
-			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-				$volume_rules = $this->model_catalog_product->getVolumeDiscountRules($product_id);
-				$unit_base = (float)$product_info['special'] > 0 ? (float)$product_info['special'] : (float)$product_info['price'];
-
-				if ($volume_rules) {
-					$tiers = [];
-
-					$tiers[] = [
-						'quantity'        => 1,
-						'label'           => $this->language->get('text_pdp_pack_single'),
-						'per_unit_base'   => $this->formatProductMoney($product_info, $unit_base),
-						'per_unit_now'    => $this->formatProductMoney($product_info, $unit_base),
-						'percent_label'   => '',
-						'savings_line'    => '',
-						'is_volume'       => false,
-					];
-
-					foreach ($volume_rules as $rule) {
-						$qty = (int)$rule['quantity'];
-
-						if ($qty < 2) {
-							continue;
-						}
-
-						$type = $rule['type'];
-						$unit_tier = $this->computeVolumeUnitPrice($unit_base, $type, (float)$rule['rule_price']);
-
-						if ($type === 'P') {
-							$percent_label = '-' . (int)$rule['rule_price'] . '%';
-						} elseif ($unit_base > 0.00001) {
-							$pct = (int)round((1 - min(1.0, $unit_tier / $unit_base)) * 100);
-
-							$percent_label = $pct > 0 ? '-' . $pct . '%' : '';
-						} else {
-							$percent_label = '';
-						}
-
-						$save_pre_tax = ($unit_base - $unit_tier) * $qty;
-						$savings_line = $save_pre_tax > 0 ? sprintf($this->language->get('text_pdp_volume_save'), $this->formatProductMoney($product_info, $save_pre_tax)) : '';
-
-						$tiers[] = [
-							'quantity'        => $qty,
-							'label'           => sprintf($this->language->get('text_pdp_pack_many'), $qty),
-							'per_unit_base'   => $this->formatProductMoney($product_info, $unit_base),
-							'per_unit_now'    => $this->formatProductMoney($product_info, $unit_tier),
-							'percent_label'   => $percent_label,
-							'savings_line'    => $savings_line,
-							'is_volume'       => true,
-						];
-					}
-
-					$data['pdp_volume_tiers'] = $tiers;
-				}
-			}
 
 			$data['options'] = [];
 
@@ -510,6 +454,8 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$data['attribute_groups'] = $this->model_catalog_product->getAttributes($product_id);
 
+			$this->applyPdpPackDisplay($data);
+
 			$data['related'] = $this->load->controller('product/related');
 
 			$data['tags'] = [];
@@ -557,6 +503,149 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return null;
+	}
+
+	/**
+	 * PDP «Фасування»: three pack boxes when pack option (import script option_id 92001) is present; otherwise leave defaults.
+	 *
+	 * @param array<string, mixed> $data
+	 */
+	private function applyPdpPackDisplay(array &$data): void {
+		$data['pdp_pack_options'] = [];
+		$data['pdp_pack_product_option_id'] = 0;
+		$data['pdp_pack_default_product_option_value_id'] = 0;
+		$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($data['attribute_groups'] ?? []);
+
+		$pack_option = null;
+
+		foreach ($data['options'] as $opt) {
+			if ((int)($opt['option_id'] ?? 0) === 92001) {
+				$pack_option = $opt;
+
+				break;
+			}
+		}
+
+		if ($pack_option === null || empty($pack_option['product_option_value'])) {
+			return;
+		}
+
+		$required_value_ids = [920011, 920012, 920013];
+		$by_value_id = [];
+
+		foreach ($pack_option['product_option_value'] as $ov) {
+			$ovid = (int)($ov['option_value_id'] ?? 0);
+
+			if (in_array($ovid, $required_value_ids, true)) {
+				$by_value_id[$ovid] = $ov;
+			}
+		}
+
+		if (count($by_value_id) !== 3) {
+			return;
+		}
+
+		$titles = [
+			920011 => $this->language->get('text_pdp_pack_title_1'),
+			920012 => $this->language->get('text_pdp_pack_title_2'),
+			920013 => $this->language->get('text_pdp_pack_title_5'),
+		];
+
+		foreach ($required_value_ids as $ovid) {
+			$ov = $by_value_id[$ovid];
+			$data['pdp_pack_options'][] = [
+				'product_option_value_id' => (int)$ov['product_option_value_id'],
+				'option_value_id'         => $ovid,
+				'title'                   => $titles[$ovid],
+				'price'                   => $ov['price'] ?? false,
+			];
+		}
+
+		$data['pdp_pack_product_option_id'] = (int)$pack_option['product_option_id'];
+		$data['pdp_pack_default_product_option_value_id'] = (int)$by_value_id[920011]['product_option_value_id'];
+
+		$data['options'] = array_values(array_filter($data['options'], static function (array $o): bool {
+			return (int)($o['option_id'] ?? 0) !== 92001;
+		}));
+	}
+
+	/**
+	 * Label under each pack box (e.g. «1 гр», «30 шт») from ProductAttributes / Specification in import.
+	 *
+	 * @param array<int, array<string, mixed>> $attribute_groups
+	 */
+	private function getPdpPackagingUnitLabel(array $attribute_groups): string {
+		foreach ($attribute_groups as $group) {
+			if (empty($group['attribute']) || !is_array($group['attribute'])) {
+				continue;
+			}
+
+			foreach ($group['attribute'] as $attr) {
+				$name = isset($attr['name']) ? trim((string)$attr['name']) : '';
+				$text = isset($attr['text']) ? trim((string)$attr['text']) : '';
+
+				if ($text === '' || $name === '') {
+					continue;
+				}
+
+				if (mb_stripos($name, 'фасу') !== false) {
+					return $text;
+				}
+			}
+		}
+
+		foreach ($attribute_groups as $group) {
+			$group_name = isset($group['name']) ? trim((string)$group['name']) : '';
+
+			if ($group_name === '') {
+				continue;
+			}
+
+			if (mb_stripos($group_name, 'specification') === false && mb_stripos($group_name, 'специфікац') === false) {
+				continue;
+			}
+
+			if (empty($group['attribute']) || !is_array($group['attribute'])) {
+				continue;
+			}
+
+			foreach ($group['attribute'] as $attr) {
+				$name = isset($attr['name']) ? trim((string)$attr['name']) : '';
+				$text = isset($attr['text']) ? trim((string)$attr['text']) : '';
+
+				if ($text === '') {
+					continue;
+				}
+
+				if (preg_match('/фасу|упаков|weight|pack|вага|насіння\s+в/ui', $name)) {
+					return $text;
+				}
+			}
+
+			foreach ($group['attribute'] as $attr) {
+				$text = isset($attr['text']) ? trim((string)$attr['text']) : '';
+
+				if ($text !== '' && preg_match('/\d+\s*(гр|шт)/ui', $text)) {
+					return $text;
+				}
+			}
+		}
+
+		foreach ($attribute_groups as $group) {
+			if (empty($group['attribute']) || !is_array($group['attribute'])) {
+				continue;
+			}
+
+			foreach ($group['attribute'] as $attr) {
+				$text = isset($attr['text']) ? trim((string)$attr['text']) : '';
+
+				if ($text !== '' && preg_match('/\d+\s*(гр|шт)/ui', $text)) {
+					return $text;
+				}
+			}
+		}
+
+		return '';
 	}
 	
 	/**
@@ -789,29 +878,6 @@ class Product extends \Opencart\System\Engine\Controller {
 	 *
 	 * @return array
 	 */
-	/**
-	 * Format a product money amount (same tax rules as main price).
-	 *
-	 * @param array<string, mixed> $product_info
-	 */
-	private function formatProductMoney(array $product_info, float $amount): string {
-		return $this->currency->format($this->tax->calculate($amount, $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-	}
-
-	/**
-	 * Per-unit price at a volume tier from the effective base unit price (after sale).
-	 */
-	private function computeVolumeUnitPrice(float $unit_base, string $type, float $rule_price): float {
-		switch ($type) {
-			case 'P':
-				return max(0.0, $unit_base - ($unit_base * ($rule_price / 100)));
-			case 'S':
-				return max(0.0, $unit_base - $rule_price);
-			default:
-				return max(0.0, $rule_price);
-		}
-	}
-
 	private function generateTwitterTags(array $product_info, int $product_id, array $data): array {
 		$twitter = [
 			'twitter:card' => 'summary_large_image',

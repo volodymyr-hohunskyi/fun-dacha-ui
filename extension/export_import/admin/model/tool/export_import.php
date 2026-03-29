@@ -4969,6 +4969,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			}
 		}
 
+		$this->mergeOptionsFromWorkbook( $reader, $options, $export_import_settings_use_option_id, $export_import_settings_use_option_value_id );
+
 		// only existing options can be used in 'ProductOptions' worksheet
 		$product_options = array();
 		$data = $reader->getSheetByName( 'ProductOptions' );
@@ -5184,6 +5186,127 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		}
 
 		return $ok;
+	}
+
+
+	/**
+	 * Merge Options + OptionValues defined in the same workbook into the $options map used for validation,
+	 * so ProductOptions / ProductOptionValues can reference option names created in this import run.
+	 *
+	 * @param array<string|int, array<string|int, bool>> $options
+	 */
+	protected function mergeOptionsFromWorkbook( &$reader, array &$options, bool $use_option_id, bool $use_option_value_id ): void {
+		$default_code = (string) $this->config->get( 'config_language' );
+		if ( $default_code === '' ) {
+			$default_code = 'en-gb';
+		}
+
+		$option_id_to_name = array();
+
+		$data = $reader->getSheetByName( 'Options' );
+		if ( $data !== null ) {
+			$k = $data->getHighestRow();
+			$max_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $data->getHighestColumn() );
+			$first_row = array();
+			for ( $j = 1; $j <= $max_col; $j += 1 ) {
+				$first_row[ $j ] = $this->getCell( $data, 0, $j );
+			}
+			for ( $i = 1; $i < $k; $i += 1 ) {
+				$j = 1;
+				$option_id = trim( $this->getCell( $data, $i, $j++ ) );
+				if ( $option_id === '' ) {
+					continue;
+				}
+				$this->getCell( $data, $i, $j++ );
+				$this->getCell( $data, $i, $j++ );
+				$names = array();
+				while ( ( $j <= $max_col ) && isset( $first_row[ $j ] ) && $this->startsWith( $first_row[ $j ], 'name(' ) ) {
+					$language_code = substr( $first_row[ $j ], strlen( 'name(' ), strlen( $first_row[ $j ] ) - strlen( 'name(' ) - 1 );
+					$names[ $language_code ] = htmlspecialchars_decode( trim( (string) $this->getCell( $data, $i, $j++ ) ) );
+				}
+				$opt_name = isset( $names[ $default_code ] ) ? $names[ $default_code ] : '';
+				if ( $opt_name === '' && $names ) {
+					$opt_name = (string) reset( $names );
+				}
+				if ( $opt_name === '' ) {
+					continue;
+				}
+				$option_id_to_name[ $option_id ] = $opt_name;
+				if ( ! $use_option_id ) {
+					if ( ! isset( $options[ $opt_name ] ) ) {
+						$options[ $opt_name ] = array();
+					}
+				} else {
+					if ( ! isset( $options[ $option_id ] ) ) {
+						$options[ $option_id ] = array();
+					}
+				}
+			}
+		}
+
+		$data = $reader->getSheetByName( 'OptionValues' );
+		if ( $data === null ) {
+			return;
+		}
+
+		$k = $data->getHighestRow();
+		$max_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $data->getHighestColumn() );
+		$first_row = array();
+		for ( $j = 1; $j <= $max_col; $j += 1 ) {
+			$first_row[ $j ] = $this->getCell( $data, 0, $j );
+		}
+
+		for ( $i = 1; $i < $k; $i += 1 ) {
+			$j = 1;
+			$option_value_id = trim( $this->getCell( $data, $i, $j++ ) );
+			if ( $option_value_id === '' ) {
+				continue;
+			}
+			$option_id = trim( $this->getCell( $data, $i, $j++ ) );
+			if ( $option_id === '' ) {
+				continue;
+			}
+			$this->getCell( $data, $i, $j++ );
+			$this->getCell( $data, $i, $j++ );
+			$names = array();
+			while ( ( $j <= $max_col ) && isset( $first_row[ $j ] ) && $this->startsWith( $first_row[ $j ], 'name(' ) ) {
+				$language_code = substr( $first_row[ $j ], strlen( 'name(' ), strlen( $first_row[ $j ] ) - strlen( 'name(' ) - 1 );
+				$names[ $language_code ] = htmlspecialchars_decode( trim( (string) $this->getCell( $data, $i, $j++ ) ) );
+			}
+			$val_name = isset( $names[ $default_code ] ) ? $names[ $default_code ] : '';
+			if ( $val_name === '' && $names ) {
+				$val_name = (string) reset( $names );
+			}
+			if ( $val_name === '' ) {
+				continue;
+			}
+			if ( $use_option_id ) {
+				if ( ! $use_option_value_id ) {
+					if ( ! isset( $options[ $option_id ] ) ) {
+						$options[ $option_id ] = array();
+					}
+					$options[ $option_id ][ $val_name ] = true;
+				} else {
+					if ( ! isset( $options[ $option_id ] ) ) {
+						$options[ $option_id ] = array();
+					}
+					$options[ $option_id ][ $option_value_id ] = true;
+				}
+			} else {
+				$opt_name = isset( $option_id_to_name[ $option_id ] ) ? $option_id_to_name[ $option_id ] : '';
+				if ( $opt_name === '' ) {
+					continue;
+				}
+				if ( ! isset( $options[ $opt_name ] ) ) {
+					$options[ $opt_name ] = array();
+				}
+				if ( ! $use_option_value_id ) {
+					$options[ $opt_name ][ $val_name ] = true;
+				} else {
+					$options[ $opt_name ][ $option_value_id ] = true;
+				}
+			}
+		}
 	}
 
 
@@ -6495,6 +6618,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			}
 			$this->uploadDiscounts( $reader, $incremental, $available_product_ids );
 			$this->uploadRewards( $reader, $incremental, $available_product_ids );
+			$this->uploadOptions( $reader, $incremental );
+			$this->uploadOptionValues( $reader, $incremental );
 			$this->uploadProductOptions( $reader, $incremental, $available_product_ids );
 			$this->uploadProductOptionValues( $reader, $incremental, $available_product_ids );
 			$this->uploadProductAttributes( $reader, $incremental, $available_product_ids );
@@ -6503,8 +6628,6 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			if (version_compare(VERSION,'4.1.0.1','>=')) {
 				$this->uploadProductCodes( $reader, $incremental, $available_product_ids );
 			}
-			$this->uploadOptions( $reader, $incremental );
-			$this->uploadOptionValues( $reader, $incremental );
 			$this->uploadAttributeGroups( $reader, $incremental );
 			$this->uploadAttributes( $reader, $incremental );
 			$this->uploadCustomers( $reader, $incremental, $available_customer_ids );

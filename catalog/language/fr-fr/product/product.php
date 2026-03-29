@@ -33,6 +33,9 @@ $_['text_pdp_growing_heading']   = 'Culture';
 $_['text_pdp_size_heading']      = 'Conditionnement';
 $_['text_pdp_size_intro']        = 'Un seul conditionnement standard est proposé pour l’instant.';
 $_['text_pdp_size_future']       = '';
+$_['text_pdp_pack_title_1']      = '1 paquet';
+$_['text_pdp_pack_title_2']      = '2 paquets';
+$_['text_pdp_pack_title_5']      = '5 paquets';
 
 $_['text_pdp_volume_heading']    = 'Tarifs par quantité';
 $_['text_pdp_pack_single']       = '1 unité au prix de';

@@ -35,6 +35,9 @@ $_['text_pdp_growing_heading']   = 'Growing information';
 $_['text_pdp_size_heading']      = 'Pack size';
 $_['text_pdp_size_intro']        = 'Only one standard pack is available for this product right now.';
 $_['text_pdp_size_future']       = '';
+$_['text_pdp_pack_title_1']      = '1 pack';
+$_['text_pdp_pack_title_2']      = '2 packs';
+$_['text_pdp_pack_title_5']      = '5 packs';
 
 $_['text_pdp_volume_heading']    = 'Pack pricing';
 $_['text_pdp_pack_single']       = '1 pack at';

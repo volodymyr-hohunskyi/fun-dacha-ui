@@ -35,6 +35,9 @@ $_['text_pdp_growing_heading']   = 'Вирощування';
 $_['text_pdp_size_heading']      = 'Фасування';
 $_['text_pdp_size_intro']        = 'Наразі для цього товару доступна одна стандартна упаковка.';
 $_['text_pdp_size_future']       = '';
+$_['text_pdp_pack_title_1']      = '1 пакет';
+$_['text_pdp_pack_title_2']      = '2 пакета';
+$_['text_pdp_pack_title_5']      = '5 пакетів';
 
 $_['text_pdp_volume_heading']    = 'Упаковки';
 $_['text_pdp_pack_single']       = '1 упаковка за ціною';

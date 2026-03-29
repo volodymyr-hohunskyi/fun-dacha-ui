@@ -1235,6 +1235,57 @@ footer.freshgo-footer {
   margin-bottom: 0;
 }
 
+.pdp-pack-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.pdp-pack-choice-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 5.5rem;
+  padding: 0.75rem 0.5rem;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9375rem;
+  line-height: 1.35;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pdp-pack-choice-box:hover {
+  border-color: #999;
+}
+
+.pdp-pack-choice-box--active {
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 1px #2e7d32;
+}
+
+.pdp-pack-choice-box__title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1a1a1a;
+}
+
+.pdp-pack-choice-box__price {
+  font-size: 0.8125rem;
+  color: #333;
+  margin-top: 0.35rem;
+}
+
+.pdp-pack-choice-box__footer {
+  margin-top: auto;
+  padding-top: 0.5rem;
+  font-size: 0.8125rem;
+  color: #666;
+}
+
 .pdp-dl {
   margin-bottom: 0;
 }

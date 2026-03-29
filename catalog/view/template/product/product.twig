@@ -89,50 +89,32 @@
                 <li>{{ text_points }} {{ points }}</li>
               {% endif %}
             </ul>
-            {% if pdp_volume_tiers %}
-            <section class="pdp-volume-pricing mt-3 mb-3" aria-labelledby="pdp-heading-volume">
-              <h2 id="pdp-heading-volume" class="pdp-detail-section__title">{{ text_pdp_volume_heading }}</h2>
-              <ul class="list-unstyled pdp-volume-pricing__list mb-0">
-                {% for tier in pdp_volume_tiers %}
-                <li class="pdp-volume-tier{% if tier.is_volume %} pdp-volume-tier--volume{% endif %}">
-                  <div class="pdp-volume-tier__label">{{ tier.label }}</div>
-                  {% if tier.is_volume %}
-                  <div class="pdp-volume-tier__lines">
-                    <div class="pdp-volume-tier__row pdp-volume-tier__row--base">
-                      <span class="pdp-volume-tier__unit-base">{{ tier.per_unit_base }}</span>
-                    </div>
-                    <div class="pdp-volume-tier__row pdp-volume-tier__row--deal">
-                      {% if tier.percent_label %}
-                      <span class="pdp-volume-tier__pct">{{ tier.percent_label }}</span>
-                      {% endif %}
-                      <span class="pdp-volume-tier__unit-now">{{ tier.per_unit_now }}</span>
-                    </div>
-                    {% if tier.savings_line %}
-                    <div class="pdp-volume-tier__save">{{ tier.savings_line }}</div>
-                    {% endif %}
-                  </div>
-                  {% else %}
-                  <div class="pdp-volume-tier__lines">
-                    <div class="pdp-volume-tier__row pdp-volume-tier__row--single">
-                      <span class="pdp-volume-tier__unit-now">{{ tier.per_unit_now }}</span>
-                    </div>
-                  </div>
-                  {% endif %}
-                </li>
-                {% endfor %}
-              </ul>
-            </section>
-            {% else %}
             <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-pack-inline">
               <h2 id="pdp-heading-pack-inline" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
               <div class="pdp-detail-section__body">
-                <p class="mb-0">{{ text_pdp_size_intro }}</p>
-                {% if text_pdp_size_future %}
-                  <p class="mb-0 mt-2 text-muted small">{{ text_pdp_size_future }}</p>
+                {% if pdp_pack_options %}
+                  <div class="pdp-pack-choice-grid" role="group" aria-label="{{ text_pdp_size_heading }}">
+                    {% for box in pdp_pack_options %}
+                      <button type="button" class="pdp-pack-choice-box{% if loop.first %} pdp-pack-choice-box--active{% endif %}" data-pov-id="{{ box.product_option_value_id }}">
+                        <span class="pdp-pack-choice-box__title">{{ box.title }}</span>
+                        {% if box.price %}
+                          <span class="pdp-pack-choice-box__price">{{ box.price }}</span>
+                        {% endif %}
+                        {% if pdp_pack_unit_label %}
+                          <span class="pdp-pack-choice-box__footer">{{ pdp_pack_unit_label }}</span>
+                        {% endif %}
+                      </button>
+                    {% endfor %}
+                  </div>
+                  <input type="hidden" form="form-product" name="option[{{ pdp_pack_product_option_id }}]" id="pdp-pack-option-input" value="{{ pdp_pack_default_product_option_value_id }}" />
+                {% else %}
+                  <p class="mb-0">{{ text_pdp_size_intro }}</p>
+                  {% if text_pdp_size_future %}
+                    <p class="mb-0 mt-2 text-muted small">{{ text_pdp_size_future }}</p>
+                  {% endif %}
                 {% endif %}
               </div>
             </section>
-            {% endif %}
           {% endif %}
           <div id="product">
             <form id="form-product">
@@ -442,6 +424,20 @@ function changeQuantity(delta) {
 }
 
 $(document).ready(function() {
+    var $packGrid = $('.pdp-pack-choice-grid');
+    var $packInput = $('#pdp-pack-option-input');
+    if ($packGrid.length && $packInput.length) {
+        $packGrid.on('click', '.pdp-pack-choice-box', function() {
+            var id = $(this).attr('data-pov-id');
+            if (!id) {
+                return;
+            }
+            $packInput.val(id);
+            $packGrid.find('.pdp-pack-choice-box').removeClass('pdp-pack-choice-box--active');
+            $(this).addClass('pdp-pack-choice-box--active');
+        });
+    }
+
     $('.magnific-popup').magnificPopup({
         type: 'image',
         delegate: 'a',

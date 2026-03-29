@@ -48,21 +48,29 @@ Template: `../samples/Specials.csv`
 
 ---
 
-## 4. Bulk volume tiers in `products_import.xlsx` (seed catalog)
+## 4. Pack options (1 / 2 / 5) in `products_import.xlsx` — **recommended**
 
-The repo workbook can include a **`Discounts`** sheet with **volume** rows (`special` = `false`): e.g. **2 pcs → −5%**, **5 pcs → −10%** (`type` = `P`), for every product whose **`categories`** column lists at least one target category.
+Instead of **volume `Discounts`** rows, the storefront should use **product options** so the PDP shows three choices (radio / select). The script builds:
 
-Regenerate that sheet after editing products or category lists:
+- **`Options`** + **`OptionValues`** — one global option (e.g. “Pack quantity”) with values **1 pack**, **2 packs**, **5 packs**
+- **`ProductOptions`** + **`ProductOptionValues`** — per product, **required** option; **price** modifiers are computed from **`Products.price`** (treat this as your **per-unit selling price**, including sale if you store it there)
 
-`shared/import/scripts/apply_volume_discounts_to_workbook.py`
+**Math (quantity in cart = 1):** total = `product.price + option_price` = `N × unit × (1 − tier%)` for N packs (−5% for 2, −10% for 5).
 
-It reads **`Products`!`categories`**, matches the configured category IDs, and rewrites the **`Discounts`** tab (placed **after** **`Products`**). **`customer_group`** is set to **`Default`** — change `DEFAULT_CUSTOMER_GROUP` in the script if your store uses another name.
+Regenerate after editing the workbook:
 
-### Import checklist (OpenCart **4.1+**)
+`shared/import/scripts/apply_pack_options_to_workbook.py`
 
-- **Sheet name:** `Discounts` (exact), **after** `Products` in the workbook (tab order in Excel matches this).
-- **Row 1 headers:**  
-  `product_id`, `customer_group`, `quantity`, `priority`, `price`, `type`, `special`, `date_start`, `date_end`
-- **Volume tiers:** `quantity` &gt; `1`, **`special`** = `false` (not the sale row). **`type`** = `P` for percent in **`price`** (e.g. `5` = 5%).
-- **`customer_group`** must match the **name** in **Sales → Customers → Customer Groups** (English admin often uses `Default`).
-- **Memory:** large files need more than 128 MB PHP memory while PhpSpreadsheet reads the file. The extension raises the limit for import/export runs; if your host blocks `ini_set`, set `memory_limit` to **512M** or higher in `php.ini` / `.user.ini` / MultiPHP INI Editor.
+It removes any **`Discounts`** sheet, inserts **`Options`**, **`OptionValues`**, **`ProductOptions`**, **`ProductOptionValues`** after **`Products`**, for products whose **`categories`** match the script’s target IDs and **`price` &gt; 0**.
+
+Set **`DEFAULT_LANG_CODE`** in the script to match **Admin → System → Settings → Store** default **language code** (e.g. `uk-ua`) so **`ProductOptions`!`option`** matches **`option_description.name`** for that language.
+
+### Import checklist
+
+- **Order in file:** `Products` → `Options` → `OptionValues` → `ProductOptions` → `ProductOptionValues` (the extension loads global options **before** product options; the repo extension was updated accordingly).
+- **Validation:** options defined **in the same file** are accepted (merged during validation).
+- **Memory:** large XLSX may need **512M+** PHP memory; the extension raises the limit during import.
+
+### Legacy: **`Discounts`** volume rows
+
+Still supported for automatic quantity pricing without options — see §2. Do **not** mix duplicate logic: use **either** pack **options** (§4) **or** volume **Discounts**, not both for the same intent.
