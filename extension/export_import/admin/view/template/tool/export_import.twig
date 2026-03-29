@@ -112,6 +112,16 @@
 											{{ text_export_type_customer }}
 										</label>
 									</div>
+									<div class="form-check">
+										<label class="form-check-label">
+											{% if (export_type=='v') %}
+											<input class="form-check-input" type="radio" name="export_type" value="v" checked="checked" />
+											{% else %}
+											<input class="form-check-input" type="radio" name="export_type" value="v" />
+											{% endif %}
+											{{ text_export_type_reviews }}
+										</label>
+									</div>
 								</div>
 							</div>
 							<div class="row mb-3" style="margin:0px;" id="export_filter">

@@ -110,6 +110,9 @@ class ExportImport extends \Opencart\System\Engine\Controller {
 				case 'f':
 					$this->model_extension_export_import_tool_export_import->download('f', null, null, null, null);
 					break;
+				case 'v':
+					$this->model_extension_export_import_tool_export_import->download('v', null, null, null, null);
+					break;
 				default:
 					break;
 			}

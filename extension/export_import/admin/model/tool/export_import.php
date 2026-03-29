@@ -3968,6 +3968,132 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	protected function deleteReviewsAll() {
+		$this->db->query( "DELETE FROM `" . DB_PREFIX . "review`" );
+		$this->db->query( "UPDATE `" . DB_PREFIX . "product` SET `rating` = 0" );
+	}
+
+
+	protected function parseReviewDatetime( $val ) {
+		if ($val === '' || $val === null) {
+			return date( 'Y-m-d H:i:s' );
+		}
+		if (is_numeric( $val )) {
+			try {
+				$dt = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject( (float) $val );
+
+				return $dt->format( 'Y-m-d H:i:s' );
+			} catch ( \Throwable $e ) {
+				// fall through to string parse
+			}
+		}
+		$s = trim( (string) $val );
+		$ts = strtotime( $s );
+		if ($ts !== false) {
+			return date( 'Y-m-d H:i:s', $ts );
+		}
+
+		return date( 'Y-m-d H:i:s' );
+	}
+
+
+	protected function refreshProductRatingForReviewImport( $product_id ) {
+		$this->load->model( 'catalog/review' );
+		$this->load->model( 'catalog/product' );
+		$rating = $this->model_catalog_review->getRating( (int) $product_id );
+		$this->model_catalog_product->editRating( (int) $product_id, $rating );
+	}
+
+
+	// function for reading additional cells in class extensions
+	protected function moreReviewCells( $i, &$j, &$worksheet, &$review ) {
+		return;
+	}
+
+
+	protected function uploadReviews( &$reader, $incremental ) {
+		$data = $reader->getSheetByName( 'Reviews' );
+		if ($data==null) {
+			return;
+		}
+		if (!$incremental) {
+			$this->deleteReviewsAll();
+		}
+		$this->load->model( 'catalog/review' );
+		$this->load->model( 'catalog/product' );
+		$affected_product_ids = array();
+		$k = $data->getHighestRow();
+		for ($i=0; $i<$k; $i+=1) {
+			if ($i==0) {
+				continue;
+			}
+			$j = 1;
+			$product_id = trim($this->getCell($data,$i,$j++));
+			if ($product_id=="") {
+				continue;
+			}
+			if (!$this->isInteger($product_id)) {
+				continue;
+			}
+			$check = $this->db->query( "SELECT `product_id` FROM `" . DB_PREFIX . "product` WHERE `product_id`='".(int)$product_id."'" );
+			if (!$check->num_rows) {
+				continue;
+			}
+			$customer_id = trim($this->getCell($data,$i,$j++,'0'));
+			$customer_id = ($customer_id==='') ? 0 : (int)$customer_id;
+			$author = trim($this->getCell($data,$i,$j++));
+			if ($author==='') {
+				continue;
+			}
+			if (function_exists( 'mb_substr' )) {
+				$author = mb_substr( $author, 0, 64, 'UTF-8' );
+			} else {
+				$author = substr( $author, 0, 64 );
+			}
+			$text = $this->getCell($data,$i,$j++,'');
+			$text = strip_tags( html_entity_decode( (string) $text, ENT_QUOTES, 'UTF-8' ) );
+			if (trim( $text )==='') {
+				continue;
+			}
+			$rating = (int)trim($this->getCell($data,$i,$j++,'5'));
+			if ($rating < 1) {
+				$rating = 1;
+			}
+			if ($rating > 5) {
+				$rating = 5;
+			}
+			$status_raw = trim($this->getCell($data,$i,$j++,'1'));
+			$status_str = strtoupper( (string) $status_raw );
+			$status = (( $status_str=='TRUE' ) || ( $status_str=='YES' ) || ( $status_str=='ENABLED' ) || ( $status_str=='Y' ) || ( (int)$status_raw===1 )) ? 1 : 0;
+			$date_added_raw = $this->getCell($data,$i,$j++,'');
+			$date_modified_raw = $this->getCell($data,$i,$j++,'');
+			$date_added = $this->parseReviewDatetime( $date_added_raw );
+			$date_modified = ($date_modified_raw==='' || $date_modified_raw===null) ? $date_added : $this->parseReviewDatetime( $date_modified_raw );
+			$review = array(
+				'product_id'    => $product_id,
+				'customer_id'   => $customer_id,
+				'author'        => $author,
+				'text'          => $text,
+				'rating'        => $rating,
+				'status'        => $status,
+				'date_added'    => $date_added,
+				'date_modified' => $date_modified,
+			);
+			$this->moreReviewCells( $i, $j, $data, $review );
+			$author_esc = $this->db->escape( $review['author'] );
+			$text_esc = $this->db->escape( $review['text'] );
+			$sql  = "INSERT INTO `" . DB_PREFIX . "review` (`product_id`,`customer_id`,`author`,`text`,`rating`,`status`,`date_added`,`date_modified`) VALUES ";
+			$sql .= "(".(int)$review['product_id'].",".(int)$review['customer_id'].",'".$author_esc."','".$text_esc."',".(int)$review['rating'].",".(int)$review['status'].",'".$this->db->escape( $review['date_added'] )."','".$this->db->escape( $review['date_modified'] )."')";
+			$this->db->query( $sql );
+			$affected_product_ids[(int)$product_id] = true;
+		}
+		foreach (array_keys( $affected_product_ids ) as $pid) {
+			$this->refreshProductRatingForReviewImport( (int) $pid );
+		}
+		$this->cache->delete( 'product' );
+	}
+
+
 	protected function getCell(&$worksheet,$row,$col,$default_val='') {
 //		$col -= 1; // we use 1-based, PHPExcel uses 0-based column index, PhpSpreadsheet now uses 1-based column index
 		$row += 1; // we use 0-based, PhpSpreadsheet uses 1-based row index
@@ -7492,6 +7618,64 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	protected function getReviewsForExport( $min_id=null, $max_id=null ) {
+		$sql = "SELECT `product_id`, `customer_id`, `author`, `text`, `rating`, `status`, `date_added`, `date_modified` FROM `" . DB_PREFIX . "review`";
+		if (isset($min_id) && isset($max_id)) {
+			$sql .= " WHERE `review_id` BETWEEN ".(int)$min_id." AND ".(int)$max_id." ";
+		}
+		$sql .= " ORDER BY `review_id` ASC";
+		$query = $this->db->query( $sql );
+
+		return $query->rows;
+	}
+
+
+	protected function populateReviewsWorksheet( &$worksheet, &$box_format, &$text_format, $min_id=null, $max_id=null ) {
+		$j = 1;
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 12 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 12 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 24 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 50 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 8 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 8 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 20 );
+		$worksheet->getColumnDimensionByColumn($j++)->setWidth( 20 );
+		$styles = array();
+		$data = array();
+		$i = 1;
+		$j = 1;
+		$data[$j++] = 'product_id';
+		$data[$j++] = 'customer_id';
+		$data[$j++] = 'author';
+		$styles[$j] = &$text_format;
+		$data[$j++] = 'text';
+		$data[$j++] = 'rating';
+		$data[$j++] = 'status';
+		$data[$j++] = 'date_added';
+		$data[$j++] = 'date_modified';
+		$worksheet->getRowDimension($i)->setRowHeight( 30 );
+		$this->setCellRow( $worksheet, $i, $data, $box_format );
+		$i += 1;
+		$j = 1;
+		$reviews = $this->getReviewsForExport( $min_id, $max_id );
+		foreach ($reviews as $row) {
+			$worksheet->getRowDimension($i)->setRowHeight( 13 );
+			$data = array();
+			$data[$j++] = $row['product_id'];
+			$data[$j++] = $row['customer_id'];
+			$data[$j++] = $row['author'];
+			$data[$j++] = $row['text'];
+			$data[$j++] = $row['rating'];
+			$data[$j++] = ((int)$row['status'] === 1) ? '1' : '0';
+			$data[$j++] = $row['date_added'];
+			$data[$j++] = $row['date_modified'];
+			$this->setCellRow( $worksheet, $i, $data, $this->null_array, $styles );
+			$i += 1;
+			$j = 1;
+		}
+	}
+
+
 	protected function getProductOptions( $min_id, $max_id ) {
 		// get default language id
 		$language_id = $this->getDefaultLanguageId();
@@ -9244,6 +9428,15 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					$worksheet->freezePaneByColumnAndRow( 2, 2 );
 					break;
 
+				case 'v':
+					// Product reviews (single worksheet, import-compatible)
+					$workbook->setActiveSheetIndex($worksheet_index++);
+					$worksheet = $workbook->getActiveSheet();
+					$worksheet->setTitle( 'Reviews' );
+					$this->populateReviewsWorksheet( $worksheet, $box_format, $text_format, $min_id, $max_id );
+					$worksheet->freezePaneByColumnAndRow( 2, 2 );
+					break;
+
 				default:
 					break;
 			}
@@ -9305,6 +9498,18 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						if (isset($rows)) {
 							$filename .= "-rows-$rows";
 						} else if (isset($max_id)) {
+							$filename .= "-end-$max_id";
+						}
+					}
+					$filename .= '.xlsx';
+					break;
+				case 'v':
+					$filename = 'reviews-'.$datetime;
+					if (!$all) {
+						if (isset($min_id)) {
+							$filename .= "-start-$min_id";
+						}
+						if (isset($max_id)) {
 							$filename .= "-end-$max_id";
 						}
 					}
