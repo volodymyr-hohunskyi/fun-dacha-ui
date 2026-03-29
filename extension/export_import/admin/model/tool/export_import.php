@@ -1996,32 +1996,56 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 	protected function getOptionIds() {
 		$default_language_id = (int)$this->getDefaultLanguageId();
-		$language_ids = $this->getRelevantLanguageIds();
 		$option_ids = array();
 
-		// Prefer default-language labels (matches typical spreadsheet / admin); add other languages only for names missing from the map.
-		$query = $this->db->query( "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` WHERE `language_id` = '" . $default_language_id . "'" );
-		foreach ($query->rows as $row) {
+		// All language rows: ProductOptions may use any column label (e.g. en-gb) while config default is another language.
+		$sql = "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` ORDER BY `language_id` = '" . $default_language_id . "' DESC, `option_id` ASC";
+		$query = $this->db->query( $sql );
+		foreach ($query->rows as $row ) {
 			$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
-			if ($name === '') {
+			if ($name === '' || isset( $option_ids[$name] )) {
 				continue;
 			}
 			$option_ids[$name] = (int)$row['option_id'];
 		}
 
-		$other_language_ids = array_values( array_diff( array_map( 'intval', $language_ids ), array( $default_language_id ) ) );
-		if (!empty( $other_language_ids )) {
-			$query = $this->db->query( "SELECT `option_id`, `name` FROM `" . DB_PREFIX . "option_description` WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $other_language_ids ) ) . ")" );
-			foreach ($query->rows as $row) {
-				$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
-				if ($name === '' || isset( $option_ids[$name] )) {
-					continue;
+		return $option_ids;
+	}
+
+
+	/**
+	 * Add every name(…) cell from the Options sheet so lookups match the workbook even when DB rows differ (encoding, disabled languages).
+	 *
+	 * @param array<string,int> $option_ids
+	 */
+	protected function mergeOptionNamesFromOptionsSheet( &$reader, array &$option_ids ) {
+		$data = $reader->getSheetByName( 'Options' );
+		if ( $data === null ) {
+			return;
+		}
+		$k = $data->getHighestRow();
+		$max_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $data->getHighestColumn() );
+		$first_row = array();
+		for ( $j = 1; $j <= $max_col; $j += 1 ) {
+			$first_row[ $j ] = $this->getCell( $data, 0, $j );
+		}
+		for ( $i = 1; $i < $k; $i += 1 ) {
+			$j = 1;
+			$oid = $this->normalizeNumericIdCell( $this->getCell( $data, $i, $j++ ) );
+			if ( $oid === '' ) {
+				continue;
+			}
+			$oid = (int) $oid;
+			$this->getCell( $data, $i, $j++ );
+			$this->getCell( $data, $i, $j++ );
+			while ( ( $j <= $max_col ) && isset( $first_row[ $j ] ) && $this->startsWith( $first_row[ $j ], 'name(' ) ) {
+				$raw = trim( (string) $this->getCell( $data, $i, $j++ ) );
+				$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $raw, ENT_QUOTES ) );
+				if ( $name !== '' && ! isset( $option_ids[ $name ] ) ) {
+					$option_ids[ $name ] = $oid;
 				}
-				$option_ids[$name] = (int)$row['option_id'];
 			}
 		}
-
-		return $option_ids;
 	}
 
 
@@ -2102,6 +2126,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 		if (!$sheet_uses_option_id) {
 			$option_ids = $this->getOptionIds();
+			$this->mergeOptionNamesFromOptionsSheet( $reader, $option_ids );
 		}
 
 		// load the worksheet cells and store them to the database
@@ -2162,33 +2187,60 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 	protected function getOptionValueIds() {
 		$default_language_id = (int)$this->getDefaultLanguageId();
-		$language_ids = $this->getRelevantLanguageIds();
 		$option_value_ids = array();
 
-		$query = $this->db->query( "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `language_id` = '" . $default_language_id . "'" );
-		foreach ($query->rows as $row) {
+		$sql = "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` ORDER BY `language_id` = '" . $default_language_id . "' DESC, `option_id` ASC, `option_value_id` ASC";
+		$query = $this->db->query( $sql );
+		foreach ($query->rows as $row ) {
 			$option_id = (int)$row['option_id'];
 			$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
-			if ($name === '') {
+			if ($name === '' || isset( $option_value_ids[$option_id][$name] )) {
 				continue;
 			}
 			$option_value_ids[$option_id][$name] = (int)$row['option_value_id'];
 		}
 
-		$other_language_ids = array_values( array_diff( array_map( 'intval', $language_ids ), array( $default_language_id ) ) );
-		if (!empty( $other_language_ids )) {
-			$query = $this->db->query( "SELECT `option_id`, `option_value_id`, `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `language_id` IN (" . implode( ',', array_map( 'intval', $other_language_ids ) ) . ")" );
-			foreach ($query->rows as $row) {
-				$option_id = (int)$row['option_id'];
-				$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $row['name'], ENT_QUOTES ) );
-				if ($name === '' || isset( $option_value_ids[$option_id][$name] )) {
-					continue;
+		return $option_value_ids;
+	}
+
+
+	/**
+	 * Add every name(…) cell from OptionValues so ProductOptionValues can match any language column.
+	 *
+	 * @param array<int, array<string,int>> $option_value_ids
+	 */
+	protected function mergeOptionValueNamesFromOptionValuesSheet( &$reader, array &$option_value_ids ) {
+		$data = $reader->getSheetByName( 'OptionValues' );
+		if ( $data === null ) {
+			return;
+		}
+		$k = $data->getHighestRow();
+		$max_col = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $data->getHighestColumn() );
+		$first_row = array();
+		for ( $j = 1; $j <= $max_col; $j += 1 ) {
+			$first_row[ $j ] = $this->getCell( $data, 0, $j );
+		}
+		for ( $i = 1; $i < $k; $i += 1 ) {
+			$j = 1;
+			$option_value_id = $this->normalizeNumericIdCell( $this->getCell( $data, $i, $j++ ) );
+			if ( $option_value_id === '' ) {
+				continue;
+			}
+			$option_id = $this->normalizeNumericIdCell( $this->getCell( $data, $i, $j++ ) );
+			if ( $option_id === '' ) {
+				continue;
+			}
+			$option_id = (int) $option_id;
+			$this->getCell( $data, $i, $j++ );
+			$this->getCell( $data, $i, $j++ );
+			while ( ( $j <= $max_col ) && isset( $first_row[ $j ] ) && $this->startsWith( $first_row[ $j ], 'name(' ) ) {
+				$raw = trim( (string) $this->getCell( $data, $i, $j++ ) );
+				$name = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( $raw, ENT_QUOTES ) );
+				if ( $name !== '' && ! isset( $option_value_ids[ $option_id ][ $name ] ) ) {
+					$option_value_ids[ $option_id ][ $name ] = (int) $option_value_id;
 				}
-				$option_value_ids[$option_id][$name] = (int)$row['option_value_id'];
 			}
 		}
-
-		return $option_value_ids;
 	}
 
 
@@ -2300,9 +2352,11 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 		if (!$sheet_uses_option_id) {
 			$option_ids = $this->getOptionIds();
+			$this->mergeOptionNamesFromOptionsSheet( $reader, $option_ids );
 		}
 		if (!$sheet_uses_option_value_id) {
 			$option_value_ids = $this->getOptionValueIds();
+			$this->mergeOptionValueNamesFromOptionValuesSheet( $reader, $option_value_ids );
 		}
 
 		// load the worksheet cells and store them to the database
@@ -5491,6 +5545,16 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					if ( ! isset( $options[ $opt_name ] ) ) {
 						$options[ $opt_name ] = array();
 					}
+					$bucket = &$options[ $opt_name ];
+					foreach ( $names as $raw ) {
+						$n = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( trim( (string) $raw ), ENT_QUOTES ) );
+						if ( $n === '' ) {
+							continue;
+						}
+						if ( ! isset( $options[ $n ] ) ) {
+							$options[ $n ] = &$bucket;
+						}
+					}
 				} else {
 					if ( ! isset( $options[ $option_id ] ) ) {
 						$options[ $option_id ] = array();
@@ -5542,6 +5606,12 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						$options[ $option_id ] = array();
 					}
 					$options[ $option_id ][ $val_name ] = true;
+					foreach ( $names as $raw ) {
+						$vn = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( trim( (string) $raw ), ENT_QUOTES ) );
+						if ( $vn !== '' ) {
+							$options[ $option_id ][ $vn ] = true;
+						}
+					}
 				} else {
 					if ( ! isset( $options[ $option_id ] ) ) {
 						$options[ $option_id ] = array();
@@ -5558,6 +5628,12 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				}
 				if ( ! $use_option_value_id ) {
 					$options[ $opt_name ][ $val_name ] = true;
+					foreach ( $names as $raw ) {
+						$vn = $this->normalizeOptionLabelForLookup( htmlspecialchars_decode( trim( (string) $raw ), ENT_QUOTES ) );
+						if ( $vn !== '' ) {
+							$options[ $opt_name ][ $vn ] = true;
+						}
+					}
 				} else {
 					$options[ $opt_name ][ $option_value_id ] = true;
 				}
