@@ -102,13 +102,14 @@ button:focus {
 }
 
 /* Fun Dacha Button / CTA - Brand specs - !important ensures brand color wins over Bootstrap */
-.btn-primary,
-#cart .btn-primary,
-#checkout-cart .btn-primary,
+/* Exclude .btn-qty-step and .btn-sm: those use compact rules below (cart qty, coupon, etc.) */
+.btn-primary:not(.btn-qty-step):not(.btn-sm),
+#cart .btn-primary:not(.btn-qty-step):not(.btn-sm),
+#checkout-cart .btn-primary:not(.btn-qty-step):not(.btn-sm),
+#product-info .btn-primary:not(.btn-qty-step):not(.btn-sm),
 #checkout-button,
 #button-confirm,
 #button-confirm-footer,
-.btn-primary.btn-sm,
 .btn-primary.btn-lg {
   background-color: var(--color-primary) !important;
   border-color: var(--color-primary) !important;
@@ -123,14 +124,70 @@ button:focus {
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.btn-primary:hover,
-.btn-primary:focus,
-.btn-primary:active,
-#cart .btn-primary:hover,
-#checkout-cart .btn-primary:hover,
+/* Primary sm: brand colors + Bootstrap-scale padding (coupon, small actions) */
+.btn-primary.btn-sm:not(.btn-qty-step),
+#cart .btn-primary.btn-sm:not(.btn-qty-step),
+#checkout-cart .btn-primary.btn-sm:not(.btn-qty-step),
+#product-info .btn-primary.btn-sm:not(.btn-qty-step) {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.875rem !important;
+  letter-spacing: 0.02em;
+  line-height: 1.25 !important;
+  padding: 0.25rem 0.65rem !important;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Cart / product quantity +/- (must win over #checkout-cart .btn-primary) */
+.btn-primary.btn-qty-step,
+#checkout-cart .btn-primary.btn-qty-step,
+#product-info .btn-primary.btn-qty-step {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-white) !important;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.6875rem !important;
+  letter-spacing: normal !important;
+  line-height: 1 !important;
+  padding: 0.15rem 0.4rem !important;
+  min-width: 1.55rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-primary:not(.btn-qty-step):not(.btn-sm):hover,
+.btn-primary:not(.btn-qty-step):not(.btn-sm):focus,
+.btn-primary:not(.btn-qty-step):not(.btn-sm):active,
+#cart .btn-primary:not(.btn-qty-step):not(.btn-sm):hover,
+#checkout-cart .btn-primary:not(.btn-qty-step):not(.btn-sm):hover,
+#product-info .btn-primary:not(.btn-qty-step):not(.btn-sm):hover,
 #checkout-button:hover,
 #button-confirm:hover,
 #button-confirm-footer:hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--color-white) !important;
+}
+
+.btn-primary.btn-sm:not(.btn-qty-step):hover,
+.btn-primary.btn-sm:not(.btn-qty-step):focus,
+#checkout-cart .btn-primary.btn-sm:not(.btn-qty-step):hover,
+#cart .btn-primary.btn-sm:not(.btn-qty-step):hover,
+#product-info .btn-primary.btn-sm:not(.btn-qty-step):hover {
+  background-color: var(--color-primary-dark) !important;
+  border-color: var(--color-primary-dark) !important;
+  color: var(--color-white) !important;
+}
+
+.btn-primary.btn-qty-step:hover,
+.btn-primary.btn-qty-step:focus,
+#checkout-cart .btn-primary.btn-qty-step:hover,
+#product-info .btn-primary.btn-qty-step:hover {
   background-color: var(--color-primary-dark) !important;
   border-color: var(--color-primary-dark) !important;
   color: var(--color-white) !important;
@@ -1006,13 +1063,7 @@ footer.freshgo-footer {
   line-height: 1.35;
 }
 
-.btn-qty-step {
-  padding: 0.15rem 0.4rem;
-  font-size: 0.6875rem;
-  line-height: 1;
-  min-width: 1.55rem;
-}
-
+/* Stepper icon size (padding on .btn-primary.btn-qty-step in CTA section above) */
 .btn-qty-step i {
   font-size: 0.65rem;
   vertical-align: -0.05em;
@@ -1030,11 +1081,20 @@ footer.freshgo-footer {
 
 /* Cart: coupon accordion aligned with compact Remove button */
 .checkout-coupon-compact .accordion-button {
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
+  padding: 0.45rem 0.9rem;
+  min-height: 0;
 }
 
 .checkout-coupon-compact .accordion-body .col-form-label-sm {
   font-size: 0.8125rem;
+}
+
+/* Coupon danger = same visual weight as row remove (btn-sm) */
+#checkout-cart .checkout-coupon-compact .btn-danger.btn-sm {
+  padding: 0.25rem 0.65rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25 !important;
 }
 
 /* Product page: price block */
