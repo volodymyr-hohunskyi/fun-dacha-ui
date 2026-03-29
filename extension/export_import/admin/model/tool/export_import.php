@@ -76,6 +76,12 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	protected $posted_manufacturers = '';
 	protected $version = '4.17.9';
 
+	/**
+	 * Reserved product_discount.priority for rows generated from SalesCalendar (category promos).
+	 * Manual / sheet discounts should use lower numeric priority to take precedence.
+	 */
+	protected const SALES_CALENDAR_PRODUCT_DISCOUNT_PRIORITY = 999999;
+
 
 	public function __construct( $registry ) {
 		parent::__construct( $registry );
@@ -1232,7 +1238,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	protected function deleteProduct( $product_id ) {
-		$sql  = "DELETE FROM `".DB_PREFIX."product` WHERE `product_id` = '$product_id';\n";
+		$sql  = "DELETE FROM `".DB_PREFIX."product_option_value` WHERE `product_id` = '" . (int)$product_id . "';\n";
+		$sql .= "DELETE FROM `".DB_PREFIX."product_option` WHERE `product_id` = '" . (int)$product_id . "';\n";
+		$sql .= "DELETE FROM `".DB_PREFIX."product_discount` WHERE `product_id` = '" . (int)$product_id . "';\n";
+		$sql .= "DELETE FROM `".DB_PREFIX."product` WHERE `product_id` = '$product_id';\n";
 		$sql .= "DELETE FROM `".DB_PREFIX."product_description` WHERE `product_id` = '$product_id';\n";
 		$sql .= "DELETE FROM `".DB_PREFIX."product_to_category` WHERE `product_id` = '$product_id';\n";
 		$sql .= "DELETE FROM `".DB_PREFIX."product_to_store` WHERE `product_id` = '$product_id';\n";
@@ -6559,6 +6568,95 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	/**
+	 * Parse discount_percent from SalesCalendar (e.g. "10%", "12.5", "15 %").
+	 */
+	protected function parseSalesCalendarPercent( $raw ) {
+		$s = trim( (string) $raw );
+		if ($s === '') {
+			return 0.0;
+		}
+		$s = str_replace( array( '%', ' ' ), '', $s );
+		$s = str_replace( ',', '.', $s );
+		$n = (float) $s;
+		return $n > 0 ? $n : 0.0;
+	}
+
+
+	/**
+	 * Parse period cell to YYYY-MM-DD. Empty → 0000-00-00 (no limit).
+	 * Supports DD.MM.YYYY, DD.MM (year = current calendar year), DD/MM variants.
+	 */
+	protected function parseSalesCalendarDate( $raw ) {
+		$s = trim( (string) $raw );
+		if ($s === '') {
+			return '0000-00-00';
+		}
+		if (preg_match( '/^(\d{1,2})[\.\/](\d{1,2})[\.\/](\d{4})$/u', $s, $m )) {
+			return sprintf( '%04d-%02d-%02d', (int) $m[3], (int) $m[2], (int) $m[1] );
+		}
+		if (preg_match( '/^(\d{1,2})[\.\/](\d{1,2})$/u', $s, $m )) {
+			$y = (int) date( 'Y' );
+			return sprintf( '%04d-%02d-%02d', $y, (int) $m[2], (int) $m[1] );
+		}
+		return '0000-00-00';
+	}
+
+
+	/**
+	 * Mirror SalesCalendar into oc_product_discount so storefront pricing uses category promos.
+	 * One row per product (highest percent wins if a product sits in multiple promo categories).
+	 */
+	protected function applySalesCalendarProductDiscounts() {
+		$this->ensureCategorySalesCalendarTable();
+		$this->db->query( "DELETE FROM `" . DB_PREFIX . "product_discount` WHERE `priority` = '" . (int) self::SALES_CALENDAR_PRODUCT_DISCOUNT_PRIORITY . "'" );
+
+		$q = $this->db->query( "SELECT `category_id`, `discount_percent`, `period_start`, `period_end` FROM `" . DB_PREFIX . "category_sales_calendar` ORDER BY `category_id` ASC" );
+		if (!$q->num_rows) {
+			return;
+		}
+
+		$customer_group_id = (int) $this->config->get( 'config_customer_group_id' );
+		$best = array();
+
+		foreach ($q->rows as $row ) {
+			$category_id = (int) $row['category_id'];
+			$pct = $this->parseSalesCalendarPercent( $row['discount_percent'] );
+			if ($pct <= 0) {
+				continue;
+			}
+			$date_start = $this->parseSalesCalendarDate( $row['period_start'] );
+			$date_end = $this->parseSalesCalendarDate( $row['period_end'] );
+			$pq = $this->db->query( "SELECT DISTINCT `ptc`.`product_id` FROM `" . DB_PREFIX . "product_to_category` `ptc` INNER JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `ptc`.`product_id`) WHERE `ptc`.`category_id` = '" . $category_id . "'" );
+			foreach ($pq->rows as $pr ) {
+				$product_id = (int) $pr['product_id'];
+				if (!isset( $best[$product_id] ) || $pct > $best[$product_id]['percent'] ) {
+					$best[$product_id] = array(
+						'percent'     => $pct,
+						'date_start'  => $date_start,
+						'date_end'    => $date_end,
+					);
+				}
+			}
+		}
+
+		foreach ($best as $product_id => $d ) {
+			$price = $d['percent'];
+			$ds = $this->db->escape( $d['date_start'] );
+			$de = $this->db->escape( $d['date_end'] );
+			$pri = (int) self::SALES_CALENDAR_PRODUCT_DISCOUNT_PRIORITY;
+			if (version_compare( VERSION, '4.1.0.0', '>=' )) {
+				$sql = "INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`,`customer_group_id`,`quantity`,`priority`,`price`,`type`,`special`,`date_start`,`date_end`) VALUES (";
+				$sql .= "'" . $product_id . "','" . $customer_group_id . "','1','" . $pri . "','" . (float) $price . "','P','0','" . $ds . "','" . $de . "')";
+			} else {
+				$sql = "INSERT INTO `" . DB_PREFIX . "product_discount` (`product_id`,`customer_group_id`,`quantity`,`priority`,`price`,`date_start`,`date_end`) VALUES (";
+				$sql .= "'" . $product_id . "','" . $customer_group_id . "','1','" . $pri . "','" . (float) $price . "','" . $ds . "','" . $de . "')";
+			}
+			$this->db->query( $sql );
+		}
+	}
+
+
 	protected function populateSalesCalendarWorksheet( &$worksheet, &$box_format, &$text_format ) {
 		$this->ensureCategorySalesCalendarTable();
 		$default_language_id = (int) $this->getDefaultLanguageId();
@@ -6645,6 +6743,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				$this->uploadSpecials( $reader, $incremental, $available_product_ids );
 			}
 			$this->uploadDiscounts( $reader, $incremental, $available_product_ids );
+			$this->applySalesCalendarProductDiscounts();
 			$this->uploadRewards( $reader, $incremental, $available_product_ids );
 			$this->uploadOptions( $reader, $incremental );
 			$this->uploadOptionValues( $reader, $incremental );
