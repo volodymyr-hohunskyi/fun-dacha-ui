@@ -718,6 +718,7 @@ class Product extends \Opencart\System\Engine\Controller {
 			$n = (int)max(1, round((float)str_replace(',', '.', $m[1])));
 
 			if ($lang === 'uk-ua') {
+				$n = $this->normalizeGramGramsForPackIntro($n, $product_info);
 				$phrase = $this->formatUkrainianGramsPhrase($n);
 			} elseif ($lang === 'fr-fr') {
 				$phrase = $this->formatFrenchGramsPhrase($n);
@@ -745,7 +746,44 @@ class Product extends \Opencart\System\Engine\Controller {
 		return sprintf($this->language->get('text_pdp_size_intro_pack'), $unit_label);
 	}
 
+	/**
+	 * Catalog often stores a 1 g pack as weight=1 with kg class (meaning 1 kg → 1000 g in copy).
+	 * For UA фасування line only, treat that as «1 грам» when we would otherwise print «1000 грамів».
+	 */
+	private function normalizeGramGramsForPackIntro(int $n, array $product_info): int {
+		if ($n !== 1000) {
+			return $n;
+		}
+
+		$w = (float)($product_info['weight'] ?? 0);
+
+		if (abs($w - 1.0) > 0.00001) {
+			return $n;
+		}
+
+		if (!$this->isProductWeightUnitKilograms($product_info)) {
+			return $n;
+		}
+
+		return 1;
+	}
+
+	private function isProductWeightUnitKilograms(array $product_info): bool {
+		$wc = (int)($product_info['weight_class_id'] ?? 0);
+		$u = trim($this->weight->getUnit($wc));
+
+		if ($u === '') {
+			return false;
+		}
+
+		return (bool)preg_match('/^кг\.?$|^kg\.?$/iu', $u);
+	}
+
 	private function formatUkrainianGramsPhrase(int $n): string {
+		if ($n >= 1000 && $n % 1000 === 0) {
+			return $this->formatUkrainianKilogramsPhrase((int)($n / 1000));
+		}
+
 		$mod100 = $n % 100;
 		$mod10 = $n % 10;
 
@@ -762,6 +800,25 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return $n . ' грамів';
+	}
+
+	private function formatUkrainianKilogramsPhrase(int $n): string {
+		$mod100 = $n % 100;
+		$mod10 = $n % 10;
+
+		if ($mod100 >= 11 && $mod100 <= 14) {
+			return $n . ' кілограмів';
+		}
+
+		if ($mod10 === 1) {
+			return $n . ' кілограм';
+		}
+
+		if ($mod10 >= 2 && $mod10 <= 4) {
+			return $n . ' кілограми';
+		}
+
+		return $n . ' кілограмів';
 	}
 
 	private function formatUkrainianPiecesPhrase(int $n): string {
