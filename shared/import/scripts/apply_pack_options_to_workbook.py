@@ -2,9 +2,11 @@
 """
 Build **pack-size product options** (1 / 2 / 5) in `products_import.xlsx` for Export/Import.
 
-Replaces volume **Discounts** rows with:
+Adds / refreshes:
   - **Options** + **OptionValues** (global definitions)
   - **ProductOptions** + **ProductOptionValues** per matching product
+
+The **`Discounts`** sheet is **kept**: legacy **quantity > 1** volume rows are removed so they do not stack with pack options; **quantity = 1** rows (e.g. **special** sale price for OpenCart 4.1+) stay — align those with your **SalesCalendar** / pricing process.
 
 Pricing: **Products.price** is treated as the **per-unit selling price** (after sale in your sheet).
 Option price modifiers stack so **cart line total** = base_unit + option_delta = N × unit × (1 − tier%).
@@ -258,6 +260,35 @@ def write_sheet(wb: openpyxl.Workbook, name: str, data: list[list], index: int |
             ws.cell(row=r, column=c, value=val)
 
 
+def strip_volume_discount_rows(wb: openpyxl.Workbook) -> int:
+    """
+    Remove Discounts rows with quantity > 1 (legacy volume tiers). Keeps qty=1 rows (specials / sale lines).
+    """
+    if "Discounts" not in wb.sheetnames:
+        return 0
+    ws = wb["Discounts"]
+    header = [c.value for c in ws[1]]
+    idx_q = None
+    for i, h in enumerate(header):
+        if h is not None and str(h).strip().lower() == "quantity":
+            idx_q = i
+            break
+    if idx_q is None:
+        return 0
+    col = idx_q + 1
+    removed = 0
+    for r in range(ws.max_row, 1, -1):
+        raw = ws.cell(row=r, column=col).value
+        try:
+            q = float(raw) if raw is not None and str(raw).strip() != "" else 0.0
+        except (TypeError, ValueError):
+            q = 0.0
+        if q > 1.0:
+            ws.delete_rows(r)
+            removed += 1
+    return removed
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -278,8 +309,7 @@ def main() -> None:
     headers = [c.value for c in ws_p[1]]
     product_ids = product_ids_for_categories(ws_p, headers)
 
-    if "Discounts" in wb.sheetnames:
-        wb.remove(wb["Discounts"])
+    vol_removed = strip_volume_discount_rows(wb)
 
     # Insert global option sheets after Products (import order in extension is Options → OptionValues before ProductOptions)
     idx_after_products = wb.sheetnames.index("Products") + 1
@@ -299,7 +329,9 @@ def main() -> None:
     wb.save(path)
     print(
         f"Updated {path.name}: Options + OptionValues + ProductOptions + ProductOptionValues "
-        f"for {len(product_ids)} products; removed Discounts sheet."
+        f"for {len(product_ids)} products; Discounts sheet preserved"
+        + (f", removed {vol_removed} volume (qty>1) discount row(s)" if vol_removed else "")
+        + "."
     )
 
 

@@ -1035,7 +1035,7 @@ footer.freshgo-footer {
   }
 }
 
-/* PDP Фасування: pack quantity boxes (import option_id 92001) */
+/* PDP Фасування: pack quantity boxes (imported radio option, three values) */
 .pdp-pack-choice-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

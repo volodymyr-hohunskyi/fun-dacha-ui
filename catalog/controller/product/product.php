@@ -506,7 +506,8 @@ class Product extends \Opencart\System\Engine\Controller {
 	}
 
 	/**
-	 * PDP «Фасування»: three pack boxes when pack option (import script option_id 92001) is present; otherwise leave defaults.
+	 * PDP «Фасування»: pack boxes when the product has an imported **radio** option that looks like pack quantity
+	 * (three values; labels come from option value names in the workbook — not hardcoded IDs).
 	 *
 	 * @param array<string, mixed> $data
 	 */
@@ -519,7 +520,7 @@ class Product extends \Opencart\System\Engine\Controller {
 		$pack_option = null;
 
 		foreach ($data['options'] as $opt) {
-			if ((int)($opt['option_id'] ?? 0) === 92001) {
+			if ($this->isPackQuantityRadioOption($opt)) {
 				$pack_option = $opt;
 
 				break;
@@ -530,43 +531,59 @@ class Product extends \Opencart\System\Engine\Controller {
 			return;
 		}
 
-		$required_value_ids = [920011, 920012, 920013];
-		$by_value_id = [];
+		$values = $pack_option['product_option_value'];
 
-		foreach ($pack_option['product_option_value'] as $ov) {
-			$ovid = (int)($ov['option_value_id'] ?? 0);
-
-			if (in_array($ovid, $required_value_ids, true)) {
-				$by_value_id[$ovid] = $ov;
-			}
-		}
-
-		if (count($by_value_id) !== 3) {
-			return;
-		}
-
-		$titles = [
-			920011 => $this->language->get('text_pdp_pack_title_1'),
-			920012 => $this->language->get('text_pdp_pack_title_2'),
-			920013 => $this->language->get('text_pdp_pack_title_5'),
-		];
-
-		foreach ($required_value_ids as $ovid) {
-			$ov = $by_value_id[$ovid];
+		foreach ($values as $ov) {
 			$data['pdp_pack_options'][] = [
 				'product_option_value_id' => (int)$ov['product_option_value_id'],
-				'option_value_id'         => $ovid,
-				'title'                   => $titles[$ovid],
-				'price'                   => $ov['price'] ?? false,
+				'option_value_id'         => (int)($ov['option_value_id'] ?? 0),
+				'title'                     => trim((string)($ov['name'] ?? '')),
+				'price'                     => $ov['price'] ?? false,
 			];
 		}
 
-		$data['pdp_pack_product_option_id'] = (int)$pack_option['product_option_id'];
-		$data['pdp_pack_default_product_option_value_id'] = (int)$by_value_id[920011]['product_option_value_id'];
+		$pack_product_option_id = (int)$pack_option['product_option_id'];
+		$data['pdp_pack_product_option_id'] = $pack_product_option_id;
+		$data['pdp_pack_default_product_option_value_id'] = (int)($values[0]['product_option_value_id'] ?? 0);
 
-		$data['options'] = array_values(array_filter($data['options'], static function (array $o): bool {
-			return (int)($o['option_id'] ?? 0) !== 92001;
+		$data['options'] = array_values(array_filter($data['options'], static function (array $o) use ($pack_product_option_id): bool {
+			return (int)($o['product_option_id'] ?? 0) !== $pack_product_option_id;
 		}));
+	}
+
+	/**
+	 * Radio option with three values whose names look like pack tiers (imported), or option name suggests pack quantity.
+	 *
+	 * @param array<string, mixed> $option
+	 */
+	private function isPackQuantityRadioOption(array $option): bool {
+		if (($option['type'] ?? '') !== 'radio') {
+			return false;
+		}
+
+		$values = $option['product_option_value'] ?? [];
+
+		if (count($values) !== 3) {
+			return false;
+		}
+
+		$name = mb_strtolower(trim((string)($option['name'] ?? '')));
+
+		if (preg_match('/pack|упаков|кількість|quantity|количеств|фасу/i', $name)) {
+			return true;
+		}
+
+		$numeric_prefix = 0;
+
+		foreach ($values as $v) {
+			$vn = trim((string)($v['name'] ?? ''));
+
+			if ($vn !== '' && preg_match('/^\s*\d+/u', $vn)) {
+				$numeric_prefix++;
+			}
+		}
+
+		return $numeric_prefix === 3;
 	}
 
 	/**

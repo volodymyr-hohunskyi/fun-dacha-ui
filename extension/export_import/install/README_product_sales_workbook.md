@@ -50,10 +50,10 @@ Template: `../samples/Specials.csv`
 
 ## 4. Pack options (1 / 2 / 5) in `products_import.xlsx` — **recommended**
 
-Instead of **volume `Discounts`** rows, the storefront should use **product options** so the PDP shows three choices (radio / select). The script builds:
+Use **product options** so the PDP can show pack choices (radio). The script builds:
 
-- **`Options`** + **`OptionValues`** — one global option (e.g. “Pack quantity”) with values **1 pack**, **2 packs**, **5 packs**
-- **`ProductOptions`** + **`ProductOptionValues`** — per product, **required** option; **price** modifiers are computed from **`Products.price`** (treat this as your **per-unit selling price**, including sale if you store it there)
+- **`Options`** + **`OptionValues`** — one global option (e.g. “Pack quantity”) with values **1 pack**, **2 packs**, **5 packs** (wording per language in the sheet)
+- **`ProductOptions`** + **`ProductOptionValues`** — per product, **required** option; **price** modifiers are computed from **`Products.price`** (treat this as your **per-unit selling price** — usually the same figure you use after applying **§2** sale rows / your pricing rules)
 
 **Math (quantity in cart = 1):** total = `product.price + option_price` = `N × unit × (1 − tier%)` for N packs (−5% for 2, −10% for 5).
 
@@ -61,9 +61,13 @@ Regenerate after editing the workbook:
 
 `shared/import/scripts/apply_pack_options_to_workbook.py`
 
-It removes any **`Discounts`** sheet, inserts **`Options`**, **`OptionValues`**, **`ProductOptions`**, **`ProductOptionValues`** after **`Products`**, for products whose **`categories`** match the script’s target IDs and **`price` &gt; 0**.
+It inserts/refreshes **`Options`**, **`OptionValues`**, **`ProductOptions`**, **`ProductOptionValues`** after **`Products`**, for products whose **`categories`** match the script’s target IDs and **`price` &gt; 0**. It **does not delete** the **`Discounts`** sheet: it only removes **legacy volume rows** (`quantity` &gt; **1**) so they do not double up with pack options. **`quantity` = 1** rows (OpenCart 4.1+ **special** sale price — see §2) are kept; maintain those **alongside** **`SalesCalendar`** (§1) as your business process requires (category windows vs per-product **Discounts**).
 
 Set **`DEFAULT_LANG_CODE`** in the script to match **Admin → System → Settings → Store** default **language code** (e.g. `uk-ua`) so **`ProductOptions`!`option`** matches **`option_description.name`** for that language.
+
+### Storefront
+
+PDP pack tiles use **imported** option **option value** names (current language), not hardcoded IDs — the radio option is detected when it has three values and the option name or value names look like pack quantity.
 
 ### Import checklist
 
@@ -71,6 +75,6 @@ Set **`DEFAULT_LANG_CODE`** in the script to match **Admin → System → Settin
 - **Validation:** options defined **in the same file** are accepted (merged during validation).
 - **Memory:** large XLSX may need **512M+** PHP memory; the extension raises the limit during import.
 
-### Legacy: **`Discounts`** volume rows
+### Legacy: **`Discounts`** volume rows (`quantity` &gt; 1)
 
-Still supported for automatic quantity pricing without options — see §2. Do **not** mix duplicate logic: use **either** pack **options** (§4) **or** volume **Discounts**, not both for the same intent.
+Still supported by OpenCart for automatic quantity pricing **without** options — see §2. With pack **options** (§4), remove volume rows from the workbook or let the script strip **`quantity` &gt; 1** so you do **not** mix both mechanisms for the same intent.
