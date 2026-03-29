@@ -4105,66 +4105,33 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
-	/**
-	 * Normalize worksheet header cells: BOM, NBSP/unicode spaces, fullwidth parens from Excel.
-	 */
-	protected function normalizeWorksheetHeaderCell( $value ) {
-		$s = (string) $value;
-		if (strncmp($s, "\xEF\xBB\xBF", 3) === 0) {
-			$s = substr($s, 3);
-		}
-		$s = trim($s);
-		// UTF-8 NBSP and other separator spaces not removed by trim()
-		if ($s !== '') {
-			$t = preg_replace('/^\p{Z}+/u', '', $s);
-			if ($t === null) {
-				$t = $s;
-			}
-			$t = preg_replace('/\p{Z}+$/u', '', $t);
-			if ($t !== null) {
-				$s = $t;
-			}
-		}
-		$s = str_replace(array("\xEF\xBC\x88", "\xEF\xBC\x89"), array('(', ')'), $s);
-		return $s;
-	}
-
-
 	protected function validateHeading( &$data, &$expected, &$multilingual ) {
 		$default_language_code = $this->config->get('config_language');
-		$sheet_name = $data->getTitle();
 		$heading = array();
 		$k = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString( $data->getHighestColumn() );
 		$i = 0;
 		for ($j=1; $j <= $k; $j+=1) {
-			$raw_cell = $this->getCell($data,$i,$j);
-			$entry = $this->normalizeWorksheetHeaderCell( $raw_cell );
-			$col_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($j);
+			$entry = trim( (string) $this->getCell($data,$i,$j) );
 			$bracket_start = strripos( $entry, '(', 0 );
 			if ($bracket_start === false) {
 				if (in_array( $entry, $multilingual )) {
-					$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: column " . $col_letter . "1 — multilingual field '" . $entry . "' must include a language code in parentheses (e.g. " . $entry . "(en-gb)). Raw cell: " . $this->formatHeaderCellForLog( $raw_cell ) );
 					return false;
 				}
 				$heading[] = strtolower($entry);
 			} else {
 				$name = strtolower(substr( $entry, 0, $bracket_start ));
 				if (!in_array( $name, $multilingual )) {
-					$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: column " . $col_letter . "1 — unknown field '" . $name . "' before '('. Expected one of: " . implode( ', ', $multilingual ) . ". Cell after normalize: " . $this->formatHeaderCellForLog( $entry ) . "; raw: " . $this->formatHeaderCellForLog( $raw_cell ) );
 					return false;
 				}
 				$bracket_end = strripos( $entry, ')', $bracket_start );
 				if ($bracket_end <= $bracket_start) {
-					$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: column " . $col_letter . "1 — missing closing ')' for multilingual header. Cell: " . $this->formatHeaderCellForLog( $entry ) );
 					return false;
 				}
 				if ($bracket_end+1 != strlen($entry)) {
-					$tail = substr( $entry, $bracket_end+1 );
-					$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: column " . $col_letter . "1 — extra characters after ')': " . $this->formatHeaderCellForLog( $tail ) . " (hex: " . bin2hex( $tail ) . "). Full cell: " . $this->formatHeaderCellForLog( $entry ) . "; raw: " . $this->formatHeaderCellForLog( $raw_cell ) );
 					return false;
 				}
+				$language_code = strtolower(substr( $entry, $bracket_start+1, $bracket_end-$bracket_start-1 ));
 				if (count($heading) <= 0) {
-					$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: column " . $col_letter . "1 — multilingual column '" . $entry . "' cannot be the first column (need category_id or other base columns first)." );
 					return false;
 				}
 				if ($heading[count($heading)-1] != $name) {
@@ -4174,41 +4141,13 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		}
 		for ($i=0; $i < count($expected); $i+=1) {
 			if (!isset($heading[$i])) {
-				$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: not enough logical columns (have " . count($heading) . ", need " . count($expected) . "; OpenCart " . VERSION . "). Parsed logical headers: [" . implode( ', ', $heading ) . "]. Expected: [" . implode( ', ', $expected ) . "]." );
 				return false;
 			}
 			if ($heading[$i] != $expected[$i]) {
-				$this->log->write( "Export/Import: Invalid header in the '" . $sheet_name . "' worksheet: logical column index " . $i . " is '" . $heading[$i] . "' but expected '" . $expected[$i] . "' (OpenCart " . VERSION . "). Parsed: [" . implode( ', ', $heading ) . "]. Expected: [" . implode( ', ', $expected ) . "]." );
 				return false;
 			}
 		}
 		return true;
-	}
-
-
-	/**
-	 * Safe one-line representation of a header cell for error logs.
-	 */
-	protected function formatHeaderCellForLog( $value ) {
-		if ($value === null) {
-			return '(null)';
-		}
-		if (is_object($value)) {
-			if (method_exists($value, 'getPlainText')) {
-				$value = $value->getPlainText();
-			} elseif (method_exists($value, '__toString')) {
-				$value = (string) $value;
-			} else {
-				return "'" . get_class($value) . "'";
-			}
-		} elseif (!is_string($value)) {
-			$value = (string) $value;
-		}
-		$s = str_replace(array("\r\n", "\r", "\n"), array('\\n', '\\n', '\\n'), $value);
-		if (strlen($s) > 200) {
-			$s = substr($s, 0, 200) . '…';
-		}
-		return "'" . $s . "'";
 	}
 
 
