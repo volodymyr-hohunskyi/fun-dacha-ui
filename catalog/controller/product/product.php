@@ -454,9 +454,9 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$data['attribute_groups'] = $this->model_catalog_product->getAttributes($product_id);
 
-			$this->applyPdpPackDisplay($data, $product_info);
+			$this->applyPdpPackDisplay($data);
 
-			$data['pdp_size_intro'] = $this->buildPdpSinglePackIntro($data['pdp_pack_unit_label'] ?? '', $product_info);
+			$data['pdp_size_intro'] = $this->buildPdpSinglePackIntro($data['attribute_groups'] ?? [], $data['pdp_pack_unit_label'] ?? '');
 
 			$data['related'] = $this->load->controller('product/related');
 
@@ -513,11 +513,11 @@ class Product extends \Opencart\System\Engine\Controller {
 	 *
 	 * @param array<string, mixed> $data
 	 */
-	private function applyPdpPackDisplay(array &$data, array $product_info): void {
+	private function applyPdpPackDisplay(array &$data): void {
 		$data['pdp_pack_options'] = [];
 		$data['pdp_pack_product_option_id'] = 0;
 		$data['pdp_pack_default_product_option_value_id'] = 0;
-		$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($data['attribute_groups'] ?? [], $product_info);
+		$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($data['attribute_groups'] ?? []);
 
 		$pack_option = null;
 
@@ -589,12 +589,106 @@ class Product extends \Opencart\System\Engine\Controller {
 	}
 
 	/**
-	 * Label under each pack box (e.g. «1 гр», «30 шт») from ProductAttributes / Specification in import.
+	 * Specification → Weight (e.g. 1.00) + Weight Class (gram / gramm) → integer grams, no conversions.
+	 */
+	private function findSpecificationWeightGramInt(array $attribute_groups): ?int {
+		$specGroups = [];
+		$otherGroups = [];
+
+		foreach ($attribute_groups as $group) {
+			$gn = isset($group['name']) ? trim((string)$group['name']) : '';
+
+			if (mb_stripos($gn, 'specification') !== false || mb_stripos($gn, 'специфікац') !== false) {
+				$specGroups[] = $group;
+			} else {
+				$otherGroups[] = $group;
+			}
+		}
+
+		foreach (array_merge($specGroups, $otherGroups) as $group) {
+			$n = $this->parseWeightAndClassGramIntFromAttributeGroup($group);
+
+			if ($n !== null) {
+				return $n;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param array<string, mixed> $group
+	 */
+	private function parseWeightAndClassGramIntFromAttributeGroup(array $group): ?int {
+		if (empty($group['attribute']) || !is_array($group['attribute'])) {
+			return null;
+		}
+
+		$weightRaw = null;
+		$classRaw = null;
+
+		foreach ($group['attribute'] as $attr) {
+			$name = mb_strtolower(trim((string)($attr['name'] ?? '')));
+			$text = trim((string)($attr['text'] ?? ''));
+
+			if ($name === 'weight') {
+				$weightRaw = $text;
+			}
+
+			if ($name === 'weight class' || $name === 'weight_class') {
+				$classRaw = $text;
+			}
+		}
+
+		if ($weightRaw === null || $classRaw === null || $weightRaw === '') {
+			return null;
+		}
+
+		if (!$this->isSpecificationGramClassLabel($classRaw)) {
+			return null;
+		}
+
+		$normalized = str_replace(',', '.', preg_replace('/\s+/u', '', $weightRaw));
+
+		if (!is_numeric($normalized)) {
+			return null;
+		}
+
+		$w = (float)$normalized;
+
+		if ($w <= 0) {
+			return null;
+		}
+
+		return (int)floor($w);
+	}
+
+	private function isSpecificationGramClassLabel(string $label): bool {
+		$s = mb_strtolower(trim($label));
+
+		if ($s === '') {
+			return false;
+		}
+
+		if (preg_match('/kilo|кг|\bkg\b|milli|мг\b|mg\b/ui', $s)) {
+			return false;
+		}
+
+		return (bool)preg_match('/^(gramm|grams|gramme|grammes|gram|грам|г|гр|g)$/u', $s);
+	}
+
+	/**
+	 * Label under each pack box (e.g. «1 гр», «30 шт») from Specification or legacy attributes.
 	 *
 	 * @param array<int, array<string, mixed>> $attribute_groups
-	 * @param array<string, mixed>            $product_info
 	 */
-	private function getPdpPackagingUnitLabel(array $attribute_groups, array $product_info = []): string {
+	private function getPdpPackagingUnitLabel(array $attribute_groups): string {
+		$specGrams = $this->findSpecificationWeightGramInt($attribute_groups);
+
+		if ($specGrams !== null && $specGrams > 0) {
+			return $specGrams . ' гр';
+		}
+
 		foreach ($attribute_groups as $group) {
 			if (empty($group['attribute']) || !is_array($group['attribute'])) {
 				continue;
@@ -665,60 +759,41 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		$w = (float)($product_info['weight'] ?? 0);
-
-		if ($w > 0) {
-			$from_id = (int)($product_info['weight_class_id'] ?? 0);
-			$grams = $this->weight->convert($w, $from_id, $this->getGramWeightClassId());
-
-			if ($grams > 0) {
-				$n = max(1, (int)round($grams));
-
-				return $n . ' гр';
-			}
-		}
-
 		return '';
 	}
 
 	/**
-	 * DB weight class used as «grams» for converting catalog weight to «N гр» labels.
+	 * Single-pack Фасування line from Specification Weight + Weight Class (gram), else legacy unit label.
+	 *
+	 * @param array<int, array<string, mixed>> $attribute_groups
 	 */
-	private function getGramWeightClassId(): int {
-		static $gram_id = null;
+	private function buildPdpSinglePackIntro(array $attribute_groups, string $unit_label = ''): string {
+		$lang = (string)$this->config->get('config_language');
 
-		if ($gram_id !== null) {
-			return $gram_id;
+		$specGrams = $this->findSpecificationWeightGramInt($attribute_groups);
+
+		if ($specGrams !== null && $specGrams > 0) {
+			if ($lang === 'uk-ua') {
+				$phrase = $this->formatUkrainianGramsPhrase($specGrams);
+			} elseif ($lang === 'fr-fr') {
+				$phrase = $this->formatFrenchGramsPhrase($specGrams);
+			} else {
+				$phrase = $this->formatEnglishGramsPhrase($specGrams);
+			}
+
+			return sprintf($this->language->get('text_pdp_size_intro_pack'), $phrase);
 		}
 
-		$query = $this->db->query("SELECT `weight_class_id` FROM `" . DB_PREFIX . "weight_class_description` WHERE `language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `unit` IN ('г', 'g', 'гр') LIMIT 1");
-
-		if ($query->num_rows) {
-			$gram_id = (int)$query->row['weight_class_id'];
-		} else {
-			$gram_id = (int)$this->config->get('config_weight_class_id');
-		}
-
-		return $gram_id;
-	}
-
-	/**
-	 * Single-pack Фасування line: "(1 грам)" / "(35 штук)" from attribute unit (гр / шт).
-	 */
-	private function buildPdpSinglePackIntro(string $unit_label, array $product_info = []): string {
 		$unit_label = trim($unit_label);
 
 		if ($unit_label === '') {
 			return '';
 		}
 
-		$lang = (string)$this->config->get('config_language');
-
 		if (preg_match('/(\d+(?:[.,]\d+)?)\s*(гр\.?|г)\b/ui', $unit_label, $m)) {
 			$n = (int)max(1, round((float)str_replace(',', '.', $m[1])));
 
 			if ($lang === 'uk-ua') {
-				$n = $this->normalizeGramGramsForPackIntro($n, $product_info);
 				$phrase = $this->formatUkrainianGramsPhrase($n);
 			} elseif ($lang === 'fr-fr') {
 				$phrase = $this->formatFrenchGramsPhrase($n);
@@ -746,44 +821,7 @@ class Product extends \Opencart\System\Engine\Controller {
 		return sprintf($this->language->get('text_pdp_size_intro_pack'), $unit_label);
 	}
 
-	/**
-	 * Catalog often stores a 1 g pack as weight=1 with kg class (meaning 1 kg → 1000 g in copy).
-	 * For UA фасування line only, treat that as «1 грам» when we would otherwise print «1000 грамів».
-	 */
-	private function normalizeGramGramsForPackIntro(int $n, array $product_info): int {
-		if ($n !== 1000) {
-			return $n;
-		}
-
-		$w = (float)($product_info['weight'] ?? 0);
-
-		if (abs($w - 1.0) > 0.00001) {
-			return $n;
-		}
-
-		if (!$this->isProductWeightUnitKilograms($product_info)) {
-			return $n;
-		}
-
-		return 1;
-	}
-
-	private function isProductWeightUnitKilograms(array $product_info): bool {
-		$wc = (int)($product_info['weight_class_id'] ?? 0);
-		$u = trim($this->weight->getUnit($wc));
-
-		if ($u === '') {
-			return false;
-		}
-
-		return (bool)preg_match('/^кг\.?$|^kg\.?$/iu', $u);
-	}
-
 	private function formatUkrainianGramsPhrase(int $n): string {
-		if ($n >= 1000 && $n % 1000 === 0) {
-			return $this->formatUkrainianKilogramsPhrase((int)($n / 1000));
-		}
-
 		$mod100 = $n % 100;
 		$mod10 = $n % 10;
 
@@ -800,25 +838,6 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return $n . ' грамів';
-	}
-
-	private function formatUkrainianKilogramsPhrase(int $n): string {
-		$mod100 = $n % 100;
-		$mod10 = $n % 10;
-
-		if ($mod100 >= 11 && $mod100 <= 14) {
-			return $n . ' кілограмів';
-		}
-
-		if ($mod10 === 1) {
-			return $n . ' кілограм';
-		}
-
-		if ($mod10 >= 2 && $mod10 <= 4) {
-			return $n . ' кілограми';
-		}
-
-		return $n . ' кілограмів';
 	}
 
 	private function formatUkrainianPiecesPhrase(int $n): string {
