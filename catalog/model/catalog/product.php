@@ -23,7 +23,7 @@ class Product extends \Opencart\System\Engine\Model {
 
 		// Storing some sub queries so that we are not typing them out multiple times.
 		$this->statement['discount'] = "(SELECT (CASE WHEN `pd2`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`pd2`.`price` / 100))) WHEN `pd2`.`type` = 'S' THEN (`p`.`price` - `pd2`.`price`) ELSE `pd2`.`price` END) FROM `" . DB_PREFIX . "product_discount` `pd2` WHERE `pd2`.`product_id` = `p`.`product_id` AND `pd2`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `pd2`.`quantity` = '1' AND `pd2`.`special` = '0' AND ((`pd2`.`date_start` = '0000-00-00' OR `pd2`.`date_start` < NOW()) AND (`pd2`.`date_end` = '0000-00-00' OR `pd2`.`date_end` > NOW())) ORDER BY `pd2`.`priority` ASC, `pd2`.`price` ASC LIMIT 1) AS `discount`";
-		$this->statement['special'] = "(SELECT (CASE WHEN `ps`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`ps`.`price` / 100))) WHEN `ps`.`type` = 'S' THEN (`p`.`price` - `ps`.`price`) ELSE `ps`.`price` END) FROM `" . DB_PREFIX . "product_discount` `ps` WHERE `ps`.`product_id` = `p`.`product_id` AND `ps`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `ps`.`quantity` = '1' AND `ps`.`special` = '1' AND ((`ps`.`date_start` = '0000-00-00' OR `ps`.`date_start` < NOW()) AND (`ps`.`date_end` = '0000-00-00' OR `ps`.`date_end` > NOW())) ORDER BY `ps`.`priority` ASC, `ps`.`price` ASC LIMIT 1) AS `special`";
+		$this->statement['special'] = "(SELECT (CASE WHEN `ps`.`type` = 'P' THEN (`p`.`price` - (`p`.`price` * (`ps`.`price` / 100))) WHEN `ps`.`type` = 'S' THEN (`p`.`price` - `ps`.`price`) ELSE `ps`.`price` END) FROM `" . DB_PREFIX . "product_discount` `ps` WHERE `ps`.`product_id` = `p`.`product_id` AND `ps`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `ps`.`quantity` = '1' AND `ps`.`special` = '1' AND ((`ps`.`date_start` = '0000-00-00' OR `ps`.`date_start` < NOW()) AND (`ps`.`date_end` = '0000-00-00' OR `ps`.`date_end` > NOW())) ORDER BY `ps`.`priority` ASC, `ps`.`price` ASC LIMIT 1) AS `special_price`";
 		$this->statement['reward'] = "(SELECT `pr`.`points` FROM `" . DB_PREFIX . "product_reward` `pr` WHERE `pr`.`product_id` = `p`.`product_id` AND `pr`.`customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "') AS `reward`";
 		$this->statement['review'] = "(SELECT COUNT(*) FROM `" . DB_PREFIX . "review` `r` WHERE `r`.`product_id` = `p`.`product_id` AND `r`.`status` = '1' GROUP BY `r`.`product_id`) AS `reviews`";
 	}
@@ -73,6 +73,8 @@ class Product extends \Opencart\System\Engine\Model {
 			$product_data['variant'] = $query->row['variant'] ? json_decode($query->row['variant'], true) : [];
 			$product_data['override'] = $query->row['override'] ? json_decode($query->row['override'], true) : [];
 			$product_data['price'] = (float)($query->row['discount'] ?: $query->row['price']);
+			// Avoid collision with `product.special` (flag): subquery is aliased as special_price.
+			$product_data['special'] = (float)($query->row['special_price'] ?? 0);
 			$product_data['rating'] = (int)$query->row['rating'];
 			$product_data['reviews'] = (int)$query->row['reviews'] ? $query->row['reviews'] : 0;
 
@@ -213,7 +215,7 @@ class Product extends \Opencart\System\Engine\Model {
 			if ($data['sort'] == 'pd.name' || $data['sort'] == 'p.model') {
 				$sql .= " ORDER BY LCASE(" . $data['sort'] . ")";
 			} elseif ($data['sort'] == 'p.price') {
-				$sql .= " ORDER BY (CASE WHEN `special` IS NOT NULL THEN `special` WHEN `discount` IS NOT NULL THEN `discount` ELSE `p`.`price` END)";
+				$sql .= " ORDER BY (CASE WHEN `special_price` IS NOT NULL THEN `special_price` WHEN `discount` IS NOT NULL THEN `discount` ELSE `p`.`price` END)";
 			} else {
 				$sql .= " ORDER BY " . $data['sort'];
 			}
@@ -246,12 +248,33 @@ class Product extends \Opencart\System\Engine\Model {
 		if (!$product_data) {
 			$query = $this->db->query($sql);
 
-			$product_data = $query->rows;
+			$product_data = $this->normalizeProductListRows($query->rows);
 
 			$this->cache->set('product.' . $key, $product_data);
+		} else {
+			$product_data = $this->normalizeProductListRows($product_data);
 		}
 
 		return $product_data;
+	}
+
+	/**
+	 * Map special_price subquery onto special for controllers/templates (avoids product.special collision).
+	 *
+	 * @param array<int, array<string, mixed>> $rows
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function normalizeProductListRows(array $rows): array {
+		foreach ($rows as &$row) {
+			if (array_key_exists('special_price', $row)) {
+				$row['special'] = $row['special_price'];
+			}
+		}
+
+		unset($row);
+
+		return $rows;
 	}
 
 	/**
@@ -530,9 +553,11 @@ class Product extends \Opencart\System\Engine\Model {
 	 * $product_option = $this->model_catalog_product->getOption($product_id, $product_option_id);
 	 */
 	public function getOption(int $product_id, int $product_option_id): array {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option` `po` LEFT JOIN `" . DB_PREFIX . "option` `o` ON (`po`.`option_id` = `o`.`option_id`) LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id`) WHERE `po`.`product_id` = '" . (int)$product_id . "' AND `po`.`product_option_id` = '" . (int)$product_option_id . "' AND `od`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+		$language_id = (int)$this->config->get('config_language_id');
 
-		return $query->row;
+		$query = $this->db->query("SELECT `po`.*, `o`.*, COALESCE(`od`.`name`, (SELECT `name` FROM `" . DB_PREFIX . "option_description` WHERE `option_id` = `o`.`option_id` ORDER BY `language_id` ASC LIMIT 1)) AS `name` FROM `" . DB_PREFIX . "product_option` `po` LEFT JOIN `" . DB_PREFIX . "option` `o` ON (`po`.`option_id` = `o`.`option_id`) LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id` AND `od`.`language_id` = '" . $language_id . "') WHERE `po`.`product_id` = '" . (int)$product_id . "' AND `po`.`product_option_id` = '" . (int)$product_option_id . "'");
+
+		return $query->row ? $query->row : [];
 	}
 
 	/**
@@ -552,8 +577,9 @@ class Product extends \Opencart\System\Engine\Model {
 	 */
 	public function getOptions(int $product_id): array {
 		$product_option_data = [];
+		$language_id = (int)$this->config->get('config_language_id');
 
-		$product_option_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option` `po` LEFT JOIN `" . DB_PREFIX . "option` `o` ON (`po`.`option_id` = `o`.`option_id`) LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id`) WHERE `po`.`product_id` = '" . (int)$product_id . "' AND `od`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' ORDER BY `o`.`sort_order`");
+		$product_option_query = $this->db->query("SELECT `po`.*, `o`.*, COALESCE(`od`.`name`, (SELECT `name` FROM `" . DB_PREFIX . "option_description` WHERE `option_id` = `o`.`option_id` ORDER BY `language_id` ASC LIMIT 1)) AS `name` FROM `" . DB_PREFIX . "product_option` `po` LEFT JOIN `" . DB_PREFIX . "option` `o` ON (`po`.`option_id` = `o`.`option_id`) LEFT JOIN `" . DB_PREFIX . "option_description` `od` ON (`o`.`option_id` = `od`.`option_id` AND `od`.`language_id` = '" . $language_id . "') WHERE `po`.`product_id` = '" . (int)$product_id . "' ORDER BY `o`.`sort_order`");
 
 		foreach ($product_option_query->rows as $product_option) {
 			$product_option_data[] = $product_option + ['product_option_value' => $this->getOptionValues($product_id, $product_option['product_option_id'])];
@@ -579,9 +605,11 @@ class Product extends \Opencart\System\Engine\Model {
 	 * $product_option_value_info = $this->model_catalog_product->getOptionValue($product_id, $product_option_value_id);
 	 */
 	public function getOptionValue(int $product_id, int $product_option_value_id): array {
-		$query = $this->db->query("SELECT `pov`.`option_value_id`, `ovd`.`name`, `pov`.`quantity`, `pov`.`subtract`, `pov`.`price`, `pov`.`price_prefix`, `pov`.`points`, `pov`.`points_prefix`, `pov`.`weight`, `pov`.`weight_prefix` FROM `" . DB_PREFIX . "product_option_value` `pov` LEFT JOIN `" . DB_PREFIX . "option_value` `ov` ON (`pov`.`option_value_id` = `ov`.`option_value_id`) LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id`) WHERE `pov`.`product_id` = '" . (int)$product_id . "' AND `pov`.`product_option_value_id` = '" . (int)$product_option_value_id . "' AND `ovd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+		$language_id = (int)$this->config->get('config_language_id');
 
-		return $query->row;
+		$query = $this->db->query("SELECT `pov`.`option_value_id`, COALESCE(`ovd`.`name`, (SELECT `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `option_value_id` = `ov`.`option_value_id` ORDER BY `language_id` ASC LIMIT 1)) AS `name`, `pov`.`quantity`, `pov`.`subtract`, `pov`.`price`, `pov`.`price_prefix`, `pov`.`points`, `pov`.`points_prefix`, `pov`.`weight`, `pov`.`weight_prefix` FROM `" . DB_PREFIX . "product_option_value` `pov` LEFT JOIN `" . DB_PREFIX . "option_value` `ov` ON (`pov`.`option_value_id` = `ov`.`option_value_id`) LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id` AND `ovd`.`language_id` = '" . $language_id . "') WHERE `pov`.`product_id` = '" . (int)$product_id . "' AND `pov`.`product_option_value_id` = '" . (int)$product_option_value_id . "'");
+
+		return $query->row ? $query->row : [];
 	}
 
 	/**
@@ -601,7 +629,9 @@ class Product extends \Opencart\System\Engine\Model {
 	 * $product_option_values = $this->model_catalog_product->getOptionValues($product_id, $product_option_id);
 	 */
 	public function getOptionValues(int $product_id, int $product_option_id): array {
-		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_option_value` `pov` LEFT JOIN `" . DB_PREFIX . "option_value` `ov` ON (`pov`.`option_value_id` = `ov`.`option_value_id`) LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id`) WHERE `pov`.`product_id` = '" . (int)$product_id . "' AND `pov`.`product_option_id` = '" . (int)$product_option_id . "' AND `ovd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' ORDER BY `ov`.`sort_order`");
+		$language_id = (int)$this->config->get('config_language_id');
+
+		$query = $this->db->query("SELECT `pov`.*, `ov`.*, COALESCE(`ovd`.`name`, (SELECT `name` FROM `" . DB_PREFIX . "option_value_description` WHERE `option_value_id` = `ov`.`option_value_id` ORDER BY `language_id` ASC LIMIT 1)) AS `name` FROM `" . DB_PREFIX . "product_option_value` `pov` LEFT JOIN `" . DB_PREFIX . "option_value` `ov` ON (`pov`.`option_value_id` = `ov`.`option_value_id`) LEFT JOIN `" . DB_PREFIX . "option_value_description` `ovd` ON (`ov`.`option_value_id` = `ovd`.`option_value_id` AND `ovd`.`language_id` = '" . $language_id . "') WHERE `pov`.`product_id` = '" . (int)$product_id . "' AND `pov`.`product_option_id` = '" . (int)$product_option_id . "' ORDER BY `ov`.`sort_order`");
 
 		return $query->rows;
 	}
@@ -768,9 +798,11 @@ class Product extends \Opencart\System\Engine\Model {
 		if (!$product_data) {
 			$query = $this->db->query($sql);
 
-			$product_data = $query->rows;
+			$product_data = $this->normalizeProductListRows($query->rows);
 
 			$this->cache->set('product.' . $key, $product_data);
+		} else {
+			$product_data = $this->normalizeProductListRows($product_data);
 		}
 
 		return (array)$product_data;

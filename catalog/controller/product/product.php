@@ -454,9 +454,9 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$data['attribute_groups'] = $this->model_catalog_product->getAttributes($product_id);
 
-			$this->applyPdpPackDisplay($data);
+			$this->applyPdpPackDisplay($data, $product_info);
 
-			$data['pdp_size_intro'] = $this->buildPdpSinglePackIntro($data['pdp_pack_unit_label'] ?? '');
+			$data['pdp_size_intro'] = $this->buildPdpSinglePackIntro($data['pdp_pack_unit_label'] ?? '', $product_info);
 
 			$data['related'] = $this->load->controller('product/related');
 
@@ -513,11 +513,11 @@ class Product extends \Opencart\System\Engine\Controller {
 	 *
 	 * @param array<string, mixed> $data
 	 */
-	private function applyPdpPackDisplay(array &$data): void {
+	private function applyPdpPackDisplay(array &$data, array $product_info): void {
 		$data['pdp_pack_options'] = [];
 		$data['pdp_pack_product_option_id'] = 0;
 		$data['pdp_pack_default_product_option_value_id'] = 0;
-		$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($data['attribute_groups'] ?? []);
+		$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($data['attribute_groups'] ?? [], $product_info);
 
 		$pack_option = null;
 
@@ -592,8 +592,9 @@ class Product extends \Opencart\System\Engine\Controller {
 	 * Label under each pack box (e.g. «1 гр», «30 шт») from ProductAttributes / Specification in import.
 	 *
 	 * @param array<int, array<string, mixed>> $attribute_groups
+	 * @param array<string, mixed>            $product_info
 	 */
-	private function getPdpPackagingUnitLabel(array $attribute_groups): string {
+	private function getPdpPackagingUnitLabel(array $attribute_groups, array $product_info = []): string {
 		foreach ($attribute_groups as $group) {
 			if (empty($group['attribute']) || !is_array($group['attribute'])) {
 				continue;
@@ -664,13 +665,24 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 		}
 
+		$w = (float)($product_info['weight'] ?? 0);
+
+		if ($w > 0) {
+			return $this->weight->format(
+				$w,
+				(int)($product_info['weight_class_id'] ?? 0),
+				$this->language->get('decimal_point'),
+				$this->language->get('thousand_point')
+			);
+		}
+
 		return '';
 	}
 
 	/**
 	 * Single-pack Фасування line: "(1 грам)" / "(35 штук)" from attribute unit (гр / шт).
 	 */
-	private function buildPdpSinglePackIntro(string $unit_label): string {
+	private function buildPdpSinglePackIntro(string $unit_label, array $product_info = []): string {
 		$unit_label = trim($unit_label);
 
 		if ($unit_label === '') {
@@ -679,8 +691,8 @@ class Product extends \Opencart\System\Engine\Controller {
 
 		$lang = (string)$this->config->get('config_language');
 
-		if (preg_match('/(\d+)\s*гр\.?/ui', $unit_label, $m)) {
-			$n = (int)$m[1];
+		if (preg_match('/(\d+(?:[.,]\d+)?)\s*(гр\.?|г)\b/ui', $unit_label, $m)) {
+			$n = (int)round((float)str_replace(',', '.', $m[1]));
 
 			if ($lang === 'uk-ua') {
 				$phrase = $this->formatUkrainianGramsPhrase($n);
