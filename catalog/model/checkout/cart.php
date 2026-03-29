@@ -1,5 +1,8 @@
 <?php
 namespace Opencart\Catalog\Model\Checkout;
+
+use Opencart\System\Library\Pack\PackPricing;
+
 /**
  * Class Cart
  *
@@ -24,11 +27,13 @@ class Cart extends \Opencart\System\Engine\Model {
 
 		// Upload
 		$this->load->model('tool/upload');
+		$this->load->model('catalog/product');
 
 		// Products
 		$product_data = [];
 
 		$products = $this->cart->getProducts();
+		$product_info_cache = [];
 
 		foreach ($products as $product) {
 			if ($product['image'] && is_file(DIR_IMAGE . html_entity_decode($product['image'], ENT_QUOTES, 'UTF-8'))) {
@@ -63,6 +68,16 @@ class Cart extends \Opencart\System\Engine\Model {
 				}
 
 				$option_data[] = ['value' => $value] + $option;
+			}
+
+			$pid = (int)$product['product_id'];
+
+			if (!isset($product_info_cache[$pid])) {
+				$product_info_cache[$pid] = $this->model_catalog_product->getProduct($pid);
+			}
+
+			if ($product_info_cache[$pid]) {
+				$this->enrichPackOptionDisplay($option_data, $product, $product_info_cache[$pid]);
 			}
 
 			$subscription_data = [];
@@ -127,5 +142,59 @@ class Cart extends \Opencart\System\Engine\Model {
 		}
 
 		array_multisort($sort_order, SORT_ASC, $totals);
+	}
+
+	/**
+	 * Replace option value labels with pack display lines (same logic as product page).
+	 *
+	 * @param array<int, array<string, mixed>> $option_data
+	 * @param array<string, mixed>             $product
+	 * @param array<string, mixed>             $product_info
+	 */
+	private function enrichPackOptionDisplay(array &$option_data, array $product, array $product_info): void {
+		if (($this->config->get('config_customer_price') && !$this->customer->isLogged()) || !isset($product_info['raw_price'])) {
+			return;
+		}
+
+		$raw_base = (float)$product_info['raw_price'];
+		$special = (float)($product_info['special'] ?? 0);
+		$tax_class_id = (int)($product['tax_class_id'] ?? 0);
+
+		foreach ($option_data as &$opt) {
+			$type = $opt['type'] ?? '';
+
+			if (!in_array($type, ['select', 'radio', 'checkbox'], true)) {
+				continue;
+			}
+
+			$label = (string)($opt['value'] ?? '');
+			$pack_size = PackPricing::parsePackSizeFromLabel($label);
+
+			if ($pack_size === null) {
+				continue;
+			}
+
+			$row = PackPricing::computePackDisplayRow(
+				$raw_base,
+				(float)($opt['price'] ?? 0),
+				(string)($opt['price_prefix'] ?? '+'),
+				$special,
+				$pack_size
+			);
+
+			$final_taxed = $this->tax->calculate($row['final_price'], $tax_class_id, $this->config->get('config_tax'));
+			$unit_taxed = $this->tax->calculate($row['unit_price'], $tax_class_id, $this->config->get('config_tax'));
+			$fmt = $this->currency->format($final_taxed, $this->session->data['currency']);
+			$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
+			$line = sprintf('%d уп — %s (%s / уп)', $pack_size, $fmt, $unit_fmt);
+
+			if ($row['discount_percent'] !== null) {
+				$line .= sprintf(' · −%s%%', rtrim(rtrim((string)$row['discount_percent'], '0'), '.'));
+			}
+
+			$opt['value'] = $line;
+			$opt['pack_cart_line'] = true;
+		}
+		unset($opt);
 	}
 }

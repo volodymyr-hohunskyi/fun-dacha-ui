@@ -205,6 +205,8 @@ class Cart {
 						}
 					}
 
+					// Pack pricing contract (see system/library/pack/): option modifiers are static deltas on catalog base.
+					// Line before discounts is always: raw product.price + sum(option absolute modifiers).
 					$price = $product_query->row['price'] + $option_price;
 
 					$subscription_data = [];
@@ -222,7 +224,7 @@ class Cart {
 						}
 					}
 
-					// Product Discounts
+					// Product discounts: percentage (P) applies to (base + options), not to base alone — same order as pack pricing (OPTION → discount).
 					$product_discount_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_discount` WHERE `product_id` = '" . (int)$cart['product_id'] . "' AND `customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `quantity` <= '" . (int)$product_total . "' AND ((`date_start` = '0000-00-00' OR `date_start` < NOW()) AND (`date_end` = '0000-00-00' OR `date_end` > NOW())) ORDER BY `quantity` DESC, `priority` ASC, `price` ASC LIMIT 1");
 
 					if ($product_discount_query->num_rows) {
@@ -230,7 +232,7 @@ class Cart {
 							// Fixed Price
 							$price = $product_discount_query->row['price'] + $option_price;
 						} elseif ($product_discount_query->row['type'] == 'P') {
-							// Percentage
+							// Percentage on full line (base + option modifiers)
 							$price -= ($price * ($product_discount_query->row['price'] / 100));
 						} elseif ($product_discount_query->row['type'] == 'S') {
 							// Subtract
@@ -269,19 +271,20 @@ class Cart {
 					}
 
 					$this->data[$cart['cart_id']] = [
-						'cart_id'        => $cart['cart_id'],
-						'option'         => $option_data,
-						'subscription'   => $subscription_data,
-						'download'       => $download_data,
-						'quantity'       => $cart['quantity'],
-						'minimum_status' => $minimum,
-						'stock'          => $stock,
-						'stock_status'   => $stock_status,
-						'price'          => $price,
-						'total'          => $price * $cart['quantity'],
-						'reward'         => $reward * $cart['quantity'],
-						'points'         => $product_query->row['points'] ? ($product_query->row['points'] + $option_points) * $cart['quantity'] : 0,
-						'weight'         => ($product_query->row['weight'] + $option_weight) * $cart['quantity'],
+						'cart_id'             => $cart['cart_id'],
+						'option'              => $option_data,
+						'subscription'        => $subscription_data,
+						'download'            => $download_data,
+						'quantity'            => $cart['quantity'],
+						'minimum_status'      => $minimum,
+						'stock'               => $stock,
+						'stock_status'        => $stock_status,
+						'price'               => $price,
+						'total'               => $price * $cart['quantity'],
+						'reward'              => $reward * $cart['quantity'],
+						'points'              => $product_query->row['points'] ? ($product_query->row['points'] + $option_points) * $cart['quantity'] : 0,
+						'weight'              => ($product_query->row['weight'] + $option_weight) * $cart['quantity'],
+						'catalog_base_price'  => (float)$product_query->row['price'],
 					] + $product_query->row;
 
 					// Use with order editor and subscriptions

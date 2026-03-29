@@ -75,6 +75,8 @@ class Product extends \Opencart\System\Engine\Model {
 
 			$product_data['variant'] = $query->row['variant'] ? json_decode($query->row['variant'], true) : [];
 			$product_data['override'] = $query->row['override'] ? json_decode($query->row['override'], true) : [];
+			// Catalog base (product.price) — required for pack ratio; not the same as customer-facing price when discount tier exists.
+			$product_data['raw_price'] = (float)$query->row['price'];
 			$product_data['price'] = (float)($query->row['discount'] ?: $query->row['price']);
 			// Avoid collision with `product.special` (flag): subquery is aliased as special_price.
 			$product_data['special'] = (float)($query->row['special_price'] ?? 0);

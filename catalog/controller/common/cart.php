@@ -59,7 +59,11 @@ class Cart extends \Opencart\System\Engine\Controller {
 						}
 					}
 
-					$product['option'][$key]['value'] = (oc_strlen($value) > 20 ? oc_substr($value, 0, 20) . '..' : $value);
+					if (!empty($option['pack_cart_line'])) {
+						$product['option'][$key]['value'] = $value;
+					} else {
+						$product['option'][$key]['value'] = (oc_strlen($value) > 20 ? oc_substr($value, 0, 20) . '..' : $value);
+					}
 				}
 			}
 
