@@ -1457,9 +1457,9 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$product['master_id'] = $master_id;
 			$product['variant'] = $variant;
 			$product['override'] = $override;
-			if ($incremental) {
-				$this->deleteProduct( $product_id  );
-			}
+			// Always remove existing product row before insert: duplicate product_id rows in the sheet,
+			// or a full import when the table was not empty, otherwise cause "Duplicate entry ... PRIMARY".
+			$this->deleteProduct( $product_id );
 			$available_product_ids[$product_id] = $product_id;
 			$this->moreProductCells( $i, $j, $data, $product );
 			$this->storeProductIntoDatabase( $product, $languages, $layout_ids, $available_store_ids, $manufacturers, $weight_class_ids, $length_class_ids, $url_alias_ids );
