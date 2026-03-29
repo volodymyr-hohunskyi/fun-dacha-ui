@@ -668,15 +668,38 @@ class Product extends \Opencart\System\Engine\Controller {
 		$w = (float)($product_info['weight'] ?? 0);
 
 		if ($w > 0) {
-			return $this->weight->format(
-				$w,
-				(int)($product_info['weight_class_id'] ?? 0),
-				$this->language->get('decimal_point'),
-				$this->language->get('thousand_point')
-			);
+			$from_id = (int)($product_info['weight_class_id'] ?? 0);
+			$grams = $this->weight->convert($w, $from_id, $this->getGramWeightClassId());
+
+			if ($grams > 0) {
+				$n = max(1, (int)round($grams));
+
+				return $n . ' гр';
+			}
 		}
 
 		return '';
+	}
+
+	/**
+	 * DB weight class used as «grams» for converting catalog weight to «N гр» labels.
+	 */
+	private function getGramWeightClassId(): int {
+		static $gram_id = null;
+
+		if ($gram_id !== null) {
+			return $gram_id;
+		}
+
+		$query = $this->db->query("SELECT `weight_class_id` FROM `" . DB_PREFIX . "weight_class_description` WHERE `language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `unit` IN ('г', 'g', 'гр') LIMIT 1");
+
+		if ($query->num_rows) {
+			$gram_id = (int)$query->row['weight_class_id'];
+		} else {
+			$gram_id = (int)$this->config->get('config_weight_class_id');
+		}
+
+		return $gram_id;
 	}
 
 	/**
@@ -692,7 +715,7 @@ class Product extends \Opencart\System\Engine\Controller {
 		$lang = (string)$this->config->get('config_language');
 
 		if (preg_match('/(\d+(?:[.,]\d+)?)\s*(гр\.?|г)\b/ui', $unit_label, $m)) {
-			$n = (int)round((float)str_replace(',', '.', $m[1]));
+			$n = (int)max(1, round((float)str_replace(',', '.', $m[1])));
 
 			if ($lang === 'uk-ua') {
 				$phrase = $this->formatUkrainianGramsPhrase($n);
