@@ -80,12 +80,15 @@
             </div>
           {% endif %}
           {% if price %}
-            <ul class="list-unstyled">
+            <ul class="list-unstyled product-price-block">
               {% if not special %}
-                <li><h2><span class="price-new">{{ price }}</span></h2></li>
+                <li><h2 class="mb-0"><span class="product-price-regular">{{ price }}</span></h2></li>
               {% else %}
-                <li><span class="price-old">{{ price }}</span></li>
-                <li><h2><span class="price-new">{{ special }}</span></h2></li>
+                <li class="mb-1">
+                  <span class="product-price-sale-label">{{ text_special_offer }}</span>
+                  <span class="product-price-sale">{{ special }}</span>
+                </li>
+                <li class="mb-0"><span class="product-price-was">{{ price }}</span></li>
               {% endif %}
               {% if points %}
                 <li>{{ text_points }} {{ points }}</li>
@@ -238,23 +241,23 @@
   <div class="d-flex flex-column gap-2">
 
     <!-- Quantity -->
-    <div class="input-group quantity-group">
+    <div class="input-group input-group-qty-compact quantity-group">
       <button type="button"
-              class="btn btn-primary text-white"
+              class="btn btn-primary btn-qty-step text-white"
               onclick="changeQuantity(-1)">
-        <i class="fa-solid fa-minus"></i>
+        <i class="fa-solid fa-minus" aria-hidden="true"></i>
       </button>
 
       <input type="text"
              name="quantity"
              value="{{ minimum }}"
              id="input-quantity"
-             class="form-control text-center quantity-input" />
+             class="form-control form-control-sm text-center quantity-input" />
 
       <button type="button"
-              class="btn btn-primary text-white"
+              class="btn btn-primary btn-qty-step text-white"
               onclick="changeQuantity(1)">
-        <i class="fa-solid fa-plus"></i>
+        <i class="fa-solid fa-plus" aria-hidden="true"></i>
       </button>
     </div>
 

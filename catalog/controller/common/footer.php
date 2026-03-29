@@ -92,7 +92,9 @@ class Footer extends \Opencart\System\Engine\Controller {
 		$route = isset($this->request->get['route']) ? (string) $this->request->get['route'] : '';
 
 		// Load assistant widget before getScripts('footer') so chat.js from addScript() is included.
-		if ($route === 'assistant/page') {
+		$hide_assistant = ($route === 'assistant/page' || str_starts_with($route, 'checkout/'));
+
+		if ($hide_assistant) {
 			$data['assistant_widget'] = '';
 		} else {
 			$data['assistant_widget'] = $this->load->controller('assistant/widget');

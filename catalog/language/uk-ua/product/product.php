@@ -23,6 +23,7 @@ $_['text_week']                  = 'тиждень';
 $_['text_semi_month']            = 'півмісяця';
 $_['text_month']                 = 'місяць';
 $_['text_year']                  = 'рік';
+$_['text_special_offer']         = 'Акційна ціна';
 
 // Buttons
 $_['button_wishlist']            = 'Додати до Списку Бажань';

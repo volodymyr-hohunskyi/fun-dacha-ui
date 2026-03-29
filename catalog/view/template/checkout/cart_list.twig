@@ -58,10 +58,10 @@
             </td>
             <td class="text-center">
               <form method="post" data-oc-target="#shopping-cart" id="form-quantity-{{ product.cart_id }}">
-                <div class="input-group d-inline-flex justify-content-center flex-nowrap" style="width: auto;">
-                  <button type="button" class="btn btn-primary btn-sm text-white" onclick="changeCartQuantity({{ product.cart_id }}, -1)"><i class="fa-solid fa-minus"></i></button>
-                  <input type="text" name="quantity" value="{{ product.quantity }}" size="1" class="form-control text-center{% if product.minimum %} is-invalid{% endif %}" style="width: 50px; min-width: 50px;" onchange="updateCartQuantity({{ product.cart_id }})"/>
-                  <button type="button" class="btn btn-primary btn-sm text-white" onclick="changeCartQuantity({{ product.cart_id }}, 1)"><i class="fa-solid fa-plus"></i></button>
+                <div class="input-group input-group-qty-compact d-inline-flex justify-content-center flex-nowrap" style="width: auto;">
+                  <button type="button" class="btn btn-primary btn-qty-step text-white" onclick="changeCartQuantity({{ product.cart_id }}, -1)"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
+                  <input type="text" name="quantity" value="{{ product.quantity }}" size="1" class="form-control form-control-sm text-center{% if product.minimum %} is-invalid{% endif %}" onchange="updateCartQuantity({{ product.cart_id }})"/>
+                  <button type="button" class="btn btn-primary btn-qty-step text-white" onclick="changeCartQuantity({{ product.cart_id }}, 1)"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
                 </div>
                 <input type="hidden" name="key" value="{{ product.cart_id }}"/>
               </form>
@@ -98,13 +98,13 @@
   {% endif %}
 
   <br/>
-  <div class="row g-2">
-    <div class="col-12 col-sm-6"><a href="{{ continue }}" class="btn btn-light w-100">{{ button_shopping }}</a></div>
+  <div class="row g-2 cart-stack-actions">
+    <div class="col-12 col-sm-6"><a href="{{ continue }}" class="btn btn-light w-100 cart-stack-actions__btn border">{{ button_shopping }}</a></div>
     <div class="col-12 col-sm-6 text-sm-end">
       {% if checkout and can_proceed_to_checkout %}
-        <a href="{{ checkout }}" id="checkout-button" class="btn btn-primary w-100 w-sm-auto">{{ button_checkout }}</a>
+        <a href="{{ checkout }}" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn">{{ button_checkout }}</a>
       {% else %}
-        <button type="button" id="checkout-button" class="btn btn-primary w-100 w-sm-auto" disabled title="{% if min_order_error %}{{ min_order_error }}{% else %}Мінімальна сума замовлення не досягнута{% endif %}">{{ button_checkout }}</button>
+        <button type="button" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn" disabled title="{% if min_order_error %}{{ min_order_error }}{% else %}Мінімальна сума замовлення не досягнута{% endif %}">{{ button_checkout }}</button>
       {% endif %}
     </div>
   </div>
