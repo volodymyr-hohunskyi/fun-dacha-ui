@@ -5907,6 +5907,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		if (version_compare(VERSION,'4.1.0.1','>=')) {
 			$allowed_worksheets[] = 'ProductCodes';
 		}
+		$allowed_worksheets[] = 'SalesCalendar';
 		$all_worksheets_ignored = true;
 		$worksheets = $reader->getSheetNames();
 		foreach ($worksheets as $worksheet) {
@@ -5944,6 +5945,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		}
 		if (!$this->validateCategorySEOKeywords( $reader )) {
 			$this->log->write( $this->language->get('error_category_seo_keywords_header') );
+			$ok = false;
+		}
+		if (!$this->validateSalesCalendar( $reader )) {
+			$this->log->write( $this->language->get( 'error_sales_calendar_header' ) );
 			$ok = false;
 		}
 		if (!$this->validateProducts( $reader )) {
@@ -6330,6 +6335,109 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	/**
+	 * Storage for seasonal category promo windows (import/export worksheet SalesCalendar).
+	 */
+	protected function ensureCategorySalesCalendarTable(): void {
+		static $done = false;
+		if ($done) {
+			return;
+		}
+		$done = true;
+		$this->db->query("CREATE TABLE IF NOT EXISTS `" . DB_PREFIX . "category_sales_calendar` (
+			`category_id` int(11) NOT NULL,
+			`discount_percent` varchar(16) NOT NULL DEFAULT '10%',
+			`period_start` varchar(10) NOT NULL DEFAULT '',
+			`period_end` varchar(10) NOT NULL DEFAULT '',
+			`note` text NOT NULL,
+			PRIMARY KEY (`category_id`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+	}
+
+
+	protected function validateSalesCalendar( &$reader ) {
+		$data = $reader->getSheetByName( 'SalesCalendar' );
+		if ($data == null) {
+			return true;
+		}
+		$expected_heading = array( "category_id", "category_name", "discount_percent", "period_start", "period_end", "note" );
+		$expected_multilingual = array();
+
+		return $this->validateHeading( $data, $expected_heading, $expected_multilingual );
+	}
+
+
+	protected function uploadSalesCalendar( &$reader, $incremental ) {
+		$data = $reader->getSheetByName( 'SalesCalendar' );
+		if ($data == null) {
+			return;
+		}
+		$this->ensureCategorySalesCalendarTable();
+		if (!$incremental) {
+			$this->db->query( "TRUNCATE `" . DB_PREFIX . "category_sales_calendar`" );
+		}
+		$k = $data->getHighestRow();
+		for ($i = 0; $i < $k; $i += 1) {
+			if ($i == 0) {
+				continue;
+			}
+			$j = 1;
+			$category_id = trim( $this->getCell( $data, $i, $j++ ) );
+			if ($category_id === '') {
+				continue;
+			}
+			if (!$this->isInteger( $category_id )) {
+				continue;
+			}
+			$check = $this->db->query( "SELECT `category_id` FROM `" . DB_PREFIX . "category` WHERE `category_id`='" . (int)$category_id . "'" );
+			if (!$check->num_rows) {
+				continue;
+			}
+			// column category_name — informational only
+			$this->getCell( $data, $i, $j++ );
+			$discount_percent = trim( $this->getCell( $data, $i, $j++, '10%' ) );
+			$period_start = trim( $this->getCell( $data, $i, $j++, '' ) );
+			$period_end = trim( $this->getCell( $data, $i, $j++, '' ) );
+			$note = $this->getCell( $data, $i, $j++, '' );
+			$note = (string) $note;
+			$sql = "REPLACE INTO `" . DB_PREFIX . "category_sales_calendar` (`category_id`,`discount_percent`,`period_start`,`period_end`,`note`) VALUES (";
+			$sql .= (int)$category_id . ",'" . $this->db->escape( $discount_percent ) . "','" . $this->db->escape( $period_start ) . "','" . $this->db->escape( $period_end ) . "','" . $this->db->escape( $note ) . "')";
+			$this->db->query( $sql );
+		}
+		$this->cache->delete( 'category' );
+	}
+
+
+	protected function populateSalesCalendarWorksheet( &$worksheet, &$box_format, &$text_format ) {
+		$this->ensureCategorySalesCalendarTable();
+		$default_language_id = (int) $this->getDefaultLanguageId();
+		$sql = "SELECT csc.`category_id`, csc.`discount_percent`, csc.`period_start`, csc.`period_end`, csc.`note`, cd.`name` AS `category_name` ";
+		$sql .= "FROM `" . DB_PREFIX . "category_sales_calendar` csc ";
+		$sql .= "LEFT JOIN `" . DB_PREFIX . "category_description` cd ON (csc.`category_id` = cd.`category_id` AND cd.`language_id` = '" . $default_language_id . "') ";
+		$sql .= "ORDER BY csc.`category_id` ASC";
+		$query = $this->db->query( $sql );
+
+		$headers = array( 'category_id', 'category_name', 'discount_percent', 'period_start', 'period_end', 'note' );
+		$j = 1;
+		foreach ($headers as $h) {
+			$worksheet->setCellValueExplicitByColumnAndRow( $j, 1, $h, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+			$j++;
+		}
+		$i = 1;
+		foreach ($query->rows as $row) {
+			$i++;
+			$worksheet->setCellValueExplicitByColumnAndRow( 1, $i, (string) $row['category_id'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+			$worksheet->setCellValueExplicitByColumnAndRow( 2, $i, (string) ($row['category_name'] ?? ''), \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+			$worksheet->setCellValueExplicitByColumnAndRow( 3, $i, (string) $row['discount_percent'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+			$worksheet->setCellValueExplicitByColumnAndRow( 4, $i, (string) $row['period_start'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+			$worksheet->setCellValueExplicitByColumnAndRow( 5, $i, (string) $row['period_end'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+			$worksheet->setCellValueExplicitByColumnAndRow( 6, $i, (string) $row['note'], \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING );
+		}
+		$worksheet->getStyle( 'A1:F1' )->applyFromArray( $box_format );
+		$worksheet->setAutoFilter( 'A1:F1' );
+	}
+
+
 	public function upload( $filename, $incremental=false ) {
 		// we use our own error handler
 		global $registry;
@@ -6370,6 +6478,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$available_category_ids = array();
 			$available_customer_ids = array();
 			$this->uploadCategories( $reader, $incremental, $available_category_ids );
+			$this->uploadSalesCalendar( $reader, $incremental );
 			$this->uploadFilterGroups( $reader, $incremental );
 			$this->uploadFilters( $reader, $incremental );
 			$this->uploadCategoryFilters( $reader, $incremental, $available_category_ids );
@@ -9265,6 +9374,13 @@ class ExportImport extends \Opencart\System\Engine\Model {
 					$worksheet->setTitle( 'CategorySEOKeywords' );
 					$this->populateCategorySEOKeywordsWorksheet( $worksheet, $languages, $box_format, $text_format, $min_id, $max_id );
 					$worksheet->freezePaneByColumnAndRow( 2, 2 );
+
+					$workbook->createSheet();
+					$workbook->setActiveSheetIndex($worksheet_index++);
+					$worksheet = $workbook->getActiveSheet();
+					$worksheet->setTitle( 'SalesCalendar' );
+					$this->populateSalesCalendarWorksheet( $worksheet, $box_format, $text_format );
+					$worksheet->freezePaneByColumnAndRow( 2, 2 );
 					break;
 
 				case 'p':
@@ -9358,6 +9474,13 @@ class ExportImport extends \Opencart\System\Engine\Model {
 						$this->populateProductCodesWorksheet( $worksheet, $box_format, $text_format, $min_id, $max_id );
 						$worksheet->freezePaneByColumnAndRow( 2, 2 );
 					}
+
+					$workbook->createSheet();
+					$workbook->setActiveSheetIndex($worksheet_index++);
+					$worksheet = $workbook->getActiveSheet();
+					$worksheet->setTitle( 'SalesCalendar' );
+					$this->populateSalesCalendarWorksheet( $worksheet, $box_format, $text_format );
+					$worksheet->freezePaneByColumnAndRow( 2, 2 );
 					break;
 
 				case 'o':

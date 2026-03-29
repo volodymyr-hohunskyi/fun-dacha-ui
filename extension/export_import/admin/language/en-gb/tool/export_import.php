@@ -71,6 +71,7 @@ $_['error_worksheets']                      = 'Export/Import: Invalid worksheet 
 $_['error_categories_header']               = 'Export/Import: Invalid header in the Categories worksheet';
 $_['error_category_filters_header']         = 'Export/Import: Invalid header in the CategoryFilters worksheet';
 $_['error_category_seo_keywords_header']    = 'Export/Import: Invalid header in the CategorySEOKeywords worksheet';
+$_['error_sales_calendar_header']           = 'Export/Import: Invalid header in the SalesCalendar worksheet';
 $_['error_products_header']                 = 'Export/Import: Invalid header in the Products worksheet';
 $_['error_additional_images_header']        = 'Export/Import: Invalid header in the AdditionalImages worksheet';
 $_['error_specials_header']                 = 'Export/Import: Invalid header in the Specials worksheet';
