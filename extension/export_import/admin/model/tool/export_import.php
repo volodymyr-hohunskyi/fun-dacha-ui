@@ -3974,6 +3974,20 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	/**
+	 * Remove reviews for specific products (used before incremental re-import so rows are not duplicated).
+	 */
+	protected function deleteReviewsForProductIds( array $product_ids ) {
+		$ids = array_unique( array_filter( array_map( 'intval', $product_ids ) ) );
+		if (!$ids) {
+			return;
+		}
+		$in = implode( ',', $ids );
+		$this->db->query( "DELETE FROM `" . DB_PREFIX . "review` WHERE `product_id` IN (" . $in . ")" );
+		$this->db->query( "UPDATE `" . DB_PREFIX . "product` SET `rating` = 0 WHERE `product_id` IN (" . $in . ")" );
+	}
+
+
 	protected function parseReviewDatetime( $val ) {
 		if ($val === '' || $val === null) {
 			return date( 'Y-m-d H:i:s' );
@@ -4023,6 +4037,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		$this->load->model( 'catalog/product' );
 		$affected_product_ids = array();
 		$k = $data->getHighestRow();
+		$pending_reviews = array();
 		for ($i=0; $i<$k; $i+=1) {
 			if ($i==0) {
 				continue;
@@ -4080,12 +4095,18 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				'date_modified' => $date_modified,
 			);
 			$this->moreReviewCells( $i, $j, $data, $review );
+			$pending_reviews[] = $review;
+		}
+		if ($incremental && $pending_reviews) {
+			$this->deleteReviewsForProductIds( array_column( $pending_reviews, 'product_id' ) );
+		}
+		foreach ($pending_reviews as $review) {
 			$author_esc = $this->db->escape( $review['author'] );
 			$text_esc = $this->db->escape( $review['text'] );
 			$sql  = "INSERT INTO `" . DB_PREFIX . "review` (`product_id`,`customer_id`,`author`,`text`,`rating`,`status`,`date_added`,`date_modified`) VALUES ";
 			$sql .= "(".(int)$review['product_id'].",".(int)$review['customer_id'].",'".$author_esc."','".$text_esc."',".(int)$review['rating'].",".(int)$review['status'].",'".$this->db->escape( $review['date_added'] )."','".$this->db->escape( $review['date_modified'] )."')";
 			$this->db->query( $sql );
-			$affected_product_ids[(int)$product_id] = true;
+			$affected_product_ids[(int)$review['product_id']] = true;
 		}
 		foreach (array_keys( $affected_product_ids ) as $pid) {
 			$this->refreshProductRatingForReviewImport( (int) $pid );

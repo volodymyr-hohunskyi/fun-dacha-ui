@@ -107,6 +107,18 @@ class Review extends \Opencart\System\Engine\Model {
 
 		$query = $this->db->query("SELECT `r`.`review_id`, `r`.`author`, `r`.`rating`, `r`.`text`, `r`.`date_added`, `r`.`product_id`, `p`.`image`, `pd`.`name` AS `product_name` FROM `" . DB_PREFIX . "review` `r` INNER JOIN `" . DB_PREFIX . "product` `p` ON (`r`.`product_id` = `p`.`product_id`) INNER JOIN `" . DB_PREFIX . "product_to_store` `p2s` ON (`p`.`product_id` = `p2s`.`product_id`) INNER JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `r`.`status` = '1' AND `p`.`status` = '1' AND `p`.`date_available` <= NOW() AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "' AND `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' ORDER BY `r`.`date_added` DESC LIMIT " . (int)$limit);
 
-		return $query->rows;
+		$rows = $query->rows;
+		$seen = [];
+		$out = [];
+		foreach ($rows as $row) {
+			$rid = (int)$row['review_id'];
+			if (isset($seen[$rid])) {
+				continue;
+			}
+			$seen[$rid] = true;
+			$out[] = $row;
+		}
+
+		return $out;
 	}
 }
