@@ -6451,6 +6451,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				throw new \Exception( $this->language->get( 'error_php_version' ) );
 			}
 
+			// Large workbooks (many products + Discounts rows) exceed default 128M while PhpSpreadsheet parses XML.
+			@ini_set( 'memory_limit', '512M' );
+			set_time_limit( 1800 );
+
 			$this->session->data['export_import_nochange'] = 1;
 
 			// enable auto_load from system/library/export_import
@@ -6461,9 +6465,10 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 			// parse uploaded spreadsheet file
 			$inputFileType = \PhpOffice\PhpSpreadsheet\IOFactory::identify($filename);
-			$objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($inputFileType);
-			$objReader->setReadDataOnly(true);
-			$reader = $objReader->load($filename);
+			$objReader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader( $inputFileType );
+			$objReader->setReadDataOnly( true );
+			$objReader->setReadEmptyCells( false );
+			$reader = $objReader->load( $filename );
 
 			// read the various worksheets and load them to the database
 			if (!$this->validateIncrementalOnly( $reader, $incremental )) {
@@ -9257,6 +9262,9 @@ class ExportImport extends \Opencart\System\Engine\Model {
 				throw new \Exception( $this->language->get( 'error_php_version' ) );
 			}
 
+			@ini_set( 'memory_limit', '512M' );
+			set_time_limit( 1800 );
+
 			// enable auto_load from system/library/export_import
 			require( DIR_EXTENSION.'export_import/system/library/export_import/vendor/autoload.php' );
 
@@ -9268,9 +9276,6 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 			$this->posted_categories = $this->getPostedCategories();
 			$this->posted_manufacturers = $this->getPostedManufacturers();
-
-			// set appropriate timeout limit
-			set_time_limit( 1800 );
 
 			$languages = $this->getLanguages();
 			$default_language_id = $this->getDefaultLanguageId();

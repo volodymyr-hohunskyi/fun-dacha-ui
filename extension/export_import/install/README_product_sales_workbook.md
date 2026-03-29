@@ -57,3 +57,12 @@ Regenerate that sheet after editing products or category lists:
 `shared/import/scripts/apply_volume_discounts_to_workbook.py`
 
 It reads **`Products`!`categories`**, matches the configured category IDs, and rewrites the **`Discounts`** tab (placed **after** **`Products`**). **`customer_group`** is set to **`Default`** — change `DEFAULT_CUSTOMER_GROUP` in the script if your store uses another name.
+
+### Import checklist (OpenCart **4.1+**)
+
+- **Sheet name:** `Discounts` (exact), **after** `Products` in the workbook (tab order in Excel matches this).
+- **Row 1 headers:**  
+  `product_id`, `customer_group`, `quantity`, `priority`, `price`, `type`, `special`, `date_start`, `date_end`
+- **Volume tiers:** `quantity` &gt; `1`, **`special`** = `false` (not the sale row). **`type`** = `P` for percent in **`price`** (e.g. `5` = 5%).
+- **`customer_group`** must match the **name** in **Sales → Customers → Customer Groups** (English admin often uses `Default`).
+- **Memory:** large files need more than 128 MB PHP memory while PhpSpreadsheet reads the file. The extension raises the limit for import/export runs; if your host blocks `ini_set`, set `memory_limit` to **512M** or higher in `php.ini` / `.user.ini` / MultiPHP INI Editor.
