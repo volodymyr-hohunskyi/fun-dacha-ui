@@ -517,7 +517,9 @@ class Product extends \Opencart\System\Engine\Controller {
 		$data['pdp_pack_options'] = [];
 		$data['pdp_pack_product_option_id'] = 0;
 		$data['pdp_pack_default_product_option_value_id'] = 0;
-		$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($data['attribute_groups'] ?? []);
+		$data['pdp_pack_unit_label'] = '';
+
+		$attrs = $data['attribute_groups'] ?? [];
 
 		$pack_option = null;
 
@@ -530,6 +532,8 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		if ($pack_option === null || empty($pack_option['product_option_value'])) {
+			$data['pdp_pack_unit_label'] = $this->getPdpPackagingUnitLabel($attrs);
+
 			return;
 		}
 
@@ -551,6 +555,10 @@ class Product extends \Opencart\System\Engine\Controller {
 		$data['options'] = array_values(array_filter($data['options'], static function (array $o) use ($pack_product_option_id): bool {
 			return (int)($o['product_option_id'] ?? 0) !== $pack_product_option_id;
 		}));
+
+		// Pack tiers (1 уп / 2 уп / 5 уп): show only Specification Weight (gram), not legacy «фасу» lines (e.g. bulk 5000 гр).
+		$specGrams = $this->findSpecificationWeightGramInt($attrs);
+		$data['pdp_pack_unit_label'] = ($specGrams !== null && $specGrams > 0) ? ($specGrams . ' гр') : '';
 	}
 
 	/**
@@ -592,20 +600,15 @@ class Product extends \Opencart\System\Engine\Controller {
 	 * Specification → Weight (e.g. 1.00) + Weight Class (gram / gramm) → integer grams, no conversions.
 	 */
 	private function findSpecificationWeightGramInt(array $attribute_groups): ?int {
-		$specGroups = [];
-		$otherGroups = [];
+		// 1) Merge Weight + Weight Class across all groups named Specification (OC often splits rows).
+		$n = $this->parseWeightGramIntMergedFromGroups($attribute_groups, true);
 
-		foreach ($attribute_groups as $group) {
-			$gn = isset($group['name']) ? trim((string)$group['name']) : '';
-
-			if (mb_stripos($gn, 'specification') !== false || mb_stripos($gn, 'специфікац') !== false) {
-				$specGroups[] = $group;
-			} else {
-				$otherGroups[] = $group;
-			}
+		if ($n !== null) {
+			return $n;
 		}
 
-		foreach (array_merge($specGroups, $otherGroups) as $group) {
+		// 2) Same group has both attributes.
+		foreach ($attribute_groups as $group) {
 			$n = $this->parseWeightAndClassGramIntFromAttributeGroup($group);
 
 			if ($n !== null) {
@@ -614,6 +617,53 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Collect Weight and Weight Class from one or more attribute groups and return integer grams.
+	 *
+	 * @param array<int, array<string, mixed>> $attribute_groups
+	 */
+	private function parseWeightGramIntMergedFromGroups(array $attribute_groups, bool $specificationGroupsOnly): ?int {
+		$weightRaw = null;
+		$classRaw = null;
+
+		foreach ($attribute_groups as $group) {
+			$gn = isset($group['name']) ? trim((string)$group['name']) : '';
+
+			if ($specificationGroupsOnly) {
+				if (mb_stripos($gn, 'specification') === false && mb_stripos($gn, 'специфікац') === false) {
+					continue;
+				}
+			}
+
+			if (empty($group['attribute']) || !is_array($group['attribute'])) {
+				continue;
+			}
+
+			foreach ($group['attribute'] as $attr) {
+				$name = mb_strtolower(trim((string)($attr['name'] ?? '')));
+				$text = trim((string)($attr['text'] ?? ''));
+
+				if ($text === '') {
+					continue;
+				}
+
+				if ($name === 'weight') {
+					$weightRaw = $weightRaw ?? $text;
+				}
+
+				if ($name === 'weight class' || $name === 'weight_class') {
+					$classRaw = $classRaw ?? $text;
+				}
+			}
+		}
+
+		if ($weightRaw === null || $classRaw === null || $weightRaw === '') {
+			return null;
+		}
+
+		return $this->gramsIntFromWeightAndClassStrings($weightRaw, $classRaw);
 	}
 
 	/**
@@ -644,6 +694,10 @@ class Product extends \Opencart\System\Engine\Controller {
 			return null;
 		}
 
+		return $this->gramsIntFromWeightAndClassStrings($weightRaw, $classRaw);
+	}
+
+	private function gramsIntFromWeightAndClassStrings(string $weightRaw, string $classRaw): ?int {
 		if (!$this->isSpecificationGramClassLabel($classRaw)) {
 			return null;
 		}
