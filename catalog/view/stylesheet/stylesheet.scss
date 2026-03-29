@@ -922,6 +922,73 @@ footer.freshgo-footer {
   opacity: 0.85;
 }
 
+/* Product page: Johnny’s-style detail blocks (Quick facts, shipping, guarantee, growing, pack size) */
+.pdp-detail-sections {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  padding-top: 1.25rem;
+}
+
+.pdp-detail-section {
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.pdp-detail-section__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 0.75rem;
+  color: #1a1a1a;
+}
+
+.pdp-detail-subheading {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+  color: #333;
+}
+
+.pdp-detail-section__body {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: #333;
+}
+
+.pdp-growing-text {
+  p:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.pdp-dl {
+  margin-bottom: 0;
+}
+
+.pdp-dl__dt {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.35rem;
+}
+
+.pdp-dl__dd {
+  margin-bottom: 0.35rem;
+}
+
+@media (min-width: 576px) {
+  .pdp-dl__dt {
+    margin-bottom: 0.5rem;
+  }
+
+  .pdp-dl__dd {
+    margin-bottom: 0.5rem;
+  }
+}
+
 /* blog */
 .blog-thumb {
   border: 1px solid #ddd;

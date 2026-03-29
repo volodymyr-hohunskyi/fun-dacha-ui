@@ -4142,6 +4142,49 @@ class ExportImport extends \Opencart\System\Engine\Model {
 	}
 
 
+	protected function validateReviews( &$reader ) {
+		$data = $reader->getSheetByName( 'Reviews' );
+		if ($data==null) {
+			return true;
+		}
+		$expected_heading = array( "product_id", "customer_id", "author", "text", "rating", "status", "date_added", "date_modified" );
+		$expected_multilingual = array();
+		return $this->validateHeading( $data, $expected_heading, $expected_multilingual );
+	}
+
+
+	protected function validateReviewProductIds( &$reader ) {
+		$data = $reader->getSheetByName( 'Reviews' );
+		if ($data==null) {
+			return true;
+		}
+		$ok = true;
+		$k = $data->getHighestRow();
+		for ($i=0; $i<$k; $i+=1) {
+			if ($i==0) {
+				continue;
+			}
+			$j = 1;
+			$product_id = trim($this->getCell($data,$i,$j));
+			if ($product_id=="") {
+				continue;
+			}
+			if (!$this->isInteger($product_id)) {
+				$this->log->write( "Export/Import: Invalid product_id in Reviews worksheet on row ".($i+1) );
+				$ok = false;
+				continue;
+			}
+			$query = $this->db->query( "SELECT `product_id` FROM `".DB_PREFIX."product` WHERE `product_id`='".(int)$product_id."'" );
+			if (!$query->num_rows) {
+				$msg = str_replace( '%1', $product_id, $this->language->get( 'error_reviews_product_id' ) );
+				$this->log->write( $msg );
+				$ok = false;
+			}
+		}
+		return $ok;
+	}
+
+
 	protected function validateProductOptions( &$reader ) {
 		$data = $reader->getSheetByName( 'ProductOptions' );
 		if ($data==null) {
@@ -5732,7 +5775,8 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			'FilterGroups',
 			'Filters',
 			'Customers',
-			'Addresses'
+			'Addresses',
+			'Reviews'
 		);
 		if (version_compare(VERSION,'4.1.0.1','>=')) {
 			$allowed_worksheets[] = 'ProductCodes';
@@ -5854,6 +5898,13 @@ class ExportImport extends \Opencart\System\Engine\Model {
 		}
 		if (!$this->validateAddresses( $reader )) {
 			$this->log->write( $this->language->get('error_addresses_header') );
+			$ok = false;
+		}
+		if (!$this->validateReviews( $reader )) {
+			$this->log->write( $this->language->get( 'error_reviews_header' ) );
+			$ok = false;
+		}
+		if (!$this->validateReviewProductIds( $reader )) {
 			$ok = false;
 		}
 
@@ -6220,6 +6271,7 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$this->uploadAddresses( $reader, $incremental, $available_customer_ids );
 			$this->uploadTopics( $reader, $incremental );
 			$this->uploadArticles( $reader, $incremental );
+			$this->uploadReviews( $reader, $incremental );
 			return true;
 		} catch (Exception $e) {
 			$errstr = $e->getMessage();

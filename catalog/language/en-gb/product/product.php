@@ -25,6 +25,17 @@ $_['text_month']                 = 'month';
 $_['text_year']                  = 'year';
 $_['text_special_offer']         = 'Special offer';
 
+// PDP detail sections
+$_['text_pdp_characteristics']   = 'Characteristics';
+$_['text_pdp_shipping_heading']  = 'Shipping';
+$_['text_pdp_shipping']          = 'We ship with Nova Poshta to a branch or parcel locker. Pay on delivery (cash on delivery) is charged according to the carrier’s rates — typically a percentage of the order plus a transfer fee; see Nova Poshta for current terms.';
+$_['text_pdp_guarantee_heading'] = 'Satisfaction guarantee';
+$_['text_pdp_guarantee']         = 'We want you to be happy with your seeds and supplies. If something is wrong, contact us: we will advise on growing or arrange a replacement or return in line with consumer protection rules.';
+$_['text_pdp_growing_heading']   = 'Growing information';
+$_['text_pdp_size_heading']      = 'Pack size';
+$_['text_pdp_size_intro']        = 'Only one standard pack is available for this product right now.';
+$_['text_pdp_size_future']       = 'Coming later: small and large packs, “10+1” bundle-style offers, and 10% off volume orders.';
+
 // Buttons
 $_['button_wishlist']            = 'Add to Wish List';
 $_['button_compare']             = 'Compare this Product';

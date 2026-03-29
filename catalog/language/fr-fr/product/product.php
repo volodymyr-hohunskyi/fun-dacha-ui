@@ -24,6 +24,16 @@ $_['text_semi_month']            = 'demi-mois';
 $_['text_month']                 = 'mois';
 $_['text_year']                  = 'année';
 
+$_['text_pdp_characteristics']   = 'Caractéristiques';
+$_['text_pdp_shipping_heading']  = 'Livraison';
+$_['text_pdp_shipping']          = 'Expédition par Nova Poshta vers un bureau ou un casier. Paiement à la livraison selon les tarifs du transporteur.';
+$_['text_pdp_guarantee_heading'] = 'Garantie satisfaction';
+$_['text_pdp_guarantee']         = 'Si un problème survient, contactez-nous : conseils de culture ou échange / retour selon la réglementation.';
+$_['text_pdp_growing_heading']   = 'Culture';
+$_['text_pdp_size_heading']      = 'Conditionnement';
+$_['text_pdp_size_intro']        = 'Un seul conditionnement standard est proposé pour l’instant.';
+$_['text_pdp_size_future']       = 'Bientôt : petits et grands formats, offres « 10+1 » et remise sur les commandes en volume.';
+
 // Boutons
 $_['button_wishlist']            = 'Ajouter à la liste de souhaits';
 $_['button_compare']             = 'Comparer ce produit';
