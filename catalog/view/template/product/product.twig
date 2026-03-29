@@ -88,15 +88,41 @@
               {% if points %}
                 <li>{{ text_points }} {{ points }}</li>
               {% endif %}
-              {% if discounts %}
-                <li>
-                  <hr>
-                </li>
-                {% for discount in discounts %}
-                  <li>{{ discount.quantity }}{{ text_discount }}{{ discount.price }}</li>
-                {% endfor %}
-              {% endif %}
             </ul>
+            {% if pdp_volume_tiers %}
+            <section class="pdp-volume-pricing mt-3 mb-3" aria-labelledby="pdp-heading-volume">
+              <h2 id="pdp-heading-volume" class="pdp-detail-section__title">{{ text_pdp_volume_heading }}</h2>
+              <ul class="list-unstyled pdp-volume-pricing__list mb-0">
+                {% for tier in pdp_volume_tiers %}
+                <li class="pdp-volume-tier{% if tier.is_volume %} pdp-volume-tier--volume{% endif %}">
+                  <div class="pdp-volume-tier__label">{{ tier.label }}</div>
+                  {% if tier.is_volume %}
+                  <div class="pdp-volume-tier__lines">
+                    <div class="pdp-volume-tier__row pdp-volume-tier__row--base">
+                      <span class="pdp-volume-tier__unit-base">{{ tier.per_unit_base }}</span>
+                    </div>
+                    <div class="pdp-volume-tier__row pdp-volume-tier__row--deal">
+                      {% if tier.percent_label %}
+                      <span class="pdp-volume-tier__pct">{{ tier.percent_label }}</span>
+                      {% endif %}
+                      <span class="pdp-volume-tier__unit-now">{{ tier.per_unit_now }}</span>
+                    </div>
+                    {% if tier.savings_line %}
+                    <div class="pdp-volume-tier__save">{{ tier.savings_line }}</div>
+                    {% endif %}
+                  </div>
+                  {% else %}
+                  <div class="pdp-volume-tier__lines">
+                    <div class="pdp-volume-tier__row pdp-volume-tier__row--single">
+                      <span class="pdp-volume-tier__unit-now">{{ tier.per_unit_now }}</span>
+                    </div>
+                  </div>
+                  {% endif %}
+                </li>
+                {% endfor %}
+              </ul>
+            </section>
+            {% else %}
             <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-pack-inline">
               <h2 id="pdp-heading-pack-inline" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
               <div class="pdp-detail-section__body">
@@ -106,6 +132,7 @@
                 {% endif %}
               </div>
             </section>
+            {% endif %}
           {% endif %}
           <div id="product">
             <form id="form-product">

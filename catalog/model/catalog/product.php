@@ -628,6 +628,33 @@ class Product extends \Opencart\System\Engine\Model {
 	}
 
 	/**
+	 * Volume discount rules (quantity &gt; 1, non-special rows) for PDP tier pricing.
+	 * Per-unit amounts are applied in the controller using the effective unit price (sale + base).
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function getVolumeDiscountRules(int $product_id): array {
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_discount` WHERE `product_id` = '" . (int)$product_id . "' AND `customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `quantity` > '1' AND ((`date_start` = '0000-00-00' OR `date_start` < NOW()) AND (`date_end` = '0000-00-00' OR `date_end` > NOW())) ORDER BY `quantity` ASC, `priority` ASC, `price` ASC");
+
+		$out = [];
+
+		foreach ($query->rows as $row) {
+			if (isset($row['special']) && (int)$row['special'] === 1) {
+				continue;
+			}
+
+			$out[] = [
+				'quantity'   => (int)$row['quantity'],
+				'priority'   => (int)$row['priority'],
+				'rule_price' => (float)$row['price'],
+				'type'       => (string)($row['type'] ?? 'F'),
+			];
+		}
+
+		return $out;
+	}
+
+	/**
 	 * Get Images
 	 *
 	 * Get the record of the product image records in the database.

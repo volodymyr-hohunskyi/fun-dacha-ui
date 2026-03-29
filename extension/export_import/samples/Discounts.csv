@@ -1,0 +1,2 @@
+product_id,customer_group,quantity,priority,price,type,special,date_start,date_end
+42,Default,1,0,99.99,F,true,2026-03-01,2026-06-30

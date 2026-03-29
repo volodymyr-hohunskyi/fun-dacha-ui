@@ -36,6 +36,11 @@ $_['text_pdp_size_heading']      = 'Pack size';
 $_['text_pdp_size_intro']        = 'Only one standard pack is available for this product right now.';
 $_['text_pdp_size_future']       = '';
 
+$_['text_pdp_volume_heading']    = 'Pack pricing';
+$_['text_pdp_pack_single']       = '1 pack at';
+$_['text_pdp_pack_many']         = '%d packs';
+$_['text_pdp_volume_save']       = 'SAVE %s';
+
 // Buttons
 $_['button_wishlist']            = 'Add to Wish List';
 $_['button_compare']             = 'Compare this Product';

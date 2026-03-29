@@ -372,13 +372,61 @@ class Product extends \Opencart\System\Engine\Controller {
 				$data['tax'] = false;
 			}
 
-			$discounts = $this->model_catalog_product->getDiscounts($product_id);
-
 			$data['discounts'] = [];
+			$data['pdp_volume_tiers'] = [];
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-				foreach ($discounts as $discount) {
-					$data['discounts'][] = ['price' => $this->currency->format($this->tax->calculate($discount['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])] + $discount;
+				$volume_rules = $this->model_catalog_product->getVolumeDiscountRules($product_id);
+				$unit_base = (float)$product_info['special'] > 0 ? (float)$product_info['special'] : (float)$product_info['price'];
+
+				if ($volume_rules) {
+					$tiers = [];
+
+					$tiers[] = [
+						'quantity'        => 1,
+						'label'           => $this->language->get('text_pdp_pack_single'),
+						'per_unit_base'   => $this->formatProductMoney($product_info, $unit_base),
+						'per_unit_now'    => $this->formatProductMoney($product_info, $unit_base),
+						'percent_label'   => '',
+						'savings_line'    => '',
+						'is_volume'       => false,
+					];
+
+					foreach ($volume_rules as $rule) {
+						$qty = (int)$rule['quantity'];
+
+						if ($qty < 2) {
+							continue;
+						}
+
+						$type = $rule['type'];
+						$unit_tier = $this->computeVolumeUnitPrice($unit_base, $type, (float)$rule['rule_price']);
+
+						if ($type === 'P') {
+							$percent_label = '-' . (int)$rule['rule_price'] . '%';
+						} elseif ($unit_base > 0.00001) {
+							$pct = (int)round((1 - min(1.0, $unit_tier / $unit_base)) * 100);
+
+							$percent_label = $pct > 0 ? '-' . $pct . '%' : '';
+						} else {
+							$percent_label = '';
+						}
+
+						$save_pre_tax = ($unit_base - $unit_tier) * $qty;
+						$savings_line = $save_pre_tax > 0 ? sprintf($this->language->get('text_pdp_volume_save'), $this->formatProductMoney($product_info, $save_pre_tax)) : '';
+
+						$tiers[] = [
+							'quantity'        => $qty,
+							'label'           => sprintf($this->language->get('text_pdp_pack_many'), $qty),
+							'per_unit_base'   => $this->formatProductMoney($product_info, $unit_base),
+							'per_unit_now'    => $this->formatProductMoney($product_info, $unit_tier),
+							'percent_label'   => $percent_label,
+							'savings_line'    => $savings_line,
+							'is_volume'       => true,
+						];
+					}
+
+					$data['pdp_volume_tiers'] = $tiers;
 				}
 			}
 
@@ -741,6 +789,29 @@ class Product extends \Opencart\System\Engine\Controller {
 	 *
 	 * @return array
 	 */
+	/**
+	 * Format a product money amount (same tax rules as main price).
+	 *
+	 * @param array<string, mixed> $product_info
+	 */
+	private function formatProductMoney(array $product_info, float $amount): string {
+		return $this->currency->format($this->tax->calculate($amount, $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+	}
+
+	/**
+	 * Per-unit price at a volume tier from the effective base unit price (after sale).
+	 */
+	private function computeVolumeUnitPrice(float $unit_base, string $type, float $rule_price): float {
+		switch ($type) {
+			case 'P':
+				return max(0.0, $unit_base - ($unit_base * ($rule_price / 100)));
+			case 'S':
+				return max(0.0, $unit_base - $rule_price);
+			default:
+				return max(0.0, $rule_price);
+		}
+	}
+
 	private function generateTwitterTags(array $product_info, int $product_id, array $data): array {
 		$twitter = [
 			'twitter:card' => 'summary_large_image',

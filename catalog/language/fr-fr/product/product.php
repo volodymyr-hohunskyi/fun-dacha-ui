@@ -34,6 +34,11 @@ $_['text_pdp_size_heading']      = 'Conditionnement';
 $_['text_pdp_size_intro']        = 'Un seul conditionnement standard est proposé pour l’instant.';
 $_['text_pdp_size_future']       = '';
 
+$_['text_pdp_volume_heading']    = 'Tarifs par quantité';
+$_['text_pdp_pack_single']       = '1 unité au prix de';
+$_['text_pdp_pack_many']         = '%d unités';
+$_['text_pdp_volume_save']       = 'ÉCONOMIE %s';
+
 // Boutons
 $_['button_wishlist']            = 'Ajouter à la liste de souhaits';
 $_['button_compare']             = 'Comparer ce produit';

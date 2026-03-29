@@ -1,5 +1,7 @@
 # Sales calendar (категорії)
 
+Цей аркуш стосується **акцій по категоріях** (`category_sales_calendar`), не цін товарів. Для **ціни розпродажу по товару** див. `README_product_sales_workbook.md` (аркуші `Discounts` / `Specials`).
+
 ## База даних
 
 Таблиця `PREFIXcategory_sales_calendar` створюється автоматично при першому імпорті/експорті через **Export/Import**, або виконайте SQL з `category_sales_calendar.sql` (замініть `oc_` на ваш `DB_PREFIX`).
@@ -24,6 +26,6 @@
 
 ## Імпорт
 
-Плагін очікує **XLSX** з аркушем з назвою точно **`SalesCalendar`**. Відкрийте CSV у Excel / LibreOffice, перейменуйте аркуш на `SalesCalendar`, додайте до вашого `products-*.xlsx` або імпортуйте разом з іншими аркушами.
+Плагін приймає **XLS, XLSX або ODS** з аркушем з назвою точно **`SalesCalendar`**. Відкрийте CSV у Excel / LibreOffice, перейменуйте аркуш на `SalesCalendar`, додайте до вашого каталогу (наприклад **`products_import.xls`**) або імпортуйте разом з іншими аркушами.
 
 Режими: **повна заміна** — очищає таблицю календаря перед завантаженням; **інкрементальний** — лише оновлює рядки з вказаними `category_id`.

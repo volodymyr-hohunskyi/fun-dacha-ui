@@ -1,6 +1,6 @@
 {
   "meta": {
-    "description": "Чернетка відгуків для імпорту в OpenCart 4 (таблиця review). Товари взято з assistant_db.json (той самий каталог, що й products_import.numbers).",
+    "description": "Чернетка відгуків для імпорту в OpenCart 4 (таблиця review). Товари взято з assistant_db.json (той самий каталог, що й products_import.xls).",
     "total_reviews": 50,
     "locale_text": "uk-ua",
     "shop_reviews": {

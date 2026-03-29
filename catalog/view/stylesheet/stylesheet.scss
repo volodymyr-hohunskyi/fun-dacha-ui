@@ -922,6 +922,76 @@ footer.freshgo-footer {
   opacity: 0.85;
 }
 
+/* PDP: volume / pack tiers */
+.pdp-volume-pricing__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pdp-volume-tier {
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  background: #fafafa;
+
+  &--volume {
+    background: #fff;
+  }
+}
+
+.pdp-volume-tier__label {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+}
+
+.pdp-volume-tier__lines {
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.pdp-volume-tier__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+
+  &--deal {
+    margin-top: 0.15rem;
+  }
+
+  &--single .pdp-volume-tier__unit-now {
+    font-size: 1.125rem;
+  }
+}
+
+.pdp-volume-tier__row--base .pdp-volume-tier__unit-base {
+  font-weight: 600;
+  color: #333;
+}
+
+.pdp-volume-tier__pct {
+  color: #c62828;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.pdp-volume-tier__unit-now {
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: #1a1a1a;
+}
+
+.pdp-volume-tier__save {
+  margin-top: 0.35rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #2e7d32;
+}
+
 /* Product page: Johnny’s-style detail blocks (Quick facts, shipping, guarantee, growing, pack size) */
 .pdp-detail-sections {
   border-top: 1px solid rgba(0, 0, 0, 0.08);

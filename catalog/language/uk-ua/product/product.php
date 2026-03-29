@@ -36,6 +36,11 @@ $_['text_pdp_size_heading']      = 'Фасування';
 $_['text_pdp_size_intro']        = 'Наразі для цього товару доступна одна стандартна упаковка.';
 $_['text_pdp_size_future']       = '';
 
+$_['text_pdp_volume_heading']    = 'Упаковки';
+$_['text_pdp_pack_single']       = '1 упаковка за ціною';
+$_['text_pdp_pack_many']       = '%d уп.';
+$_['text_pdp_volume_save']     = 'ЗНИЖКА %s';
+
 // Buttons
 $_['button_wishlist']            = 'Додати до Списку Бажань';
 $_['button_compare']             = 'Порівняти цей Товар';

@@ -12,6 +12,9 @@ system/logs/
 
 system/storage/
 
+# Local tooling (e.g. openpyxl for xlsx edits)
+.venv-xlsx/
+
 # vQmod log files
 vqmod/logs/*
 # vQmod cache files

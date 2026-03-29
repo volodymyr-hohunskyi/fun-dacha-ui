@@ -45,12 +45,12 @@ OpenCart uses two systems: **Attributes** (product display) and **Filters** (cat
 
 ---
 
-## 2. Migration Approach for products_import.xlsx
+## 2. Migration Approach for products_import.xls
 
 ### Step-by-Step Process
 
 1. **Prepare source file**
-   - Ensure `products_import.xlsx` has a sheet with `ProductID` (or `product_id`) and `ProductAttributes` columns.
+   - Ensure `products_import.xls` has a sheet with `ProductID` (or `product_id`) and `ProductAttributes` columns.
    - Supported formats in `ProductAttributes`:
      - Single: `Колір: Жовтий, Оранжевий`
      - Multi-line: `Колір: Жовтий\nРіст: Високорослий, Розлогий`
@@ -58,8 +58,9 @@ OpenCart uses two systems: **Attributes** (product display) and **Filters** (cat
 2. **Run normalization script**
    ```bash
    cd shared/data
-   python3 normalize_flat_attributes.py --input products_import.xlsx --output products_import_normalized.xlsx
+   python3 normalize_flat_attributes.py --input products_import.xls --output products_import_normalized.xlsx
    ```
+   If a helper script only accepts `.xlsx`, open the workbook in Excel or LibreOffice and **Save As** Excel Workbook (`.xlsx`) for that step.
 
 3. **Inspect output**
    - `NormalizedAttributes` – Canonical format: ProductID | AttributeGroup | AttributeValue (one row per value)
@@ -278,10 +279,10 @@ Add these to `FILTER_VALUE_TAXONOMY` and `ATTRIBUTE_DEFINITIONS` as needed.
 |------|---------|
 | `shared/data/attribute_schema.py` | Attribute definitions, filter taxonomy, value normalization |
 | `shared/data/normalize_flat_attributes.py` | For flat ProductAttributes column in Products sheet |
-| `shared/data/normalize_product_attributes_in_workbook.py` | For ProductAttributes sheet in products_import.xlsx (splits values, adds ProductFilters) |
+| `shared/data/normalize_product_attributes_in_workbook.py` | For ProductAttributes sheet in products_import.xls (splits values, adds ProductFilters) |
 | `shared/data/create_sample_import.py` | Creates sample `products_import.xlsx` |
 | `shared/data/build_attribute_workbook.py` | Generates AttributeGroups + Attributes for OpenCart |
-| `shared/data/products_import.xlsx` | Source (your real data with Products, Categories, etc.) |
+| `shared/data/products_import.xls` | Source (your real data with Products, Categories, etc.) |
 | `shared/data/products_import_sample.xlsx` | Sample (created by create_sample_import.py for testing only) |
 | `shared/data/products_import_normalized.xlsx` | Output: NormalizedAttributes, ProductAttributes, ProductFilters, FilterGroups, Filters |
 
@@ -293,11 +294,11 @@ Add these to `FILTER_VALUE_TAXONOMY` and `ATTRIBUTE_DEFINITIONS` as needed.
 # 1. (Optional) Create sample for testing only → products_import_sample.xlsx
 python3 shared/data/create_sample_import.py
 
-# 2. Normalize ProductAttributes in products_import.xlsx (ProductAttributes sheet format)
+# 2. Normalize ProductAttributes in products_import.xls (ProductAttributes sheet format)
 python3 shared/data/normalize_product_attributes_in_workbook.py
 
 # Or for flat format (Products sheet with ProductAttributes column):
-python3 shared/data/normalize_flat_attributes.py --input /path/to/file.xlsx
+python3 shared/data/normalize_flat_attributes.py --input /path/to/file.xls
 
 # 3. Build attribute taxonomy (if needed)
 python3 shared/data/build_attribute_workbook.py
