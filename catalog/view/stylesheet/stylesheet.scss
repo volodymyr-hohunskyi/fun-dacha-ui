@@ -841,19 +841,53 @@ footer.freshgo-footer {
   color: #444;
 }
 
-/* Cart table & product page: compact +/- controls */
+/* Cart table & product page: compact +/- — equal thirds, segmented corners (one control) */
 .input-group-qty-compact.input-group {
-  width: auto;
+  align-items: stretch;
+  min-width: 0;
 }
 
-.input-group-qty-compact .form-control {
-  width: 2.5rem;
-  min-width: 2.25rem;
-  max-width: 3rem;
-  flex: 0 0 auto;
+.input-group-qty-compact .btn-qty-step {
+  flex: 1 1 0;
+  min-width: 0;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.input-group-qty-compact .form-control,
+.input-group-qty-compact .quantity-input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  max-width: none;
   padding: 0.15rem 0.3rem;
   font-size: 0.8125rem;
   line-height: 1.35;
+  align-self: stretch;
+}
+
+/* Segmented: only outer corners rounded */
+.input-group-qty-compact > .btn-qty-step:first-child {
+  border-radius: 8px 0 0 8px !important;
+}
+
+.input-group-qty-compact > .btn-qty-step:last-child {
+  border-radius: 0 8px 8px 0 !important;
+}
+
+.input-group-qty-compact > .form-control,
+.input-group-qty-compact > .quantity-input {
+  border-radius: 0 !important;
+}
+
+/* Cart page: give the group a width so equal flex columns distribute */
+#output-cart .input-group-qty-compact.input-group {
+  width: 100%;
+  max-width: 12rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Stepper icon size (padding on .btn-primary.btn-qty-step in CTA section above) */
@@ -862,7 +896,7 @@ footer.freshgo-footer {
   vertical-align: -0.05em;
 }
 
-/* PDP: qty + add to cart one row, half width each, same height; stepper − / input / + equal width */
+/* PDP: qty + add to cart one row, half width each, same height */
 #product-info .pdp-qty-cart-row {
   width: 100%;
 }
@@ -876,38 +910,6 @@ footer.freshgo-footer {
 
 #product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact {
   width: auto;
-  align-items: stretch;
-}
-
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact .btn-qty-step {
-  flex: 1 1 0;
-  min-width: 0;
-  align-self: stretch;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact .quantity-input {
-  flex: 1 1 0;
-  min-width: 0;
-  width: auto;
-  max-width: none;
-  align-self: stretch;
-  height: auto;
-}
-
-/* Segmented: only outer corners rounded (not three separate pills) */
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact > .btn-qty-step:first-child {
-  border-radius: 8px 0 0 8px !important;
-}
-
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact > .btn-qty-step:last-child {
-  border-radius: 0 8px 8px 0 !important;
-}
-
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact > .form-control {
-  border-radius: 0 !important;
 }
 
 /* Cart: continue + checkout — same height (override global #checkout-button CTA padding vs btn-light) */
