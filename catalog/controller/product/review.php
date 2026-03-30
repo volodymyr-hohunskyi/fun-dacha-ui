@@ -54,9 +54,9 @@ class Review extends \Opencart\System\Engine\Controller {
 
 		$data['language'] = $this->config->get('config_language');
 
-		$data['action'] = $this->url->link('product/review.write', 'language=' . $this->config->get('config_language') . '&product_id=' . $data['product_id'] . '&review_token=' . $data['review_token']);
+		$data['action'] = $this->url->link('product/review.write', 'language=' . $this->config->get('config_language') . '&product_id=' . $data['product_id'] . '&review_token=' . $data['review_token'], true);
 
-		$data['review_list_url'] = $this->url->link('product/review.list', 'language=' . $this->config->get('config_language') . '&product_id=' . $data['product_id']);
+		$data['review_list_url'] = $this->url->link('product/review.list', 'language=' . $this->config->get('config_language') . '&product_id=' . $data['product_id'], true);
 
 		$data['button_submit'] = $this->language->get('button_submit');
 		$data['text_review_form_heading'] = $this->language->get('text_review_form_heading');
@@ -65,7 +65,6 @@ class Review extends \Opencart\System\Engine\Controller {
 		$data['entry_rating'] = $this->language->get('entry_rating');
 		$data['entry_good'] = $this->language->get('entry_good');
 		$data['entry_bad'] = $this->language->get('entry_bad');
-		$data['text_note'] = $this->language->get('text_note');
 
 		return $this->load->view('product/review', $data);
 	}

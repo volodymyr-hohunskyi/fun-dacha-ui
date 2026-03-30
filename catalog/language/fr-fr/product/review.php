@@ -5,7 +5,6 @@ $_['text_reviews']    = '%s avis';
 $_['text_write']      = 'Écrire un avis';
 $_['text_login']      = 'Veuillez <a href="%s">vous connecter</a> ou <a href="%s">vous inscrire</a> pour laisser un avis';
 $_['text_no_results'] = 'Il n\'y a pas d\'avis pour ce produit.';
-$_['text_note']       = '<span class="text-danger">Remarque:</span> Le HTML n\'est pas traduit!';
 $_['text_success']    = 'Merci pour votre avis. Il a été soumis au webmaster pour approbation.';
 
 // Entrée
