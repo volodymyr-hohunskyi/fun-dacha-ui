@@ -6,12 +6,11 @@
       {% for category in categories %}
         <div class="col">
           <div class="popular-crop-card">
-            <div class="popular-crop-image mb-3">
-              <img src="{{ category.image }}" alt="{{ category.name }}" class="img-fluid"/>
-            </div>
-            <h3 class="popular-crop-title h6 mb-2">{{ category.name }}</h3>
-            <p class="popular-crop-desc text-muted small mb-3">{{ category.description }}</p>
-            <a href="{{ category.href }}" class="btn btn-outline-primary btn-sm">{{ button_shop }}</a>
+            <a href="{{ category.href }}" class="popular-crop-link d-block text-decoration-none">
+              <div class="popular-crop-image">
+                <img src="{{ category.image }}" alt="{{ category.name }}" class="img-fluid"/>
+              </div>
+            </a>
           </div>
         </div>
       {% endfor %}

@@ -1,19 +1,13 @@
 <?php
 namespace Opencart\Catalog\Controller\Common;
 /**
- * Shop Popular Crops – 4 featured categories with image, title, description, SHOP NOW.
+ * Shop Popular Crops – up to 4 featured categories (keyword match), image-only tiles linking to category.
  *
  * @package Opencart\Catalog\Controller\Common
  */
 class PopularCrops extends \Opencart\System\Engine\Controller {
-	private const KEYWORDS = [
-		'томат'   => 'desc_tomatoes',
-		'помідор' => 'desc_tomatoes',
-		'огір'    => 'desc_cucumbers',
-		'перець'  => 'desc_peppers',
-		'квіт'    => 'desc_flowers',
-		'flower'  => 'desc_flowers',
-	];
+	/** Substrings matched against category name (lowercase) to include in the widget. */
+	private const KEYWORDS = ['томат', 'помідор', 'огір', 'перець', 'квіт', 'flower'];
 
 	public function index(): string {
 		$this->load->language('common/popular_crops');
@@ -21,7 +15,6 @@ class PopularCrops extends \Opencart\System\Engine\Controller {
 		$this->load->model('tool/image');
 
 		$data['heading_title'] = $this->language->get('heading_title');
-		$data['button_shop'] = $this->language->get('button_shop');
 		$data['categories'] = [];
 
 		$all = $this->model_catalog_category->getCategories(0);
@@ -35,24 +28,15 @@ class PopularCrops extends \Opencart\System\Engine\Controller {
 				continue;
 			}
 			$name_lower = mb_strtolower($cat['name']);
-			$desc_key = null;
-			foreach (self::KEYWORDS as $kw => $lang_key) {
+			$matched = false;
+			foreach (self::KEYWORDS as $kw) {
 				if (mb_strpos($name_lower, $kw) !== false) {
-					$desc_key = $lang_key;
+					$matched = true;
 					break;
 				}
 			}
-			if ($desc_key === null) {
+			if (!$matched) {
 				continue;
-			}
-			$description = trim((string)($cat['meta_description'] ?? $cat['description'] ?? ''));
-			if ($description === '' || oc_strlen(strip_tags(html_entity_decode($description, ENT_QUOTES, 'UTF-8'))) > 200) {
-				$description = $this->language->get($desc_key);
-			} else {
-				$description = trim(strip_tags(html_entity_decode($description, ENT_QUOTES, 'UTF-8')));
-				if (oc_strlen($description) > 120) {
-					$description = oc_substr($description, 0, 117) . '...';
-				}
 			}
 			$image = '';
 			if ($cat['image'] && is_file(DIR_IMAGE . html_entity_decode($cat['image'], ENT_QUOTES, 'UTF-8'))) {
@@ -61,11 +45,10 @@ class PopularCrops extends \Opencart\System\Engine\Controller {
 				$image = $this->model_tool_image->resize('placeholder.png', 600, 450);
 			}
 			$data['categories'][] = [
-				'category_id'  => $cat['category_id'],
-				'name'         => $cat['name'],
-				'description'  => $description,
-				'image'        => $image,
-				'href'         => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $cat['category_id']),
+				'category_id' => $cat['category_id'],
+				'name'        => $cat['name'],
+				'image'       => $image,
+				'href'        => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $cat['category_id']),
 			];
 			$found[(int)$cat['category_id']] = true;
 		}
