@@ -75,6 +75,27 @@
             </div>
           {% endif %}
           {% if price %}
+            {% if pdp_pack_options %}
+              {% set first_pack = pdp_pack_options[0] %}
+            <ul class="list-unstyled product-price-block">
+              <li class="list-unstyled border-0 p-0 mb-0">
+                <ul class="list-unstyled mb-0" id="pdp-main-price">
+                  {% if first_pack.pack_line_was_formatted %}
+                    <li class="mb-1 product-price-block__row product-price-block__row--sale">
+                      <span class="product-price-sale-label">{{ text_special_offer }}</span>
+                      <span class="product-price-sale price-display__sale">{{ first_pack.pack_total_formatted }}</span>
+                    </li>
+                    <li class="mb-0 product-price-block__row product-price-block__row--was"><span class="product-price-was price-display__was">{{ first_pack.pack_line_was_formatted }}</span></li>
+                  {% else %}
+                    <li><h2 class="mb-0"><span class="product-price-regular">{{ first_pack.pack_total_formatted }}</span></h2></li>
+                  {% endif %}
+                </ul>
+              </li>
+              {% if points %}
+                <li>{{ text_points }} {{ points }}</li>
+              {% endif %}
+            </ul>
+            {% else %}
             <ul class="list-unstyled product-price-block">
               {% if not special %}
                 <li><h2 class="mb-0"><span class="product-price-regular">{{ price }}</span></h2></li>
@@ -89,13 +110,14 @@
                 <li>{{ text_points }} {{ points }}</li>
               {% endif %}
             </ul>
+            {% endif %}
             <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-pack-inline">
               <h2 id="pdp-heading-pack-inline" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
               <div class="pdp-detail-section__body">
                 {% if pdp_pack_options %}
                   <div class="pdp-pack-choice-grid" role="group" aria-label="{{ text_pdp_size_heading }}">
                     {% for box in pdp_pack_options %}
-                      <button type="button" class="pdp-pack-choice-box{% if loop.first %} pdp-pack-choice-box--active{% endif %}" data-pov-id="{{ box.product_option_value_id }}" aria-label="{{ box.pack_label }} {{ box.pack_total_formatted }} {{ box.pack_unit_formatted }}">
+                      <button type="button" class="pdp-pack-choice-box{% if loop.first %} pdp-pack-choice-box--active{% endif %}" data-pov-id="{{ box.product_option_value_id }}" data-pdp-sale="{{ box.pack_total_formatted|e('html_attr') }}" data-pdp-was="{{ box.pack_line_was_formatted|e('html_attr') }}" aria-label="{{ box.pack_label }} {{ box.pack_total_formatted }} {{ box.pack_unit_formatted }}">
                         <span class="pdp-pack-choice-box__label d-block fw-semibold">{{ box.pack_label }}</span>
                         <span class="pdp-pack-choice-box__total d-block">{{ box.pack_total_formatted }}</span>
                         <span class="pdp-pack-choice-box__unit d-block text-muted small">{{ box.pack_unit_formatted }}</span>
@@ -270,7 +292,7 @@
                 </div>
               {% endif %}
 <div class="mb-3">
-  <div class="d-flex flex-column gap-2 align-items-stretch pdp-qty-cart-row">
+  <div class="d-flex flex-row gap-2 align-items-stretch pdp-qty-cart-row">
 
     <!-- Quantity -->
     <div class="input-group input-group-qty-compact quantity-group">
@@ -441,6 +463,7 @@ $(document).ready(function() {
     var $packGrid = $('.pdp-pack-choice-grid');
     var $packInput = $('#pdp-pack-option-input');
     if ($packGrid.length && $packInput.length) {
+        var pdpSaleLabel = "{{ text_special_offer|e('js') }}";
         $packGrid.on('click', '.pdp-pack-choice-box', function() {
             var id = $(this).attr('data-pov-id');
             if (!id) {
@@ -449,6 +472,24 @@ $(document).ready(function() {
             $packInput.val(id);
             $packGrid.find('.pdp-pack-choice-box').removeClass('pdp-pack-choice-box--active');
             $(this).addClass('pdp-pack-choice-box--active');
+            var $priceSlot = $('#pdp-main-price');
+            if ($priceSlot.length) {
+                var sale = $(this).attr('data-pdp-sale') || '';
+                var was = $(this).attr('data-pdp-was') || '';
+                if (was) {
+                    $priceSlot.html(
+                        '<li class="mb-1 product-price-block__row product-price-block__row--sale">' +
+                        '<span class="product-price-sale-label">' + $('<div/>').text(pdpSaleLabel).html() + '</span> ' +
+                        '<span class="product-price-sale price-display__sale">' + sale + '</span></li>' +
+                        '<li class="mb-0 product-price-block__row product-price-block__row--was">' +
+                        '<span class="product-price-was price-display__was">' + was + '</span></li>'
+                    );
+                } else {
+                    $priceSlot.html(
+                        '<li><h2 class="mb-0"><span class="product-price-regular">' + sale + '</span></h2></li>'
+                    );
+                }
+            }
         });
     }
 

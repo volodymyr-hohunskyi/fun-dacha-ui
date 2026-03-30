@@ -568,24 +568,39 @@ class Product extends \Opencart\System\Engine\Controller {
 	 * @param array<string, mixed> $product_info
 	 * @param array{final_price: float, unit_price: float, pack_size: int} $row
 	 *
-	 * @return array{label: string, total_formatted: string, unit_formatted: string, savings_percent: float|null, select_label: string}
+	 * @return array{label: string, total_formatted: string, unit_formatted: string, savings_percent: float|null, select_label: string, line_was_formatted: string}
 	 */
 	private function buildPackOptionDisplay(array $product_info, array $row, int $pack_size): array {
 		$list_unit = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price'] ?? 0);
-		$final_taxed = $this->tax->calculate($row['final_price'], (int)$product_info['tax_class_id'], $this->config->get('config_tax'));
-		$unit_taxed = $this->tax->calculate($row['unit_price'], (int)$product_info['tax_class_id'], $this->config->get('config_tax'));
+		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price'] ?? 0);
+		$tax_class_id = (int)$product_info['tax_class_id'];
+		$config_tax = $this->config->get('config_tax');
+		$final_taxed = $this->tax->calculate($row['final_price'], $tax_class_id, $config_tax);
+		$unit_taxed = $this->tax->calculate($row['unit_price'], $tax_class_id, $config_tax);
 		$total_fmt = $this->currency->format($final_taxed, $this->session->data['currency']);
 		$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
 		$savings = PackPricing::unitSavingsVsListUnit( $list_unit, $row['unit_price'] );
 
+		$list_line = $catalog_base * (float) $pack_size;
+		$sale_line = $row['final_price'];
+		$line_was_formatted = '';
+
+		if (abs($list_line - $sale_line) > 0.0001) {
+			$line_was_formatted = $this->currency->format(
+				$this->tax->calculate($list_line, $tax_class_id, $config_tax),
+				$this->session->data['currency']
+			);
+		}
+
 		$label = PackLabel::ukPackCount($pack_size);
 
 		return [
-			'label'             => $label,
-			'total_formatted'   => $total_fmt,
-			'unit_formatted'    => $unit_fmt . ' / пак.',
-			'savings_percent'   => $savings,
-			'select_label'      => PackLabel::ukPackShort($pack_size) . ' — ' . $total_fmt . ' · ' . $unit_fmt . '/п.',
+			'label'               => $label,
+			'total_formatted'     => $total_fmt,
+			'unit_formatted'      => $unit_fmt . ' / пак.',
+			'savings_percent'     => $savings,
+			'select_label'        => PackLabel::ukPackShort($pack_size) . ' — ' . $total_fmt . ' · ' . $unit_fmt . '/п.',
+			'line_was_formatted'  => $line_was_formatted,
 		];
 	}
 
@@ -624,12 +639,13 @@ class Product extends \Opencart\System\Engine\Controller {
 			$pd = $ov['pack_display'] ?? [];
 
 			$data['pdp_pack_options'][] = [
-				'product_option_value_id' => (int)$ov['product_option_value_id'],
-				'option_value_id'         => (int)($ov['option_value_id'] ?? 0),
-				'pack_label'              => (string)($pd['label'] ?? ''),
-				'pack_total_formatted'    => (string)($pd['total_formatted'] ?? ''),
-				'pack_unit_formatted'     => (string)($pd['unit_formatted'] ?? ''),
-				'pack_savings_percent'    => $pd['savings_percent'] ?? null,
+				'product_option_value_id'   => (int)$ov['product_option_value_id'],
+				'option_value_id'           => (int)($ov['option_value_id'] ?? 0),
+				'pack_label'                => (string)($pd['label'] ?? ''),
+				'pack_total_formatted'      => (string)($pd['total_formatted'] ?? ''),
+				'pack_unit_formatted'       => (string)($pd['unit_formatted'] ?? ''),
+				'pack_savings_percent'      => $pd['savings_percent'] ?? null,
+				'pack_line_was_formatted'   => (string)($pd['line_was_formatted'] ?? ''),
 			];
 		}
 

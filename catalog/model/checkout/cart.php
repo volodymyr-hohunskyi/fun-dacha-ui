@@ -35,6 +35,7 @@ class Cart extends \Opencart\System\Engine\Model {
 
 		$products = $this->cart->getProducts();
 		$product_info_cache = [];
+		$product_options_cache = [];
 
 		foreach ($products as $product) {
 			if ($product['image'] && is_file(DIR_IMAGE . html_entity_decode($product['image'], ENT_QUOTES, 'UTF-8'))) {
@@ -81,9 +82,13 @@ class Cart extends \Opencart\System\Engine\Model {
 
 			if ($pinfo) {
 				$this->enrichPackOptionDisplay($option_data, $product, $pinfo);
+
+				if (!isset($product_options_cache[$pid])) {
+					$product_options_cache[$pid] = $this->model_catalog_product->getOptions($pid);
+				}
 			}
 
-			$cart_pack = ($pinfo) ? $this->buildCartPackPricingRow($product, $option_data, $pinfo) : ['has_pack' => false];
+			$cart_pack = ($pinfo) ? $this->buildCartPackPricingRow($product, $option_data, $pinfo, $product_options_cache[$pid] ?? []) : ['has_pack' => false];
 
 			$subscription_data = [];
 
@@ -215,9 +220,11 @@ class Cart extends \Opencart\System\Engine\Model {
 	 * @param array<int, array<string, mixed>> $option_data
 	 * @param array<string, mixed>             $product_info
 	 *
-	 * @return array{has_pack: bool, pack_label?: string, line_sale?: string, line_was?: string}
+	 * @param array<int, array<string, mixed>> $product_options_all
+	 *
+	 * @return array{has_pack: bool, pack_label?: string, line_sale?: string, line_was?: string, tier_subtitle?: string}
 	 */
-	private function buildCartPackPricingRow(array $product, array $option_data, array $product_info): array {
+	private function buildCartPackPricingRow(array $product, array $option_data, array $product_info, array $product_options_all): array {
 		if (($this->config->get('config_customer_price') && !$this->customer->isLogged()) || !isset($product_info['raw_price'])) {
 			return ['has_pack' => false];
 		}
@@ -250,14 +257,96 @@ class Cart extends \Opencart\System\Engine\Model {
 			$sale_one_f = $this->currency->format($this->tax->calculate($sale_one, $tax_class_id, $tax_mode), $this->session->data['currency']);
 			$show_line_was = (abs($list_line - $sale_one) > 0.0001);
 
+			$product_option_id = (int)($opt['product_option_id'] ?? 0);
+			$tier_subtitle = $this->buildPackUnitTierSubtitle($product_info, $product, $product_option_id, $product_options_all);
+
 			return [
-				'has_pack'   => true,
-				'pack_label' => PackLabel::ukPackCount($pack_size),
-				'line_sale'  => $sale_one_f,
-				'line_was'   => $show_line_was ? $list_one_f : '',
+				'has_pack'       => true,
+				'pack_label'     => PackLabel::ukPackCount($pack_size),
+				'line_sale'      => $sale_one_f,
+				'line_was'       => $show_line_was ? $list_one_f : '',
+				'tier_subtitle'  => $tier_subtitle,
 			];
 		}
 
 		return ['has_pack' => false];
+	}
+
+	/**
+	 * Cart «Ціна за одиницю» subtitle: all pack tiers as «1 п. * ₴12.80 (−10%), 5 п. * ₴10.08 (−29%)».
+	 *
+	 * @param array<string, mixed>             $product_info
+	 * @param array<string, mixed>             $product
+	 * @param array<int, array<string, mixed>> $product_options_all
+	 */
+	private function buildPackUnitTierSubtitle(array $product_info, array $product, int $product_option_id, array $product_options_all): string {
+		if ($product_option_id < 1 || $product_options_all === []) {
+			return '';
+		}
+
+		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price']);
+		$special = (float)($product_info['special'] ?? 0);
+		$tax_class_id = (int)($product['tax_class_id'] ?? 0);
+		$tax_mode = $this->config->get('config_tax');
+
+		$values = [];
+
+		foreach ($product_options_all as $po) {
+			if ((int)($po['product_option_id'] ?? 0) === $product_option_id) {
+				$values = $po['product_option_value'] ?? [];
+
+				break;
+			}
+		}
+
+		if ($values === []) {
+			return '';
+		}
+
+		$rows = [];
+
+		foreach ($values as $pov) {
+			$pack_size = PackPricing::parsePackSizeFromLabel((string)($pov['name'] ?? ''));
+
+			if ($pack_size === null) {
+				continue;
+			}
+
+			$row = PackPricing::computePackDisplayRow(
+				$catalog_base,
+				(float)($pov['price'] ?? 0),
+				(string)($pov['price_prefix'] ?? '+'),
+				$special,
+				$pack_size
+			);
+			$rows[] = ['pack_size' => $pack_size, 'unit' => $row['unit_price']];
+		}
+
+		if ($rows === []) {
+			return '';
+		}
+
+		usort($rows, static function (array $a, array $b): int {
+			return $a['pack_size'] <=> $b['pack_size'];
+		});
+
+		$parts = [];
+
+		foreach ($rows as $item) {
+			$unit_taxed = $this->tax->calculate($item['unit'], $tax_class_id, $tax_mode);
+			$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
+			$pct = PackPricing::unitSavingsPercentVsListUnit($catalog_base, $item['unit']);
+			$label = PackLabel::ukPackShort($item['pack_size']);
+			$segment = $label . ' * ' . $unit_fmt;
+
+			if ($pct !== null && $pct > 0.0) {
+				$pct_str = (abs($pct - round($pct)) < 0.05) ? (string)(int)round($pct) : rtrim(rtrim(number_format($pct, 1, '.', ''), '0'), '.');
+				$segment .= ' (−' . $pct_str . '%)';
+			}
+
+			$parts[] = $segment;
+		}
+
+		return implode(', ', $parts);
 	}
 }
