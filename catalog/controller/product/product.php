@@ -358,14 +358,16 @@ class Product extends \Opencart\System\Engine\Controller {
 			}
 
 			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
-				$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				if ((float)$product_info['special']) {
+					// Was price = catalog base (product.price); sale = special — never use tier-discounted price as "was" when a sale exists.
+					$data['price'] = $this->currency->format($this->tax->calculate((float)$product_info['raw_price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$data['special'] = $this->currency->format($this->tax->calculate((float)$product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				} else {
+					$data['price'] = $this->currency->format($this->tax->calculate($product_info['price'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+					$data['special'] = false;
+				}
 			} else {
 				$data['price'] = false;
-			}
-
-			if ((float)$product_info['special']) {
-				$data['special'] = $this->currency->format($this->tax->calculate($product_info['special'], $product_info['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
-			} else {
 				$data['special'] = false;
 			}
 
@@ -525,7 +527,7 @@ class Product extends \Opencart\System\Engine\Controller {
 	 * @param array<int, array<string, mixed>> $options
 	 */
 	private function enrichPackOptionValues(array $product_info, array &$options): void {
-		$raw_base = (float)($product_info['raw_price'] ?? 0);
+		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price'] ?? 0);
 		$special = (float)($product_info['special'] ?? 0);
 		$can_show = ($this->customer->isLogged() || !$this->config->get('config_customer_price'));
 
@@ -542,7 +544,7 @@ class Product extends \Opencart\System\Engine\Controller {
 				}
 
 				$row = PackPricing::computePackDisplayRow(
-					$raw_base,
+					$catalog_base,
 					(float)($ov['option_price_raw'] ?? 0),
 					(string)($ov['option_price_prefix'] ?? '+'),
 					$special,
@@ -550,8 +552,7 @@ class Product extends \Opencart\System\Engine\Controller {
 				);
 
 				if ($can_show) {
-					$ov['pack_display_line'] = $this->formatPackDisplayLine($product_info, $row, $pack_size);
-					$ov['pack_display'] = true;
+					$ov['pack_display'] = $this->buildPackOptionDisplay($product_info, $row, $pack_size);
 					$ov['price'] = false;
 				}
 			}
@@ -561,21 +562,30 @@ class Product extends \Opencart\System\Engine\Controller {
 	}
 
 	/**
-	 * @param array<string, mixed>             $product_info
-	 * @param array{final_price: float, unit_price: float, discount_percent: float|null, pack_size: int} $row
+	 * Multi-line pack display: label, total, unit; optional savings vs catalog list unit (same as raw_price).
+	 *
+	 * @param array<string, mixed> $product_info
+	 * @param array{final_price: float, unit_price: float, pack_size: int} $row
+	 *
+	 * @return array{label: string, total_formatted: string, unit_formatted: string, savings_percent: float|null, select_label: string}
 	 */
-	private function formatPackDisplayLine(array $product_info, array $row, int $pack_size): string {
+	private function buildPackOptionDisplay(array $product_info, array $row, int $pack_size): array {
+		$list_unit = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price'] ?? 0);
 		$final_taxed = $this->tax->calculate($row['final_price'], (int)$product_info['tax_class_id'], $this->config->get('config_tax'));
 		$unit_taxed = $this->tax->calculate($row['unit_price'], (int)$product_info['tax_class_id'], $this->config->get('config_tax'));
-		$fmt = $this->currency->format($final_taxed, $this->session->data['currency']);
+		$total_fmt = $this->currency->format($final_taxed, $this->session->data['currency']);
 		$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
-		$line = sprintf('%d уп — %s (%s / уп)', $pack_size, $fmt, $unit_fmt);
+		$savings = PackPricing::unitSavingsVsListUnit( $list_unit, $row['unit_price'] );
 
-		if ($row['discount_percent'] !== null) {
-			$line .= sprintf(' · −%s%%', rtrim(rtrim((string)$row['discount_percent'], '0'), '.'));
-		}
+		$label = $pack_size . ' уп';
 
-		return $line;
+		return [
+			'label'             => $label,
+			'total_formatted'   => $total_fmt,
+			'unit_formatted'    => $unit_fmt . ' / уп',
+			'savings_percent'   => $savings,
+			'select_label'      => $label . ' — ' . $total_fmt . ' · ' . $unit_fmt . '/уп',
+		];
 	}
 
 	/**
@@ -589,9 +599,6 @@ class Product extends \Opencart\System\Engine\Controller {
 		$data['pdp_pack_product_option_id'] = 0;
 		$data['pdp_pack_default_product_option_value_id'] = 0;
 		$data['pdp_pack_unit_label'] = '';
-		$data['pdp_pack_default_hero'] = '';
-		$data['pdp_pack_price_map'] = [];
-
 		$attrs = $data['attribute_groups'] ?? [];
 
 		$pack_option = null;
@@ -613,22 +620,16 @@ class Product extends \Opencart\System\Engine\Controller {
 		$values = $pack_option['product_option_value'];
 
 		foreach ($values as $ov) {
+			$pd = $ov['pack_display'] ?? [];
+
 			$data['pdp_pack_options'][] = [
 				'product_option_value_id' => (int)$ov['product_option_value_id'],
 				'option_value_id'         => (int)($ov['option_value_id'] ?? 0),
-				'title'                   => trim((string)($ov['name'] ?? '')),
-				'pack_display_line'       => (string)($ov['pack_display_line'] ?? ''),
+				'pack_label'              => (string)($pd['label'] ?? ''),
+				'pack_total_formatted'    => (string)($pd['total_formatted'] ?? ''),
+				'pack_unit_formatted'     => (string)($pd['unit_formatted'] ?? ''),
+				'pack_savings_percent'    => $pd['savings_percent'] ?? null,
 			];
-		}
-
-		if ($data['pdp_pack_options']) {
-			$data['pdp_pack_default_hero'] = (string)($data['pdp_pack_options'][0]['pack_display_line'] ?? '');
-
-			foreach ($data['pdp_pack_options'] as $box) {
-				$data['pdp_pack_price_map'][(string)$box['product_option_value_id']] = [
-					'hero' => (string)($box['pack_display_line'] ?? ''),
-				];
-			}
 		}
 
 		$pack_product_option_id = (int)$pack_option['product_option_id'];

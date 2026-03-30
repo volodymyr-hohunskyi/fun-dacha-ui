@@ -116,7 +116,7 @@ class PackPricing {
 	/**
 	 * Deterministic storefront row: OPTION → DISCOUNT → unit (all rounded to 2 decimals).
 	 *
-	 * @return array{final_price: float, unit_price: float, discount_percent: float|null, pack_size: int}
+	 * @return array{final_price: float, unit_price: float, pack_size: int}
 	 */
 	public static function computePackDisplayRow(float $rawBase, float $optionPrice, string $pricePrefix, float $specialAbsolute, int $packSize): array {
 		$modifier = self::optionModifierAmount( $optionPrice, $pricePrefix );
@@ -124,17 +124,24 @@ class PackPricing {
 		$final    = self::finalPriceWithSpecialRatio( $after, $rawBase, $specialAbsolute );
 		$unit     = ($packSize >= 1) ? round( $final / (float) $packSize, 2 ) : 0.0;
 
-		$discountPercent = null;
+		return [
+			'final_price' => $final,
+			'unit_price'  => $unit,
+			'pack_size'   => $packSize,
+		];
+	}
 
-		if ($rawBase > 0.0 && $specialAbsolute > 0.0) {
-			$discountPercent = round( ( 1.0 - ( $specialAbsolute / $rawBase ) ) * 100.0, 1 );
+
+	/**
+	 * Total discount vs list unit price (catalog base per unit), e.g. list 12.00 vs unit 9.90 → 17.5%.
+	 */
+	public static function unitSavingsPercentVsListUnit(float $listUnitPrice, float $unitPriceAfterAll): ?float {
+		if ($listUnitPrice <= 0.0) {
+			return null;
 		}
 
-		return [
-			'final_price'       => $final,
-			'unit_price'        => $unit,
-			'discount_percent'  => $discountPercent,
-			'pack_size'         => $packSize,
-		];
+		$p = round( 100.0 * ( 1.0 - ( $unitPriceAfterAll / $listUnitPrice ) ), 1 );
+
+		return $p > 0.0 ? $p : null;
 	}
 }

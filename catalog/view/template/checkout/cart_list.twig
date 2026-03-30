@@ -41,7 +41,7 @@
               <ul class="list-unstyled mb-0">
                 {% for option in product.option %}
                   <li>
-                    <small> - {{ option.name }}: {{ option.value }}</small>
+                    <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
                   </li>
                 {% endfor %}
                 {% if product.subscription %}

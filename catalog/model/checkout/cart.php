@@ -156,7 +156,8 @@ class Cart extends \Opencart\System\Engine\Model {
 			return;
 		}
 
-		$raw_base = (float)$product_info['raw_price'];
+		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price']);
+		$list_unit = $catalog_base;
 		$special = (float)($product_info['special'] ?? 0);
 		$tax_class_id = (int)($product['tax_class_id'] ?? 0);
 
@@ -175,7 +176,7 @@ class Cart extends \Opencart\System\Engine\Model {
 			}
 
 			$row = PackPricing::computePackDisplayRow(
-				$raw_base,
+				$catalog_base,
 				(float)($opt['price'] ?? 0),
 				(string)($opt['price_prefix'] ?? '+'),
 				$special,
@@ -186,13 +187,20 @@ class Cart extends \Opencart\System\Engine\Model {
 			$unit_taxed = $this->tax->calculate($row['unit_price'], $tax_class_id, $this->config->get('config_tax'));
 			$fmt = $this->currency->format($final_taxed, $this->session->data['currency']);
 			$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
-			$line = sprintf('%d уп — %s (%s / уп)', $pack_size, $fmt, $unit_fmt);
+			$unit_line = $unit_fmt . ' / уп';
+			$savings = PackPricing::unitSavingsVsListUnit($list_unit, $row['unit_price']);
 
-			if ($row['discount_percent'] !== null) {
-				$line .= sprintf(' · −%s%%', rtrim(rtrim((string)$row['discount_percent'], '0'), '.'));
+			$title = $pack_size . ' уп';
+			$html = '<span class="d-block fw-semibold">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</span>';
+			$html .= '<span class="d-block">' . htmlspecialchars($fmt, ENT_QUOTES, 'UTF-8') . '</span>';
+			$html .= '<span class="d-block text-muted small">' . htmlspecialchars($unit_line, ENT_QUOTES, 'UTF-8') . '</span>';
+
+			if ($savings !== null) {
+				$html .= '<span class="d-block text-success small">−' . htmlspecialchars((string)$savings, ENT_QUOTES, 'UTF-8') . '%</span>';
 			}
 
-			$opt['value'] = $line;
+			$opt['pack_display_html'] = $html;
+			$opt['value'] = $title . ' — ' . $fmt . ' — ' . $unit_fmt . '/уп';
 			$opt['pack_cart_line'] = true;
 		}
 		unset($opt);

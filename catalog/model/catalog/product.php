@@ -68,15 +68,17 @@ class Product extends \Opencart\System\Engine\Model {
 	 * $product_info = $this->model_catalog_product->getProduct($product_id);
 	 */
 	public function getProduct(int $product_id): array {
-		$query = $this->db->query("SELECT DISTINCT *, `pd`.`name`, `p`.`image`, " . $this->statement['discount'] . ", " . $this->statement['special'] . ", " . $this->statement['reward'] . ", " . $this->statement['review'] . " FROM `" . DB_PREFIX . "product_to_store` `p2s` LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()) LEFT JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `p2s`.`product_id` = '" . (int)$product_id . "' AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'");
+		$query = $this->db->query("SELECT DISTINCT *, `p`.`price` AS `catalog_base_price`, `pd`.`name`, `p`.`image`, " . $this->statement['discount'] . ", " . $this->statement['special'] . ", " . $this->statement['reward'] . ", " . $this->statement['review'] . " FROM `" . DB_PREFIX . "product_to_store` `p2s` LEFT JOIN `" . DB_PREFIX . "product` `p` ON (`p`.`product_id` = `p2s`.`product_id` AND `p`.`status` = '1' AND `p`.`date_available` <= NOW()) LEFT JOIN `" . DB_PREFIX . "product_description` `pd` ON (`p`.`product_id` = `pd`.`product_id`) WHERE `p2s`.`store_id` = '" . (int)$this->config->get('config_store_id') . "' AND `p2s`.`product_id` = '" . (int)$product_id . "' AND `pd`.`language_id` = '" . (int)$this->config->get('config_language_id') . "'");
 
 		if ($query->num_rows) {
 			$product_data = $query->row;
 
 			$product_data['variant'] = $query->row['variant'] ? json_decode($query->row['variant'], true) : [];
 			$product_data['override'] = $query->row['override'] ? json_decode($query->row['override'], true) : [];
-			// Catalog base (product.price) — required for pack ratio; not the same as customer-facing price when discount tier exists.
-			$product_data['raw_price'] = (float)$query->row['price'];
+			// Catalog base from `product.price` — explicit alias avoids duplicate-column ambiguity in SELECT *.
+			$catalog_base = (float)($query->row['catalog_base_price'] ?? $query->row['price']);
+			$product_data['catalog_base_price'] = $catalog_base;
+			$product_data['raw_price'] = $catalog_base;
 			$product_data['price'] = (float)($query->row['discount'] ?: $query->row['price']);
 			// Avoid collision with `product.special` (flag): subquery is aliased as special_price.
 			$product_data['special'] = (float)($query->row['special_price'] ?? 0);

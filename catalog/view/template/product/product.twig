@@ -75,14 +75,6 @@
             </div>
           {% endif %}
           {% if price %}
-            {% if pdp_pack_options %}
-            <ul class="list-unstyled product-price-block">
-              <li id="pdp-pack-hero-price"><h2 class="mb-0"><span class="product-price-regular">{{ pdp_pack_default_hero }}</span></h2></li>
-              {% if points %}
-                <li>{{ text_points }} {{ points }}</li>
-              {% endif %}
-            </ul>
-            {% else %}
             <ul class="list-unstyled product-price-block">
               {% if not special %}
                 <li><h2 class="mb-0"><span class="product-price-regular">{{ price }}</span></h2></li>
@@ -97,19 +89,21 @@
                 <li>{{ text_points }} {{ points }}</li>
               {% endif %}
             </ul>
-            {% endif %}
             <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-pack-inline">
               <h2 id="pdp-heading-pack-inline" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
               <div class="pdp-detail-section__body">
                 {% if pdp_pack_options %}
                   <div class="pdp-pack-choice-grid" role="group" aria-label="{{ text_pdp_size_heading }}">
                     {% for box in pdp_pack_options %}
-                      <button type="button" class="pdp-pack-choice-box{% if loop.first %} pdp-pack-choice-box--active{% endif %}" data-pov-id="{{ box.product_option_value_id }}"{% if box.pack_display_line %} aria-label="{{ box.pack_display_line|e('html_attr') }}"{% endif %}>
-                        {% if box.pack_display_line %}
-                          <span class="pdp-pack-choice-box__price">{{ box.pack_display_line }}</span>
+                      <button type="button" class="pdp-pack-choice-box{% if loop.first %} pdp-pack-choice-box--active{% endif %}" data-pov-id="{{ box.product_option_value_id }}" aria-label="{{ box.pack_label }} {{ box.pack_total_formatted }} {{ box.pack_unit_formatted }}">
+                        <span class="pdp-pack-choice-box__label d-block fw-semibold">{{ box.pack_label }}</span>
+                        <span class="pdp-pack-choice-box__total d-block">{{ box.pack_total_formatted }}</span>
+                        <span class="pdp-pack-choice-box__unit d-block text-muted small">{{ box.pack_unit_formatted }}</span>
+                        {% if box.pack_savings_percent is not null %}
+                          <span class="pdp-pack-choice-box__save d-block small text-success">−{{ box.pack_savings_percent }}%</span>
                         {% endif %}
                         {% if pdp_pack_unit_label %}
-                          <span class="pdp-pack-choice-box__footer">{{ pdp_pack_unit_label }}</span>
+                          <span class="pdp-pack-choice-box__footer d-block small">{{ pdp_pack_unit_label }}</span>
                         {% endif %}
                       </button>
                     {% endfor %}
@@ -138,7 +132,7 @@
                         <select name="option[{{ option.product_option_id }}]" id="input-option-{{ option.product_option_id }}" class="form-select">
                           <option value="">{{ text_select }}</option>
                           {% for option_value in option.product_option_value %}
-                            <option value="{{ option_value.product_option_value_id }}">{% if option_value.pack_display_line %}{{ option_value.pack_display_line }}{% else %}{{ option_value.name }}{% if option_value.price %}
+                            <option value="{{ option_value.product_option_value_id }}">{% if option_value.pack_display %}{{ option_value.pack_display.select_label }}{% else %}{{ option_value.name }}{% if option_value.price %}
                                 ({{ option_value.price_prefix }}{{ option_value.price }})
                               {% endif %}{% endif %}</option>
                           {% endfor %}
@@ -156,11 +150,20 @@
                               <input type="radio" name="option[{{ option.product_option_id }}]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-input"/>
                               <label for="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-label">
                                 {% if option_value.image %}
-                                  <img src="{{ option_value.image }}" alt="{% if option_value.pack_display_line %}{{ option_value.pack_display_line }}{% else %}{{ option_value.name }}{% endif %}" class="img-thumbnail"/>{% endif %}
-                                {% if option_value.pack_display_line %}{{ option_value.pack_display_line }}{% else %}{{ option_value.name }}
+                                  <img src="{{ option_value.image }}" alt="{{ option_value.pack_display ? option_value.pack_display.label : option_value.name }}" class="img-thumbnail"/>{% endif %}
+                                {% if option_value.pack_display %}
+                                  <span class="d-block fw-semibold">{{ option_value.pack_display.label }}</span>
+                                  <span class="d-block">{{ option_value.pack_display.total_formatted }}</span>
+                                  <span class="d-block text-muted small">{{ option_value.pack_display.unit_formatted }}</span>
+                                  {% if option_value.pack_display.savings_percent is not null %}
+                                    <span class="d-block small text-success">−{{ option_value.pack_display.savings_percent }}%</span>
+                                  {% endif %}
+                                {% else %}
+                                  {{ option_value.name }}
                                 {% if option_value.price %}
                                   ({{ option_value.price_prefix }}{{ option_value.price }})
-                                {% endif %}{% endif %}</label>
+                                {% endif %}
+                                {% endif %}</label>
                             </div>
                           {% endfor %}
                         </div>
@@ -177,11 +180,20 @@
                               <input type="checkbox" name="option[{{ option.product_option_id }}][]" value="{{ option_value.product_option_value_id }}" id="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-input"/> 
 							                <label for="input-option-value-{{ option_value.product_option_value_id }}" class="form-check-label">
                                 {% if option_value.image %}
-                                  <img src="{{ option_value.image }}" alt="{% if option_value.pack_display_line %}{{ option_value.pack_display_line }}{% else %}{{ option_value.name }}{% endif %}" class="img-thumbnail"/>{% endif %}
-                                {% if option_value.pack_display_line %}{{ option_value.pack_display_line }}{% else %}{{ option_value.name }}
+                                  <img src="{{ option_value.image }}" alt="{{ option_value.pack_display ? option_value.pack_display.label : option_value.name }}" class="img-thumbnail"/>{% endif %}
+                                {% if option_value.pack_display %}
+                                  <span class="d-block fw-semibold">{{ option_value.pack_display.label }}</span>
+                                  <span class="d-block">{{ option_value.pack_display.total_formatted }}</span>
+                                  <span class="d-block text-muted small">{{ option_value.pack_display.unit_formatted }}</span>
+                                  {% if option_value.pack_display.savings_percent is not null %}
+                                    <span class="d-block small text-success">−{{ option_value.pack_display.savings_percent }}%</span>
+                                  {% endif %}
+                                {% else %}
+                                  {{ option_value.name }}
                                 {% if option_value.price %}
                                   ({{ option_value.price_prefix }}{{ option_value.price }})
-                                {% endif %}{% endif %}</label>
+                                {% endif %}
+                                {% endif %}</label>
                             </div>
                           {% endfor %}
                         </div>
@@ -433,7 +445,6 @@ function changeQuantity(delta) {
 $(document).ready(function() {
     var $packGrid = $('.pdp-pack-choice-grid');
     var $packInput = $('#pdp-pack-option-input');
-    var pdpPackPriceMap = {{ pdp_pack_price_map|default({})|json_encode|raw }};
     if ($packGrid.length && $packInput.length) {
         $packGrid.on('click', '.pdp-pack-choice-box', function() {
             var id = $(this).attr('data-pov-id');
@@ -443,9 +454,6 @@ $(document).ready(function() {
             $packInput.val(id);
             $packGrid.find('.pdp-pack-choice-box').removeClass('pdp-pack-choice-box--active');
             $(this).addClass('pdp-pack-choice-box--active');
-            if (pdpPackPriceMap && pdpPackPriceMap[id] && pdpPackPriceMap[id].hero) {
-                $('#pdp-pack-hero-price .product-price-regular').text(pdpPackPriceMap[id].hero);
-            }
         });
     }
 
