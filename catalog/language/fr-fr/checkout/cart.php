@@ -21,6 +21,7 @@ $_['text_year']                  = 'année';
 $_['text_points']                = 'Points de récompenses';
 $_['text_next']                  = 'Que souhaitez-vous faire ensuite?';
 $_['text_next_choice']           = 'Choisissez si vous avez un code de réduction ou des points de récompenses que vous souhaitez utiliser ou si vous souhaitez estimer le coût de votre expédition.';
+$_['text_minimum_order_not_met'] = 'Montant minimum de commande non atteint';
 
 // Colonne
 $_['column_image']               = 'Image';
@@ -32,6 +33,7 @@ $_['column_total']               = 'Total';
 // Erreur
 $_['error_stock']                = 'Les produits marqués avec *** ne sont pas disponibles en quantité souhaitée ou ne sont pas en stock!';
 $_['error_minimum']              = 'Le montant minimum de commande pour %s est de %s!';
+$_['error_minimum_order']        = 'Le montant minimum de commande est %s. Veuillez ajouter des articles pour un total d’au moins %s.';
 $_['error_required']             = '%s requis!';
 $_['error_regex']                = '%s n\'est pas une entrée valide!';
 $_['error_product']              = 'Attention: Le produit est introuvable!';

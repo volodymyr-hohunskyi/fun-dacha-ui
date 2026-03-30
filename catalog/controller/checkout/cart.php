@@ -199,13 +199,13 @@ class Cart extends \Opencart\System\Engine\Controller {
 			}
 		}
 
-		// Check minimum order amount (500 UAH)
-		$min_order_amount = 500;
+		$min_order_amount = (float)(include DIR_SYSTEM . 'config/min_order_amount.php');
 		$data['min_order_amount'] = $min_order_amount;
 		$data['min_order_amount_formatted'] = $this->currency->format($min_order_amount, $this->session->data['currency']);
 		$data['min_order_error'] = '';
 		$data['can_proceed_to_checkout'] = true;
-		
+		$data['text_minimum_order_not_met'] = $this->language->get('text_minimum_order_not_met');
+
 		if ($price_status && $total > 0 && $total < $min_order_amount) {
 			$data['min_order_error'] = sprintf($this->language->get('error_minimum_order'), $this->currency->format($min_order_amount, $this->session->data['currency']), $this->currency->format($min_order_amount, $this->session->data['currency']));
 			$data['can_proceed_to_checkout'] = false;

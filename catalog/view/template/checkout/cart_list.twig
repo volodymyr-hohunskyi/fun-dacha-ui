@@ -111,7 +111,7 @@
       {% if checkout and can_proceed_to_checkout %}
         <a href="{{ checkout }}" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn align-self-stretch">{{ button_checkout }}</a>
       {% else %}
-        <button type="button" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn align-self-stretch" disabled title="{% if min_order_error %}{{ min_order_error }}{% else %}Мінімальна сума замовлення не досягнута{% endif %}">{{ button_checkout }}</button>
+        <button type="button" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn align-self-stretch" disabled title="{% if min_order_error %}{{ min_order_error }}{% else %}{{ text_minimum_order_not_met }}{% endif %}">{{ button_checkout }}</button>
       {% endif %}
     </div>
   </div>

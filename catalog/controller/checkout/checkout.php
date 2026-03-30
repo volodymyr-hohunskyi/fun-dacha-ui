@@ -17,9 +17,8 @@ class Checkout extends \Opencart\System\Engine\Controller {
 			$this->response->redirect($this->url->link('checkout/cart', 'language=' . $this->config->get('config_language'), true));
 		}
 
-		// Check minimum order amount (500 UAH)
 		$this->load->language('checkout/cart');
-		$min_order_amount = 500;
+		$min_order_amount = (float)(include DIR_SYSTEM . 'config/min_order_amount.php');
 		$totals = [];
 		$taxes = $this->cart->getTaxes();
 		$total = 0;
