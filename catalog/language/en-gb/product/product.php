@@ -33,6 +33,7 @@ $_['text_pdp_guarantee_heading'] = 'Satisfaction guarantee';
 $_['text_pdp_guarantee']         = 'We want you to be happy with your seeds and supplies. If something is wrong, contact us: we will advise on growing or arrange a replacement or return in line with consumer protection rules.';
 $_['text_pdp_growing_heading']   = 'Growing information';
 $_['text_pdp_size_heading']      = 'Pack size';
+$_['text_pdp_quantity_heading']  = 'Quantity';
 $_['text_pdp_size_intro']        = 'Only one standard pack is available for this product right now.';
 $_['text_pdp_size_intro_pack']   = 'Only one standard pack is available for this product right now, %s.';
 $_['text_pdp_size_future']       = '';

@@ -291,42 +291,45 @@
                   <div id="error-subscription" class="invalid-feedback"></div>
                 </div>
               {% endif %}
-<div class="mb-3">
-  <div class="d-flex flex-column gap-2 align-items-stretch pdp-qty-cart-row">
+<section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-quantity">
+  <h2 id="pdp-heading-quantity" class="pdp-detail-section__title">{{ text_pdp_quantity_heading }}</h2>
+  <div class="pdp-detail-section__body">
+    <div class="d-flex flex-column gap-2 align-items-stretch pdp-qty-cart-row">
 
-    <!-- Quantity -->
-    <div class="input-group input-group-qty-compact quantity-group">
-      <button type="button"
-              class="btn btn-primary btn-qty-step text-white"
-              onclick="changeQuantity(-1)">
-        <i class="fa-solid fa-minus" aria-hidden="true"></i>
+      <!-- Quantity -->
+      <div class="input-group input-group-qty-compact quantity-group">
+        <button type="button"
+                class="btn btn-primary btn-qty-step text-white"
+                onclick="changeQuantity(-1)">
+          <i class="fa-solid fa-minus" aria-hidden="true"></i>
+        </button>
+
+        <input type="text"
+               name="quantity"
+               value="{{ minimum }}"
+               id="input-quantity"
+               class="form-control form-control-sm text-center quantity-input" />
+
+        <button type="button"
+                class="btn btn-primary btn-qty-step text-white"
+                onclick="changeQuantity(1)">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- Add to cart -->
+      <button type="submit"
+              id="button-cart"
+              class="btn btn-primary btn-lg text-white add-to-cart-btn">
+        {{ button_cart }}
       </button>
 
-      <input type="text"
-             name="quantity"
-             value="{{ minimum }}"
-             id="input-quantity"
-             class="form-control form-control-sm text-center quantity-input" />
-
-      <button type="button"
-              class="btn btn-primary btn-qty-step text-white"
-              onclick="changeQuantity(1)">
-        <i class="fa-solid fa-plus" aria-hidden="true"></i>
-      </button>
     </div>
 
-    <!-- Add to cart -->
-    <button type="submit"
-            id="button-cart"
-            class="btn btn-primary btn-lg text-white add-to-cart-btn">
-      {{ button_cart }}
-    </button>
-
+    <input type="hidden" name="product_id" value="{{ product_id }}" />
+    <div id="error-quantity" class="form-text"></div>
   </div>
-
-  <input type="hidden" name="product_id" value="{{ product_id }}" />
-  <div id="error-quantity" class="form-text"></div>
-</div>
+</section>
 
               {% if minimum > 1 %}
                 <div class="alert alert-warning"><i class="fa-solid fa-circle-info"></i> {{ text_minimum }}</div>

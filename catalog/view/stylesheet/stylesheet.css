@@ -1122,16 +1122,33 @@ footer.freshgo-footer {
   vertical-align: -0.05em;
 }
 
-/* PDP: qty (narrow, same scale as cart) stacked above full-width add to cart */
+/* PDP: qty stacked above full-width add to cart; stepper slightly larger than cart */
 #product-info .pdp-qty-cart-row {
   width: 100%;
 }
 
 #product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact {
-  max-width: 6rem;
+  max-width: 8.75rem;
   width: 100%;
   align-self: flex-start;
   box-sizing: border-box;
+}
+
+#product-info .pdp-qty-cart-row .input-group-qty-compact .btn-qty-step {
+  padding: 0.22rem 0.5rem !important;
+  min-width: 1.85rem;
+}
+
+#product-info .pdp-qty-cart-row .input-group-qty-compact .form-control,
+#product-info .pdp-qty-cart-row .input-group-qty-compact .quantity-input {
+  font-size: 0.875rem;
+  padding: 0.22rem 0.4rem;
+  line-height: 1.4;
+}
+
+#product-info .pdp-qty-cart-row .btn-qty-step i {
+  font-size: 0.72rem;
+  vertical-align: -0.06em;
 }
 
 #product-info .pdp-qty-cart-row .add-to-cart-btn {

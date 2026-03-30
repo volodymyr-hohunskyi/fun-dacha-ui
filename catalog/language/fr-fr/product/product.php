@@ -31,6 +31,7 @@ $_['text_pdp_guarantee_heading'] = 'Garantie satisfaction';
 $_['text_pdp_guarantee']         = 'Si un problème survient, contactez-nous : conseils de culture ou échange / retour selon la réglementation.';
 $_['text_pdp_growing_heading']   = 'Culture';
 $_['text_pdp_size_heading']      = 'Conditionnement';
+$_['text_pdp_quantity_heading']  = 'Quantité';
 $_['text_pdp_size_intro']        = 'Un seul conditionnement standard est proposé pour l’instant.';
 $_['text_pdp_size_intro_pack']   = 'Un seul conditionnement standard est proposé pour l’instant, %s.';
 $_['text_pdp_size_future']       = '';
