@@ -144,4 +144,12 @@ class PackPricing {
 
 		return $p > 0.0 ? $p : null;
 	}
+
+
+	/**
+	 * Alias for {@see unitSavingsPercentVsListUnit()} (used by PDP/cart callers).
+	 */
+	public static function unitSavingsVsListUnit(float $listUnitPrice, float $unitPriceAfterAll): ?float {
+		return self::unitSavingsPercentVsListUnit( $listUnitPrice, $unitPriceAfterAll );
+	}
 }
