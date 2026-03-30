@@ -1,5 +1,6 @@
 <?php
 // Texte
+$_['text_review_form_heading'] = 'Laisser un avis';
 $_['text_reviews']    = '%s avis';
 $_['text_write']      = 'Écrire un avis';
 $_['text_login']      = 'Veuillez <a href="%s">vous connecter</a> ou <a href="%s">vous inscrire</a> pour laisser un avis';
@@ -16,6 +17,9 @@ $_['entry_bad']        = 'Mauvais';
 
 // Onglet
 $_['tab_review']       = 'Avis (%s)';
+
+// Bouton
+$_['button_submit']    = 'Envoyer';
 
 // Erreur
 $_['error_token']      = 'Attention: Jeton d\'avis invalide!';

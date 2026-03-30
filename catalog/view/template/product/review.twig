@@ -1,10 +1,108 @@
-<div class="product-reviews-list">
-  <div id="review">{{ list }}</div>
+<div class="product-reviews-block">
+  {% if review_guest %}
+  <div id="pdp-write-review" class="card mb-4">
+    <div class="card-header">
+      <h2 class="h5 mb-0">{{ text_review_form_heading }}</h2>
+    </div>
+    <div class="card-body">
+      <form id="form-review">
+        <div class="mb-3 required">
+          <label for="input-review-author" class="form-label">{{ entry_author }}</label>
+          <input type="text" name="author" value="{{ customer }}" placeholder="{{ entry_author }}" id="input-review-author" class="form-control"/>
+          <div id="error-review-author" class="invalid-feedback d-block"></div>
+        </div>
+        <div class="mb-3 required">
+          <label for="input-review-text" class="form-label">{{ entry_review }}</label>
+          <textarea name="text" rows="5" id="input-review-text" class="form-control" placeholder="{{ entry_review }}"></textarea>
+          <div id="error-review-text" class="invalid-feedback d-block"></div>
+        </div>
+        <div class="mb-3 required">
+          <label class="form-label d-block">{{ entry_rating }}</label>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="text-muted">{{ entry_bad }}</span>
+            {% for i in 1..5 %}
+              <div class="form-check form-check-inline m-0">
+                <input type="radio" name="rating" value="{{ i }}" id="input-rating-{{ i }}" class="form-check-input"/>
+                <label class="form-check-label" for="input-rating-{{ i }}">{{ i }}</label>
+              </div>
+            {% endfor %}
+            <span class="text-muted">{{ entry_good }}</span>
+          </div>
+          <div id="error-review-rating" class="invalid-feedback d-block"></div>
+        </div>
+        <div class="mb-3 small">{{ text_note|raw }}</div>
+        {% if captcha %}
+          <div class="mb-3">{{ captcha|raw }}</div>
+          <div id="error-review-captcha" class="invalid-feedback d-block"></div>
+        {% endif %}
+        <div id="error-review-warning" class="alert alert-danger d-none" role="alert"></div>
+        <button type="button" id="button-review" class="btn btn-primary">{{ button_submit }}</button>
+      </form>
+    </div>
+  </div>
+  {% else %}
+  <div id="pdp-write-review" class="alert alert-info mb-4">{{ text_login|raw }}</div>
+  {% endif %}
+
+  <div class="product-reviews-list">
+    <div id="review">{{ list }}</div>
+  </div>
 </div>
 <script type="text/javascript"><!--
 $('#review').on('click', '.pagination a', function(e) {
     e.preventDefault();
 
     $('#review').load(this.href);
+});
+
+$('#button-review').on('click', function() {
+    $.ajax({
+        url: '{{ action|escape('js') }}',
+        type: 'post',
+        data: $('#form-review').serialize(),
+        dataType: 'json',
+        beforeSend: function() {
+            $('#button-review').prop('disabled', true);
+            $('#error-review-author, #error-review-text, #error-review-rating, #error-review-captcha, #error-review-warning').text('');
+            $('#error-review-warning').addClass('d-none');
+        },
+        complete: function() {
+            $('#button-review').prop('disabled', false);
+        },
+        success: function(json) {
+            if (json['error']) {
+                if (json['error']['author']) {
+                    $('#error-review-author').html(json['error']['author']);
+                }
+                if (json['error']['text']) {
+                    $('#error-review-text').html(json['error']['text']);
+                }
+                if (json['error']['rating']) {
+                    $('#error-review-rating').html(json['error']['rating']);
+                }
+                if (json['error']['captcha']) {
+                    $('#error-review-captcha').html(json['error']['captcha']);
+                }
+                if (json['error']['warning']) {
+                    $('#error-review-warning').html(json['error']['warning']).removeClass('d-none');
+                }
+                if (json['error']['purchased']) {
+                    $('#error-review-warning').html(json['error']['purchased']).removeClass('d-none');
+                }
+            }
+            if (json['success']) {
+                $('#error-review-author, #error-review-text, #error-review-rating, #error-review-captcha').text('');
+                $('#form-review').find('input[name=\'author\']').val('{{ customer|escape('js') }}');
+                $('#form-review').find('textarea[name=\'text\']').val('');
+                $('#form-review').find('input[name=\'rating\']:checked').prop('checked', false);
+                $('#review').load('{{ review_list_url|escape('js') }}');
+                $('#error-review-warning').addClass('d-none');
+                alert(json['success']);
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            alert(thrownError + '\r\n' + xhr.statusText + '\r\n' + xhr.responseText);
+        }
+    });
 });
 //--></script>

@@ -1,5 +1,6 @@
 <?php
 // Text
+$_['text_review_form_heading'] = 'Write a review';
 $_['text_reviews']    = '%s reviews';
 $_['text_write']      = 'Write a review';
 $_['text_login']      = 'Please <a href="%s">login</a> or <a href="%s">register</a> to review';
@@ -16,6 +17,9 @@ $_['entry_bad']        = 'Bad';
 
 // Tab
 $_['tab_review']       = 'Reviews (%s)';
+
+// Button
+$_['button_submit']    = 'Submit';
 
 // Error
 $_['error_token']      = 'Warning: Review token invalid!';
