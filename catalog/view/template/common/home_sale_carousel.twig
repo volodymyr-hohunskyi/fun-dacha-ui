@@ -1,0 +1,49 @@
+{% if products %}
+<section class="home-sale-carousel-section">
+  <div class="container">
+    <h2 class="home-sale-carousel-title text-start mb-4">{{ heading_title }}</h2>
+    <div id="carousel-home-sale" class="carousel slide">
+      {% if products|length > per_slide %}
+        <div class="carousel-indicators">
+          {% set sale_slide = 0 %}
+          {% for carousel_group in products|batch(per_slide) %}
+            <button type="button" data-bs-target="#carousel-home-sale" data-bs-slide-to="{{ sale_slide }}"{% if sale_slide == 0 %} class="active"{% endif %} aria-label="Slide {{ sale_slide + 1 }}"></button>
+            {% set sale_slide = sale_slide + 1 %}
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="carousel-inner">
+        {% for carousel_group in products|batch(per_slide) %}
+          <div class="carousel-item{% if loop.first %} active{% endif %}">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3 g-lg-4">
+              {% for product in carousel_group %}
+                <div class="col">
+                  <div class="home-sale-carousel-card h-100">{{ product }}</div>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      {% if products|length > per_slide %}
+        <button type="button" class="carousel-control-prev" data-bs-target="#carousel-home-sale" data-bs-slide="prev">
+          <span class="fa-solid fa-chevron-left text-dark" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button type="button" class="carousel-control-next" data-bs-target="#carousel-home-sale" data-bs-slide="next">
+          <span class="fa-solid fa-chevron-right text-dark" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      {% endif %}
+    </div>
+    <script type="text/javascript"><!--
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.querySelector('#carousel-home-sale');
+        if (el) {
+            new bootstrap.Carousel(el, { interval: false, wrap: true });
+        }
+    });
+    //--></script>
+  </div>
+</section>
+{% endif %}

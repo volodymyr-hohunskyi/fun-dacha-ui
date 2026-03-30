@@ -1534,6 +1534,7 @@ footer.freshgo-footer {
 #common-home .container,
 #common-home .hero-banner-inner,
 #common-home .popular-crops-section .container,
+#common-home .home-sale-carousel-section .container,
 #common-home .home-recommended-wrapper,
 #common-home .home-reviews-carousel-section .container,
 #common-home .blog-carousel-section .container,
@@ -1557,6 +1558,7 @@ footer.freshgo-footer {
   padding-top: var(--home-section-spacing);
 }
 #common-home .home-reviews-carousel-section,
+#common-home .home-sale-carousel-section,
 #common-home .blog-carousel-section,
 #common-home .home-recommended-wrapper,
 #common-home .home-recently-viewed-wrapper,
@@ -1580,7 +1582,7 @@ footer.freshgo-footer {
 #common-home #content .mb-5 {
   margin-bottom: 0 !important;
 }
-#common-home h2, #common-home h3, #common-home .popular-crops-title {
+#common-home h2, #common-home h3, #common-home .popular-crops-title, #common-home .home-sale-carousel-title {
   margin-bottom: var(--home-heading-margin) !important;
   color: #000 !important;
 }
@@ -1707,6 +1709,45 @@ footer.freshgo-footer {
 .home-reviews-carousel-section h3 {
   color: #000 !important;
 }
+
+/* Home sale carousel — same layout as reviews carousel */
+.home-sale-carousel-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #000 !important;
+}
+.home-sale-carousel-section,
+.home-sale-carousel-section .container,
+.home-sale-carousel-section .carousel,
+.home-sale-carousel-section .carousel-inner,
+.home-sale-carousel-section .carousel-item,
+.home-sale-carousel-section .row,
+#carousel-home-sale,
+#carousel-home-sale .carousel-inner,
+#carousel-home-sale .carousel-item,
+#carousel-home-sale .row {
+  border: none !important;
+  box-shadow: none !important;
+}
+.home-sale-carousel-section .carousel-inner,
+.home-sale-carousel-section .carousel-item,
+.home-sale-carousel-section .row {
+  background-color: transparent !important;
+}
+.home-sale-carousel-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 0.75rem;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.home-sale-carousel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+.home-sale-carousel-card .product-thumb {
+  height: 100%;
+}
+
 .home-review-card {
   border: 1px solid #eee;
   border-radius: 10px;
