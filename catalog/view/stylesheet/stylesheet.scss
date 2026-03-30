@@ -882,10 +882,10 @@ footer.freshgo-footer {
   border-radius: 0 !important;
 }
 
-/* Cart page: give the group a width so equal flex columns distribute */
+/* Cart page: compact stepper width (~half of former 12rem) */
 #output-cart .input-group-qty-compact.input-group {
   width: 100%;
-  max-width: 12rem;
+  max-width: 6rem;
   margin-left: auto;
   margin-right: auto;
 }
@@ -896,20 +896,22 @@ footer.freshgo-footer {
   vertical-align: -0.05em;
 }
 
-/* PDP: qty + add to cart one row, half width each, same height */
+/* PDP: qty (narrow, same scale as cart) stacked above full-width add to cart */
 #product-info .pdp-qty-cart-row {
   width: 100%;
 }
 
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact,
-#product-info .pdp-qty-cart-row .add-to-cart-btn {
-  flex: 1 1 0;
-  min-width: 0;
+#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact {
+  max-width: 6rem;
+  width: 100%;
+  align-self: flex-start;
   box-sizing: border-box;
 }
 
-#product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact {
-  width: auto;
+#product-info .pdp-qty-cart-row .add-to-cart-btn {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Cart: continue + checkout — same height (override global #checkout-button CTA padding vs btn-light) */
