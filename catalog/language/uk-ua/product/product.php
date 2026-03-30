@@ -42,7 +42,7 @@ $_['text_pdp_pack_title_5']      = '5 пакетів';
 
 $_['text_pdp_volume_heading']    = 'Упаковки';
 $_['text_pdp_pack_single']       = '1 упаковка за ціною';
-$_['text_pdp_pack_many']       = '%d уп.';
+$_['text_pdp_pack_many']       = '%d п.';
 $_['text_pdp_volume_save']     = 'ЗНИЖКА %s';
 
 // Buttons

@@ -37,12 +37,17 @@
                 <span class="text-muted" style="min-width: 50px; min-height: 50px; display: inline-block;"></span>
               {% endif %}
             </td>
-            <td class="text-start text-wrap"><a href="{{ product.href }}">{{ product.name }}</a>{% if not product.stock %} <span class="text-danger">***</span>{% endif %}
-              <ul class="list-unstyled mb-0">
+            <td class="text-start text-wrap"><a href="{{ product.href }}" class="fw-semibold">{{ product.name }}</a>{% if not product.stock %} <span class="text-danger">***</span>{% endif %}
+              {% if product.cart_pack %}
+              <div class="cart-pack-summary mt-1 small text-muted">{{ product.cart_pack.pack_label }}</div>
+              {% endif %}
+              <ul class="list-unstyled mb-0{% if product.cart_pack %} mt-1{% endif %}">
                 {% for option in product.option %}
+                  {% if not product.cart_pack %}
                   <li>
                     <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
                   </li>
+                  {% endif %}
                 {% endfor %}
                 {% if product.subscription %}
                   <li>
@@ -71,8 +76,8 @@
             <td class="text-center" style="padding-left: 10px; padding-right: 10px;">
               <a href="{{ product.remove }}" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i class="fa-solid fa-circle-xmark"></i></a>
             </td>
-            <td class="text-end cart-price-cell">{% if product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
-            <td class="text-end">{{ product.total }}</td>
+            <td class="text-end cart-price-cell">{% if product.cart_pack %}{{ product.cart_pack.unit_text }}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
+            <td class="text-end">{% if product.cart_pack %}{{ product.cart_pack.line_text }}{% else %}{{ product.total }}{% endif %}</td>
           </tr>
         {% endfor %}
       </tbody>

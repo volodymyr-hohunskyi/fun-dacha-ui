@@ -1,6 +1,7 @@
 <?php
 namespace Opencart\Catalog\Controller\Product;
 
+use Opencart\System\Library\Pack\PackLabel;
 use Opencart\System\Library\Pack\PackPricing;
 
 /**
@@ -577,14 +578,14 @@ class Product extends \Opencart\System\Engine\Controller {
 		$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
 		$savings = PackPricing::unitSavingsVsListUnit( $list_unit, $row['unit_price'] );
 
-		$label = $pack_size . ' уп';
+		$label = PackLabel::ukPackCount($pack_size);
 
 		return [
 			'label'             => $label,
 			'total_formatted'   => $total_fmt,
-			'unit_formatted'    => $unit_fmt . ' / уп',
+			'unit_formatted'    => $unit_fmt . ' / пак.',
 			'savings_percent'   => $savings,
-			'select_label'      => $label . ' — ' . $total_fmt . ' · ' . $unit_fmt . '/уп',
+			'select_label'      => PackLabel::ukPackShort($pack_size) . ' — ' . $total_fmt . ' · ' . $unit_fmt . '/п.',
 		];
 	}
 

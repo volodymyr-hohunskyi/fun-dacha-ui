@@ -1,6 +1,7 @@
 <?php
 namespace Opencart\Catalog\Model\Checkout;
 
+use Opencart\System\Library\Pack\PackLabel;
 use Opencart\System\Library\Pack\PackPricing;
 
 /**
@@ -76,9 +77,13 @@ class Cart extends \Opencart\System\Engine\Model {
 				$product_info_cache[$pid] = $this->model_catalog_product->getProduct($pid);
 			}
 
-			if ($product_info_cache[$pid]) {
-				$this->enrichPackOptionDisplay($option_data, $product, $product_info_cache[$pid]);
+			$pinfo = $product_info_cache[$pid] ?? [];
+
+			if ($pinfo) {
+				$this->enrichPackOptionDisplay($option_data, $product, $pinfo);
 			}
+
+			$cart_pack = ($pinfo) ? $this->buildCartPackPricingRow($product, $option_data, $pinfo) : ['has_pack' => false];
 
 			$subscription_data = [];
 
@@ -96,7 +101,8 @@ class Cart extends \Opencart\System\Engine\Model {
 				'subscription' => $subscription_data,
 				'option'       => $option_data,
 				'price_text'   => $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
-				'total_text'   => $this->currency->format($this->tax->calculate($product['total'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency'])
+				'total_text'   => $this->currency->format($this->tax->calculate($product['total'], $product['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']),
+				'cart_pack'    => !empty($cart_pack['has_pack']) ? $cart_pack : null,
 			] + $product;
 		}
 
@@ -157,7 +163,6 @@ class Cart extends \Opencart\System\Engine\Model {
 		}
 
 		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price']);
-		$list_unit = $catalog_base;
 		$special = (float)($product_info['special'] ?? 0);
 		$tax_class_id = (int)($product['tax_class_id'] ?? 0);
 
@@ -187,22 +192,84 @@ class Cart extends \Opencart\System\Engine\Model {
 			$unit_taxed = $this->tax->calculate($row['unit_price'], $tax_class_id, $this->config->get('config_tax'));
 			$fmt = $this->currency->format($final_taxed, $this->session->data['currency']);
 			$unit_fmt = $this->currency->format($unit_taxed, $this->session->data['currency']);
-			$unit_line = $unit_fmt . ' / уп';
-			$savings = PackPricing::unitSavingsVsListUnit($list_unit, $row['unit_price']);
+			$unit_line = $unit_fmt . ' / пак.';
+			$title = PackLabel::ukPackCount($pack_size);
+			$opt['pack_size'] = $pack_size;
 
-			$title = $pack_size . ' уп';
 			$html = '<span class="d-block fw-semibold">' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</span>';
 			$html .= '<span class="d-block">' . htmlspecialchars($fmt, ENT_QUOTES, 'UTF-8') . '</span>';
 			$html .= '<span class="d-block text-muted small">' . htmlspecialchars($unit_line, ENT_QUOTES, 'UTF-8') . '</span>';
 
-			if ($savings !== null) {
-				$html .= '<span class="d-block text-success small">−' . htmlspecialchars((string)$savings, ENT_QUOTES, 'UTF-8') . '%</span>';
-			}
-
 			$opt['pack_display_html'] = $html;
-			$opt['value'] = $title . ' — ' . $fmt . ' — ' . $unit_fmt . '/уп';
+			$opt['value'] = $title . ' — ' . $fmt . ' — ' . $unit_fmt . '/пак.';
 			$opt['pack_cart_line'] = true;
 		}
 		unset($opt);
+	}
+
+
+	/**
+	 * Cart table row: pack label + list→sale unit + list→sale line total (matches PDP math).
+	 *
+	 * @param array<string, mixed>             $product
+	 * @param array<int, array<string, mixed>> $option_data
+	 * @param array<string, mixed>             $product_info
+	 *
+	 * @return array{has_pack: bool, pack_label?: string, unit_text?: string, line_text?: string}
+	 */
+	private function buildCartPackPricingRow(array $product, array $option_data, array $product_info): array {
+		if (($this->config->get('config_customer_price') && !$this->customer->isLogged()) || !isset($product_info['raw_price'])) {
+			return ['has_pack' => false];
+		}
+
+		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price']);
+		$special = (float)($product_info['special'] ?? 0);
+		$tax_class_id = (int)($product['tax_class_id'] ?? 0);
+		$qty = max(1, (int)($product['quantity'] ?? 1));
+		$tax_mode = $this->config->get('config_tax');
+
+		foreach ($option_data as $opt) {
+			$pack_size = (int)($opt['pack_size'] ?? 0);
+
+			if ($pack_size < 1) {
+				continue;
+			}
+
+			$modifier = PackPricing::optionModifierAmount((float)($opt['price'] ?? 0), (string)($opt['price_prefix'] ?? '+'));
+			$price_after = PackPricing::priceAfterOption($catalog_base, $modifier);
+			$row = PackPricing::computePackDisplayRow(
+				$catalog_base,
+				(float)($opt['price'] ?? 0),
+				(string)($opt['price_prefix'] ?? '+'),
+				$special,
+				$pack_size
+			);
+
+			$list_unit = $price_after / (float)$pack_size;
+			$sale_unit = $row['unit_price'];
+			$list_line = $price_after * $qty;
+			$sale_line = $row['final_price'] * $qty;
+
+			$list_unit_f = $this->currency->format($this->tax->calculate($list_unit, $tax_class_id, $tax_mode), $this->session->data['currency']);
+			$sale_unit_f = $this->currency->format($this->tax->calculate($sale_unit, $tax_class_id, $tax_mode), $this->session->data['currency']);
+			$list_line_f = $this->currency->format($this->tax->calculate($list_line, $tax_class_id, $tax_mode), $this->session->data['currency']);
+			$sale_line_f = $this->currency->format($this->tax->calculate($sale_line, $tax_class_id, $tax_mode), $this->session->data['currency']);
+
+			$diff_u = abs($list_unit - $sale_unit);
+			$diff_l = abs($list_line - $sale_line);
+			$show_arrow = ($diff_u > 0.0001) || ($diff_l > 0.01);
+
+			$unit_text = $show_arrow ? ($list_unit_f . ' → ' . $sale_unit_f) : $sale_unit_f;
+			$line_text = $show_arrow ? ($list_line_f . ' → ' . $sale_line_f) : $sale_line_f;
+
+			return [
+				'has_pack'   => true,
+				'pack_label' => PackLabel::ukPackCount($pack_size),
+				'unit_text'  => $unit_text,
+				'line_text'  => $line_text,
+			];
+		}
+
+		return ['has_pack' => false];
 	}
 }

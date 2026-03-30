@@ -8,14 +8,20 @@
             <tr>
               <td class="text-center w-25">{% if product.thumb %}<a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-thumbnail"/></a>{% endif %}</td>
               <td><a href="{{ product.href }}">{{ product.name }}</a>
+                {% if product.cart_pack %}
+                <div class="small text-muted">{{ product.cart_pack.pack_label }}</div>
+                <div class="small">{{ product.cart_pack.unit_text }}</div>
+                {% endif %}
                 <ul class="list-unstyled mb-0">
                   <li>
                     <small> - {{ text_model }}: {{ product.model }}</small>
                   </li>
                   {% for option in product.option %}
+                    {% if not product.cart_pack %}
                     <li>
                       <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
                     </li>
+                    {% endif %}
                   {% endfor %}
                   {% if product.subscription %}
                     <li>
@@ -30,7 +36,7 @@
                 </ul>
               </td>
               <td class="text-end text-nowrap">x {{ product.quantity }}</td>
-              <td class="text-end">{{ product.total }}</td>
+              <td class="text-end">{% if product.cart_pack %}{{ product.cart_pack.line_text }}{% else %}{{ product.total }}{% endif %}</td>
               <td class="text-end">
                 <form action="{{ remove }}" method="post" data-oc-toggle="ajax" data-oc-load="{{ list }}" data-oc-target="#cart">
                   <input type="hidden" name="key" value="{{ product.cart_id }}">
