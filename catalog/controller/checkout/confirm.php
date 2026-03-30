@@ -15,6 +15,7 @@ class Confirm extends \Opencart\System\Engine\Controller {
 	 */
 	public function index(): string {
 		$this->load->language('checkout/confirm');
+		$this->load->language('checkout/cart');
 
 		// Order Totals
 		$totals = [];
@@ -312,39 +313,73 @@ class Confirm extends \Opencart\System\Engine\Controller {
 
 		$data['products'] = [];
 
-		// Use model cart products to get data for template
+		$this->load->model('tool/image');
+		$this->load->model('tool/upload');
+		$this->load->model('catalog/product');
+
 		$products = $this->model_checkout_cart->getProducts();
 
 		foreach ($products as $product) {
 			if ($product['option']) {
 				foreach ($product['option'] as $key => $option) {
-					if (!empty($option['pack_cart_line'])) {
-						$product['option'][$key]['value'] = $option['value'];
+					if ($option['type'] != 'file') {
+						$value = $option['value'];
 					} else {
-						$product['option'][$key]['value'] = (oc_strlen($option['value']) > 20 ? oc_substr($option['value'], 0, 20) . '..' : $option['value']);
+						$upload_info = $this->model_tool_upload->getUploadByCode($option['value']);
+
+						if ($upload_info) {
+							$value = $upload_info['name'];
+						} else {
+							$value = '';
+						}
+					}
+
+					if (!empty($option['pack_cart_line'])) {
+						$product['option'][$key]['value'] = $value;
+					} else {
+						$product['option'][$key]['value'] = (oc_strlen($value) > 20 ? oc_substr($value, 0, 20) . '..' : $value);
 					}
 				}
 			}
 
 			$subscription = '';
 
-			if ($product['subscription']) {
+			if ($product['subscription'] && $price_status) {
 				if ($product['subscription']['trial_status']) {
-					$subscription .= sprintf($this->language->get('text_subscription_trial'), $product['subscription']['trial_price_text'], $product['subscription']['trial_cycle'], $product['subscription']['trial_frequency_text'], $product['subscription']['trial_duration']);
+					$subscription .= sprintf($this->language->get('text_subscription_trial'), $product['subscription']['trial_price_text'], $product['subscription']['trial_cycle'], $product['subscription']['trial_frequency'], $product['subscription']['trial_duration']);
 				}
 
 				if ($product['subscription']['duration']) {
-					$subscription .= sprintf($this->language->get('text_subscription_duration'), $product['subscription']['price_text'], $product['subscription']['cycle'], $product['subscription']['frequency_text'], $product['subscription']['duration']);
+					$subscription .= sprintf($this->language->get('text_subscription_duration'), $product['subscription']['price_text'], $product['subscription']['cycle'], $product['subscription']['frequency'], $product['subscription']['duration']);
 				} else {
-					$subscription .= sprintf($this->language->get('text_subscription_cancel'), $product['subscription']['price_text'], $product['subscription']['cycle'], $product['subscription']['frequency_text']);
+					$subscription .= sprintf($this->language->get('text_subscription_cancel'), $product['subscription']['price_text'], $product['subscription']['cycle'], $product['subscription']['frequency']);
 				}
 			}
 
+			$price_was = '';
+
+			if ($price_status && empty($product['option'])) {
+				$pinfo = $this->model_catalog_product->getProduct((int)$product['product_id']);
+
+				if ($pinfo && (float)$pinfo['special'] > 0) {
+					$price_was = $this->currency->format($this->tax->calculate((float)$pinfo['price'], (int)$pinfo['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+				}
+			}
+
+			if ($product['image'] && is_file(DIR_IMAGE . html_entity_decode($product['image'], ENT_QUOTES, 'UTF-8'))) {
+				$thumb = $this->model_tool_image->resize(html_entity_decode($product['image'], ENT_QUOTES, 'UTF-8'), $this->config->get('config_image_cart_width'), $this->config->get('config_image_cart_height'));
+			} else {
+				$thumb = $this->model_tool_image->resize('placeholder.png', $this->config->get('config_image_cart_width'), $this->config->get('config_image_cart_height'));
+			}
+
 			$data['products'][] = [
-				'subscription' => $subscription,
-				'price'        => $price_status ? $product['price_text'] : '',
-				'total'        => $price_status ? $product['total_text'] : '',
-				'href'         => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product['product_id'])
+				'thumb'          => $thumb,
+				'subscription'   => $subscription,
+				'stock'          => $product['stock_status'] ? true : !(!$this->config->get('config_stock_checkout') || $this->config->get('config_stock_warning')),
+				'price'          => $price_status ? $product['price_text'] : '',
+				'price_was'      => $price_was,
+				'total'          => $price_status ? $product['total_text'] : '',
+				'href'           => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product['product_id'])
 			] + $product;
 		}
 
@@ -372,6 +407,13 @@ class Confirm extends \Opencart\System\Engine\Controller {
 		// Comment and callback data
 		$data['comment'] = isset($this->session->data['comment']) ? $this->session->data['comment'] : '';
 		$data['call_me'] = isset($this->session->data['call_me']) ? $this->session->data['call_me'] : 0;
+
+		$data['language'] = $this->config->get('config_language');
+		$data['heading_order_summary'] = $this->language->get('heading_order_summary');
+		$data['heading_extra'] = $this->language->get('heading_extra');
+		$data['text_call_me_confirm'] = $this->language->get('text_call_me_confirm');
+		$data['text_comment_label'] = $this->language->get('text_comment_label');
+		$data['text_comment_placeholder'] = $this->language->get('text_comment_placeholder');
 
 		// Validate if payment method has been set.
 		return $this->load->view('checkout/confirm', $data);

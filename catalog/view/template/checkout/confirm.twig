@@ -1,69 +1,81 @@
-<h3 class="mb-3">Деталі замовлення</h3>
-<div class="table-responsive">
-  <table class="table table-bordered table-hover">
-    <thead>
-      <tr>
-        <th>{{ column_product }}</th>
-        <th class="text-end">{{ column_total }}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for product in products %}
+<div id="checkout-confirm-order" class="checkout-confirm-order">
+  <h3 class="mb-3">{{ heading_order_summary }}</h3>
+  <div id="output-checkout-confirm" class="table-responsive">
+    <table class="table table-bordered checkout-confirm-table">
+      <thead>
         <tr>
-          <td>{{ product.quantity }}x <a href="{{ product.href }}">{{ product.name }}</a>
-
-            <ul class="list-unstyled mb-0">
-              {% for option in product.option %}
-                <li>
-                  <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
-                </li>
-              {% endfor %}
-
-              {% if product.subscription %}
-                <li>
-                  <small> - {{ text_subscription }}: {{ product.subscription }}</small>
-                </li>
-              {% endif %}
-
-              {% if product.reward %}
-                <li>
-                  <small> - {{ text_points }}: {{ product.reward }}</small>
-                </li>
-              {% endif %}
-            </ul>
-
-          </td>
-          <td class="text-end">{{ product.total }}</td>
+          <th class="text-center">{{ column_image }}</th>
+          <th>{{ column_product }}</th>
+          <th class="text-end align-middle">{{ column_price }}</th>
+          <th class="text-end align-middle">{{ column_total }}</th>
         </tr>
-      {% endfor %}
-    </tbody>
-    <tfoot>
-      {% for total in totals %}
-        <tr>
-          <td class="text-end"><strong>{{ total.title }}</strong></td>
-          <td class="text-end">{{ total.text }}</td>
-        </tr>
-      {% endfor %}
-    </tfoot>
-  </table>
+      </thead>
+      <tbody>
+        {% for product in products %}
+          <tr>
+            <td class="text-center align-middle">
+              {% if product.thumb %}
+                <a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-thumbnail"/></a>
+              {% else %}
+                <span class="text-muted d-inline-block" style="min-width: 50px; min-height: 50px;"></span>
+              {% endif %}
+            </td>
+            <td class="text-start text-wrap align-middle">
+              <span class="fw-semibold">{{ product.quantity }}x</span> <a href="{{ product.href }}">{{ product.name }}</a>{% if not product.stock %} <span class="text-danger">***</span>{% endif %}
+              {% if product.cart_pack %}
+                <div class="cart-pack-summary mt-1 small text-muted">{{ product.cart_pack.pack_label }}</div>
+              {% endif %}
+              <ul class="list-unstyled mb-0{% if product.cart_pack %} mt-1{% endif %}">
+                {% for option in product.option %}
+                  {% if not product.cart_pack %}
+                    <li>
+                      <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+                {% if product.subscription %}
+                  <li>
+                    <small> - {{ text_subscription }}: {{ product.subscription }}</small>
+                  </li>
+                {% endif %}
+                {% if product.reward %}
+                  <li>
+                    <small> - {{ text_points }}: {{ product.reward }}</small>
+                  </li>
+                {% endif %}
+              </ul>
+            </td>
+            <td class="text-end align-middle cart-price-cell">{% if product.cart_pack %}<div class="cart-price-cell__main">{% if product.cart_pack.line_was %}<span class="price-display__sale">{{ product.cart_pack.line_sale }}</span> <span class="price-display__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}</div>{% if product.cart_pack.tier_subtitle %}<div class="cart-price-cell__tiers small text-muted mt-1 text-wrap">{{ product.cart_pack.tier_subtitle }}</div>{% endif %}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
+            <td class="text-end align-middle">{{ product.total }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot id="checkout-confirm-total">
+        {% for total in totals %}
+          <tr>
+            <td colspan="3" class="text-end align-middle"><strong>{{ total.title }}</strong></td>
+            <td class="text-end align-middle">{{ total.text }}</td>
+          </tr>
+        {% endfor %}
+      </tfoot>
+    </table>
+  </div>
 </div>
 
 {# Comment and callback section - for all users (guests and logged in) #}
 <div class="mt-4 mb-4">
-  <h4>Додаткова інформація</h4>
-  
-  {# Callback checkbox #}
+  <h4>{{ heading_extra }}</h4>
+
   <div class="mb-3">
     <div class="form-check form-switch">
       <input type="checkbox" name="call_me" value="1" id="input-call-me-confirm" class="form-check-input"{% if call_me %} checked{% endif %}/>
-      <label for="input-call-me-confirm" class="form-check-label"><strong>Передзвоніть мені для уточнення деталей</strong></label>
+      <label for="input-call-me-confirm" class="form-check-label"><strong>{{ text_call_me_confirm }}</strong></label>
     </div>
   </div>
-  
-  {# Order comment #}
+
   <div class="mb-3">
-    <label for="input-comment-confirm" class="form-label"><strong>Додайте коментар до вашого замовлення</strong></label>
-    <textarea name="comment" rows="4" id="input-comment-confirm" class="form-control" placeholder="Додайте коментар до вашого замовлення">{{ comment }}</textarea>
+    <label for="input-comment-confirm" class="form-label"><strong>{{ text_comment_label }}</strong></label>
+    <textarea name="comment" rows="4" id="input-comment-confirm" class="form-control" placeholder="{{ text_comment_placeholder }}">{{ comment }}</textarea>
   </div>
 </div>
 
@@ -74,15 +86,13 @@
 </div>
 
 <script type="text/javascript"><!--
-// Save comment and callback when changed
 $(document).ready(function() {
     var language = '{{ language }}';
     var commentTimer = '';
-    
-    // Save comment
+
     $('#input-comment-confirm').on('keydown', function() {
         clearTimeout(commentTimer);
-        
+
         commentTimer = setTimeout(function() {
             $.ajax({
                 url: 'index.php?route=checkout/payment_method.comment&language=' + language,
@@ -90,7 +100,6 @@ $(document).ready(function() {
                 dataType: 'json',
                 data: { comment: $('#input-comment-confirm').val() },
                 success: function(json) {
-                    // Comment saved silently
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
                     console.log('Error saving comment:', thrownError);
@@ -98,8 +107,7 @@ $(document).ready(function() {
             });
         }, 500);
     });
-    
-    // Save callback preference
+
     $('#input-call-me-confirm').on('change', function() {
         $.ajax({
             url: 'index.php?route=checkout/payment_method.comment&language=' + language,
@@ -107,7 +115,6 @@ $(document).ready(function() {
             dataType: 'json',
             data: { call_me: $(this).is(':checked') ? 1 : 0 },
             success: function(json) {
-                // Callback preference saved silently
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.log('Error saving callback preference:', thrownError);
