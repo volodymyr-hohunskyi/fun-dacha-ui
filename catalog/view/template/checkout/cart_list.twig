@@ -21,10 +21,10 @@
         <tr>
           <th class="text-center">{{ column_image }}</th>
           <th>{{ column_name }}</th>
-          <th class="text-end">{{ column_price }}</th>
+          <th class="text-end align-middle">{{ column_price }}</th>
           <th class="text-center">{{ column_quantity }}</th>
           <th class="text-center"></th>
-          <th class="text-end">{{ column_total }}</th>
+          <th class="text-end align-middle">{{ column_total }}</th>
         </tr>
       </thead>
       <tbody>
@@ -61,7 +61,7 @@
                 {% endif %}
               </ul>
             </td>
-            <td class="text-end cart-price-cell">{% if product.cart_pack %}{% if product.cart_pack.unit_was %}<span class="price-display__sale">{{ product.cart_pack.unit_sale }}</span> <span class="price-display__was">{{ product.cart_pack.unit_was }}</span>{% else %}{{ product.cart_pack.unit_sale }}{% endif %}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
+            <td class="text-end align-middle cart-price-cell">{% if product.cart_pack %}{% if product.cart_pack.unit_was %}<span class="price-display__sale">{{ product.cart_pack.unit_sale }}</span> <span class="price-display__was">{{ product.cart_pack.unit_was }}</span>{% else %}{{ product.cart_pack.unit_sale }}{% endif %}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
             <td class="text-center align-middle cart-table__cell-qty">
               <form method="post" data-oc-target="#shopping-cart" id="form-quantity-{{ product.cart_id }}" class="mb-0">
                 <div class="input-group input-group-qty-compact d-inline-flex justify-content-center flex-nowrap" style="width: auto;">
@@ -77,15 +77,15 @@
             <td class="text-center align-middle cart-table__cell-remove" style="padding-left: 10px; padding-right: 10px;">
               <a href="{{ product.remove }}" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i class="fa-solid fa-circle-xmark"></i></a>
             </td>
-            <td class="text-end">{{ product.total }}</td>
+            <td class="text-end align-middle">{{ product.total }}</td>
           </tr>
         {% endfor %}
       </tbody>
       <tfoot id="checkout-total">
         {% for total in totals %}
           <tr>
-            <td colspan="5" class="text-end"><strong>{{ total.title }}</strong></td>
-            <td class="text-end">{{ total.text }}</td>
+            <td colspan="5" class="text-end align-middle"><strong>{{ total.title }}</strong></td>
+            <td class="text-end align-middle">{{ total.text }}</td>
           </tr>
         {% endfor %}
       </tfoot>
