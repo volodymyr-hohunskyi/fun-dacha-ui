@@ -896,39 +896,53 @@ footer.freshgo-footer {
   vertical-align: -0.05em;
 }
 
-/* PDP: qty stacked above full-width add to cart; stepper slightly larger than cart */
+/* PDP: qty stacked above full-width add to cart; picker 2× prior width, height matches btn-lg */
 #product-info .pdp-qty-cart-row {
   width: 100%;
 }
 
+/* Brand btn-lg vertical: 14px + 14px + ~22.4px text ≈ 3.15rem */
 #product-info .pdp-qty-cart-row .quantity-group.input-group-qty-compact {
-  max-width: 8.75rem;
+  max-width: 17.5rem;
   width: 100%;
   align-self: flex-start;
   box-sizing: border-box;
+  min-height: 3.15rem;
+  align-items: stretch;
 }
 
 #product-info .pdp-qty-cart-row .input-group-qty-compact .btn-qty-step {
-  padding: 0.22rem 0.5rem !important;
-  min-width: 1.85rem;
+  padding: 0 0.75rem !important;
+  min-width: 2.75rem;
+  font-size: 1rem !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
 }
 
 #product-info .pdp-qty-cart-row .input-group-qty-compact .form-control,
 #product-info .pdp-qty-cart-row .input-group-qty-compact .quantity-input {
-  font-size: 0.875rem;
-  padding: 0.22rem 0.4rem;
-  line-height: 1.4;
+  font-family: var(--font-heading);
+  font-size: var(--size-button);
+  font-weight: var(--weight-heading-semibold);
+  line-height: var(--line-height-button);
+  padding: 0 0.5rem;
+  align-self: stretch;
+  height: auto;
 }
 
 #product-info .pdp-qty-cart-row .btn-qty-step i {
-  font-size: 0.72rem;
-  vertical-align: -0.06em;
+  font-size: 0.8rem;
+  vertical-align: 0;
 }
 
 #product-info .pdp-qty-cart-row .add-to-cart-btn {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  min-height: 3.15rem;
 }
 
 /* Cart: continue + checkout — same height (override global #checkout-button CTA padding vs btn-light) */
