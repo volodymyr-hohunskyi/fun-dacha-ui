@@ -10,7 +10,6 @@ $_['text_subscription']         = 'Abonnement';
 $_['text_points']               = 'Points de fidélité';
 
 // Colonne
-$_['column_image']              = 'Image';
 $_['column_product']            = 'Produit';
 $_['column_quantity']           = 'Quantité';
 $_['column_price']              = 'Prix unitaire';

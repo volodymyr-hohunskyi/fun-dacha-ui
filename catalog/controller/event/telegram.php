@@ -94,6 +94,18 @@ class Telegram extends \Opencart\System\Engine\Controller {
             // Format product number - use emoji for 1-9, regular numbers for 10+
             $product_number = ($i <= 9) ? "{$i}️⃣" : "{$i}.";
             $message .= "{$product_number} {$product['name']}\n";
+
+            $order_options = $this->model_checkout_order->getOptions($order_id, (int)$product['order_product_id']);
+            foreach ($order_options as $option) {
+                $opt_label = trim((string)($option['name'] ?? ''));
+                $opt_value = $this->sanitizeTelegramOptionValue((string)($option['value'] ?? ''));
+                if ($opt_value === '') {
+                    continue;
+                }
+                $line = $opt_label !== '' ? "{$opt_label}: {$opt_value}" : $opt_value;
+                $message .= "   • {$line}\n";
+            }
+
             $message .= "Кількість: {$product['quantity']} × {$price} {$order['currency_code']}\n";
 
             if ($product_url) {
@@ -216,6 +228,17 @@ class Telegram extends \Opencart\System\Engine\Controller {
     private function logTelegram(string $message): void {
         $log = new \Opencart\System\Library\Log('telegram.log');
         $log->write('[Telegram] ' . $message);
+    }
+
+    /**
+     * Strip HTML / normalize whitespace for plain-text Telegram lines (options may contain markup).
+     */
+    private function sanitizeTelegramOptionValue(string $value): string {
+        $value = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $value = strip_tags($value);
+        $value = preg_replace('/\s+/u', ' ', trim($value));
+
+        return $value;
     }
 }
 

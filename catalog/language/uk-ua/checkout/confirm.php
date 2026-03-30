@@ -10,7 +10,6 @@ $_['text_subscription']        = 'Підписка';
 $_['text_points']              = 'Бонусні бали';
 
 // Column
-$_['column_image']             = 'Зображення';
 $_['column_product']           = 'Товар';
 $_['column_quantity']          = 'Кількість';
 $_['column_price']             = 'Ціна за одиницю';
