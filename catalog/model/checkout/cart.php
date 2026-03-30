@@ -215,7 +215,7 @@ class Cart extends \Opencart\System\Engine\Model {
 	 * @param array<int, array<string, mixed>> $option_data
 	 * @param array<string, mixed>             $product_info
 	 *
-	 * @return array{has_pack: bool, pack_label?: string, unit_text?: string, line_text?: string}
+	 * @return array{has_pack: bool, pack_label?: string, unit_sale?: string, unit_was?: string}
 	 */
 	private function buildCartPackPricingRow(array $product, array $option_data, array $product_info): array {
 		if (($this->config->get('config_customer_price') && !$this->customer->isLogged()) || !isset($product_info['raw_price'])) {
@@ -252,21 +252,14 @@ class Cart extends \Opencart\System\Engine\Model {
 
 			$list_unit_f = $this->currency->format($this->tax->calculate($list_unit, $tax_class_id, $tax_mode), $this->session->data['currency']);
 			$sale_unit_f = $this->currency->format($this->tax->calculate($sale_unit, $tax_class_id, $tax_mode), $this->session->data['currency']);
-			$list_line_f = $this->currency->format($this->tax->calculate($list_line, $tax_class_id, $tax_mode), $this->session->data['currency']);
-			$sale_line_f = $this->currency->format($this->tax->calculate($sale_line, $tax_class_id, $tax_mode), $this->session->data['currency']);
-
 			$diff_u = abs($list_unit - $sale_unit);
-			$diff_l = abs($list_line - $sale_line);
-			$show_arrow = ($diff_u > 0.0001) || ($diff_l > 0.01);
-
-			$unit_text = $show_arrow ? ($list_unit_f . ' → ' . $sale_unit_f) : $sale_unit_f;
-			$line_text = $show_arrow ? ($list_line_f . ' → ' . $sale_line_f) : $sale_line_f;
+			$show_unit_was = ($diff_u > 0.0001);
 
 			return [
-				'has_pack'   => true,
-				'pack_label' => PackLabel::ukPackCount($pack_size),
-				'unit_text'  => $unit_text,
-				'line_text'  => $line_text,
+				'has_pack'    => true,
+				'pack_label'  => PackLabel::ukPackCount($pack_size),
+				'unit_sale'   => $sale_unit_f,
+				'unit_was'    => $show_unit_was ? $list_unit_f : '',
 			];
 		}
 

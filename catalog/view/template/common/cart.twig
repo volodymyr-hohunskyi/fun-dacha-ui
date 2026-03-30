@@ -10,7 +10,7 @@
               <td><a href="{{ product.href }}">{{ product.name }}</a>
                 {% if product.cart_pack %}
                 <div class="small text-muted">{{ product.cart_pack.pack_label }}</div>
-                <div class="small">{{ product.cart_pack.unit_text }}</div>
+                <div class="small">{% if product.cart_pack.unit_was %}<span class="price-display__sale">{{ product.cart_pack.unit_sale }}</span> <span class="price-display__was">{{ product.cart_pack.unit_was }}</span>{% else %}{{ product.cart_pack.unit_sale }}{% endif %}</div>
                 {% endif %}
                 <ul class="list-unstyled mb-0">
                   <li>
@@ -36,7 +36,7 @@
                 </ul>
               </td>
               <td class="text-end text-nowrap">x {{ product.quantity }}</td>
-              <td class="text-end">{% if product.cart_pack %}{{ product.cart_pack.line_text }}{% else %}{{ product.total }}{% endif %}</td>
+              <td class="text-end">{{ product.total }}</td>
               <td class="text-end">
                 <form action="{{ remove }}" method="post" data-oc-toggle="ajax" data-oc-load="{{ list }}" data-oc-target="#cart">
                   <input type="hidden" name="key" value="{{ product.cart_id }}">

@@ -270,7 +270,7 @@
                 </div>
               {% endif %}
 <div class="mb-3">
-  <div class="d-flex flex-column gap-2">
+  <div class="d-flex flex-row gap-2 align-items-stretch pdp-qty-cart-row">
 
     <!-- Quantity -->
     <div class="input-group input-group-qty-compact quantity-group">
@@ -372,11 +372,6 @@
     {{ column_right }}
   </div>
 </div>
-<style>
-.quantity-group {
-  max-width: 200px;
-}
-</style>
 <script type="text/javascript"><!--
 $('#input-subscription').on('change', function(e) {
     var element = this;
