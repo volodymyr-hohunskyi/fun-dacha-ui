@@ -209,13 +209,13 @@ class Cart extends \Opencart\System\Engine\Model {
 
 
 	/**
-	 * Cart table row: pack label + list→sale unit + list→sale line total (matches PDP math).
+	 * Cart table row: pack label + sale for full option line; “was” = N × catalog list for 1 pack (same as 1-pack strikethrough × quantity of packs).
 	 *
 	 * @param array<string, mixed>             $product
 	 * @param array<int, array<string, mixed>> $option_data
 	 * @param array<string, mixed>             $product_info
 	 *
-	 * @return array{has_pack: bool, pack_label?: string, unit_sale?: string, unit_was?: string}
+	 * @return array{has_pack: bool, pack_label?: string, line_sale?: string, line_was?: string}
 	 */
 	private function buildCartPackPricingRow(array $product, array $option_data, array $product_info): array {
 		if (($this->config->get('config_customer_price') && !$this->customer->isLogged()) || !isset($product_info['raw_price'])) {
@@ -225,7 +225,6 @@ class Cart extends \Opencart\System\Engine\Model {
 		$catalog_base = (float)($product_info['catalog_base_price'] ?? $product_info['raw_price']);
 		$special = (float)($product_info['special'] ?? 0);
 		$tax_class_id = (int)($product['tax_class_id'] ?? 0);
-		$qty = max(1, (int)($product['quantity'] ?? 1));
 		$tax_mode = $this->config->get('config_tax');
 
 		foreach ($option_data as $opt) {
@@ -235,8 +234,6 @@ class Cart extends \Opencart\System\Engine\Model {
 				continue;
 			}
 
-			$modifier = PackPricing::optionModifierAmount((float)($opt['price'] ?? 0), (string)($opt['price_prefix'] ?? '+'));
-			$price_after = PackPricing::priceAfterOption($catalog_base, $modifier);
 			$row = PackPricing::computePackDisplayRow(
 				$catalog_base,
 				(float)($opt['price'] ?? 0),
@@ -245,21 +242,19 @@ class Cart extends \Opencart\System\Engine\Model {
 				$pack_size
 			);
 
-			$list_unit = $price_after / (float)$pack_size;
-			$sale_unit = $row['unit_price'];
-			$list_line = $price_after * $qty;
-			$sale_line = $row['final_price'] * $qty;
+			// Sale = full option line after special (e.g. 5 packs → ₴50.40). “Was” = N × 1-pack catalog list (e.g. 5×₴14 = ₴70), not option list from modifier alone.
+			$list_line = $catalog_base * (float) $pack_size;
+			$sale_one = $row['final_price'];
 
-			$list_unit_f = $this->currency->format($this->tax->calculate($list_unit, $tax_class_id, $tax_mode), $this->session->data['currency']);
-			$sale_unit_f = $this->currency->format($this->tax->calculate($sale_unit, $tax_class_id, $tax_mode), $this->session->data['currency']);
-			$diff_u = abs($list_unit - $sale_unit);
-			$show_unit_was = ($diff_u > 0.0001);
+			$list_one_f = $this->currency->format($this->tax->calculate($list_line, $tax_class_id, $tax_mode), $this->session->data['currency']);
+			$sale_one_f = $this->currency->format($this->tax->calculate($sale_one, $tax_class_id, $tax_mode), $this->session->data['currency']);
+			$show_line_was = (abs($list_line - $sale_one) > 0.0001);
 
 			return [
-				'has_pack'    => true,
-				'pack_label'  => PackLabel::ukPackCount($pack_size),
-				'unit_sale'   => $sale_unit_f,
-				'unit_was'    => $show_unit_was ? $list_unit_f : '',
+				'has_pack'   => true,
+				'pack_label' => PackLabel::ukPackCount($pack_size),
+				'line_sale'  => $sale_one_f,
+				'line_was'   => $show_line_was ? $list_one_f : '',
 			];
 		}
 

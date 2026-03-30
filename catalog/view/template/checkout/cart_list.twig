@@ -61,7 +61,7 @@
                 {% endif %}
               </ul>
             </td>
-            <td class="text-end align-middle cart-price-cell">{% if product.cart_pack %}{% if product.cart_pack.unit_was %}<span class="price-display__sale">{{ product.cart_pack.unit_sale }}</span> <span class="price-display__was">{{ product.cart_pack.unit_was }}</span>{% else %}{{ product.cart_pack.unit_sale }}{% endif %}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
+            <td class="text-end align-middle cart-price-cell">{% if product.cart_pack %}{% if product.cart_pack.line_was %}<span class="price-display__sale">{{ product.cart_pack.line_sale }}</span> <span class="price-display__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
             <td class="text-center align-middle cart-table__cell-qty">
               <form method="post" data-oc-target="#shopping-cart" id="form-quantity-{{ product.cart_id }}" class="mb-0">
                 <div class="input-group input-group-qty-compact d-inline-flex justify-content-center flex-nowrap" style="width: auto;">

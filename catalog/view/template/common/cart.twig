@@ -10,7 +10,7 @@
               <td><a href="{{ product.href }}">{{ product.name }}</a>
                 {% if product.cart_pack %}
                 <div class="small text-muted">{{ product.cart_pack.pack_label }}</div>
-                <div class="small">{% if product.cart_pack.unit_was %}<span class="price-display__sale">{{ product.cart_pack.unit_sale }}</span> <span class="price-display__was">{{ product.cart_pack.unit_was }}</span>{% else %}{{ product.cart_pack.unit_sale }}{% endif %}</div>
+                <div class="small">{% if product.cart_pack.line_was %}<span class="price-display__sale">{{ product.cart_pack.line_sale }}</span> <span class="price-display__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}</div>
                 {% endif %}
                 <ul class="list-unstyled mb-0">
                   <li>
