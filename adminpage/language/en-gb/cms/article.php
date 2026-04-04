@@ -10,6 +10,7 @@ $_['text_add']                = 'Add Article';
 $_['text_edit']               = 'Edit Article';
 $_['text_default']            = 'Default';
 $_['text_keyword']            = 'Do not use spaces, instead replace spaces with - and make sure the SEO URL is globally unique.';
+$_['text_export']             = 'Download all articles as Excel (same layout as blog import)';
 
 // Column
 $_['column_name']             = 'Article Name';

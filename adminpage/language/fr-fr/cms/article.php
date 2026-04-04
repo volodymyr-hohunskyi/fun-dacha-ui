@@ -10,6 +10,7 @@ $_['text_add']                = 'Ajouter un Article';
 $_['text_edit']               = 'Modifier l\'Article';
 $_['text_default']            = 'Par Défaut';
 $_['text_keyword']            = 'N\'utilisez pas d\'espaces, remplacez-les par des - et assurez-vous que l\'URL SEO soit unique à l\'échelle mondiale.';
+$_['text_export']             = 'Télécharger tous les articles en Excel (même format que l’import blog)';
 
 // Colonne
 $_['column_name']             = 'Nom de l\'Article';

@@ -44,6 +44,7 @@ class Article extends \Opencart\System\Engine\Controller {
 
 		$data['add'] = $this->url->link('cms/article.form', 'user_token=' . $this->session->data['user_token'] . $url);
 		$data['delete'] = $this->url->link('cms/article.delete', 'user_token=' . $this->session->data['user_token']);
+		$data['export'] = $this->url->link('cms/article.export', 'user_token=' . $this->session->data['user_token']);
 
 		$data['list'] = $this->getList();
 
@@ -512,5 +513,183 @@ class Article extends \Opencart\System\Engine\Controller {
 
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
+	}
+
+	/**
+	 * Export all topics and articles as .xlsx (same layout as shared blog import: Topics + Articles sheets).
+	 *
+	 * @return void
+	 */
+	public function export(): void {
+		if (!$this->user->hasPermission('access', 'cms/article')) {
+			$this->response->addHeader('HTTP/1.1 403 Forbidden');
+			$this->response->setOutput('Permission denied');
+
+			return;
+		}
+
+		require_once DIR_EXTENSION . 'export_import/system/library/export_import/vendor/autoload.php';
+
+		$this->load->model('cms/topic');
+		$this->load->model('cms/article');
+		$this->load->model('design/seo_url');
+		$this->load->model('localisation/language');
+
+		$languages = $this->model_localisation_language->getLanguages();
+		$config_language_id = (int)$this->config->get('config_language_id');
+		$default_lang_code = '';
+
+		foreach ($languages as $lang) {
+			if ((int)$lang['language_id'] === $config_language_id) {
+				$default_lang_code = $lang['code'];
+				break;
+			}
+		}
+
+		if ($default_lang_code === '') {
+			$default_lang_code = 'en-gb';
+		}
+
+		$spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+		$topics_ws = $spreadsheet->getActiveSheet();
+		$topics_ws->setTitle('Topics');
+
+		$topics_ws->fromArray([
+			['topic_id', 'name(uk-ua)', 'sort_order', 'status', 'store_id', 'language_code'],
+		], null, 'A1');
+
+		$topic_rows = $this->model_cms_topic->getTopics();
+		$r = 2;
+
+		foreach ($topic_rows as $topic) {
+			$topic_id = (int)$topic['topic_id'];
+			$descs = $this->model_cms_topic->getDescriptions($topic_id);
+			$name = '';
+
+			if (isset($descs[$config_language_id]['name'])) {
+				$name = $descs[$config_language_id]['name'];
+			} elseif ($descs) {
+				$first = reset($descs);
+				$name = $first['name'] ?? '';
+			}
+
+			$stores = $this->model_cms_topic->getStores($topic_id);
+			$store_id = $stores ? (int)min($stores) : 0;
+
+			$topics_ws->setCellValue('A' . $r, $topic_id);
+			$topics_ws->setCellValue('B' . $r, $name);
+			$topics_ws->setCellValue('C' . $r, (int)$topic['sort_order']);
+			$topics_ws->setCellValue('D' . $r, (int)$topic['status']);
+			$topics_ws->setCellValue('E' . $r, $store_id);
+			$topics_ws->setCellValue('F' . $r, $default_lang_code);
+			$r++;
+		}
+
+		$articles_ws = $spreadsheet->createSheet();
+		$articles_ws->setTitle('Articles');
+
+		$articles_ws->fromArray([
+			[
+				'article_id',
+				'topic_name',
+				'name',
+				'description',
+				'image',
+				'author',
+				'status',
+				'store_id',
+				'language_id',
+				'meta_title',
+				'meta_description',
+				'meta_keyword',
+				'tag',
+				'date_added',
+				'seo_keyword',
+			],
+		], null, 'A1');
+
+		$sql = "SELECT `a`.`article_id`, `a`.`topic_id`, `a`.`author`, `a`.`status`, `a`.`date_added`, `ad`.`language_id`, `ad`.`image`, `ad`.`name`, `ad`.`description`, `ad`.`tag`, `ad`.`meta_title`, `ad`.`meta_description`, `ad`.`meta_keyword` FROM `" . DB_PREFIX . "article` `a` INNER JOIN `" . DB_PREFIX . "article_description` `ad` ON (`a`.`article_id` = `ad`.`article_id`) ORDER BY `a`.`article_id` ASC, `ad`.`language_id` ASC";
+
+		$query = $this->db->query($sql);
+
+		$topic_name_cache = [];
+		$ar = 2;
+
+		foreach ($query->rows as $row) {
+			$article_id = (int)$row['article_id'];
+			$topic_id = (int)$row['topic_id'];
+			$lang_id = (int)$row['language_id'];
+
+			if (!isset($topic_name_cache[$topic_id])) {
+				$topic_name_cache[$topic_id] = $this->model_cms_topic->getDescriptions($topic_id);
+			}
+
+			$td = $topic_name_cache[$topic_id];
+			$topic_name = '';
+
+			if (isset($td[$lang_id]['name'])) {
+				$topic_name = $td[$lang_id]['name'];
+			} elseif (isset($td[$config_language_id]['name'])) {
+				$topic_name = $td[$config_language_id]['name'];
+			} elseif ($td) {
+				$first = reset($td);
+				$topic_name = $first['name'] ?? '';
+			}
+
+			$stores = $this->model_cms_article->getStores($article_id);
+			$store_id = $stores ? (int)min($stores) : 0;
+
+			$seo_map = $this->model_design_seo_url->getSeoUrlsByKeyValue('article_id', (string)$article_id);
+			$seo_keyword = '';
+
+			if (isset($seo_map[$store_id][$lang_id])) {
+				$seo_keyword = $seo_map[$store_id][$lang_id];
+			} elseif (isset($seo_map[0][$lang_id])) {
+				$seo_keyword = $seo_map[0][$lang_id];
+			} else {
+				foreach ($seo_map as $_stores) {
+					if (isset($_stores[$lang_id])) {
+						$seo_keyword = $_stores[$lang_id];
+						break;
+					}
+				}
+			}
+
+			$date_added = $row['date_added'];
+
+			if ($date_added && strtotime((string)$date_added)) {
+				$date_added = date('Y-m-d H:i:s', strtotime((string)$date_added));
+			}
+
+			$articles_ws->setCellValue('A' . $ar, $article_id);
+			$articles_ws->setCellValue('B' . $ar, $topic_name);
+			$articles_ws->setCellValue('C' . $ar, $row['name']);
+			$articles_ws->setCellValue('D' . $ar, $row['description']);
+			$articles_ws->setCellValue('E' . $ar, $row['image']);
+			$articles_ws->setCellValue('F' . $ar, $row['author']);
+			$articles_ws->setCellValue('G' . $ar, (int)$row['status']);
+			$articles_ws->setCellValue('H' . $ar, $store_id);
+			$articles_ws->setCellValue('I' . $ar, $lang_id);
+			$articles_ws->setCellValue('J' . $ar, $row['meta_title']);
+			$articles_ws->setCellValue('K' . $ar, $row['meta_description']);
+			$articles_ws->setCellValue('L' . $ar, $row['meta_keyword']);
+			$articles_ws->setCellValue('M' . $ar, $row['tag']);
+			$articles_ws->setCellValue('N' . $ar, $date_added);
+			$articles_ws->setCellValue('O' . $ar, $seo_keyword);
+			$ar++;
+		}
+
+		$spreadsheet->setActiveSheetIndex(0);
+
+		$filename = 'blog_export_' . date('Y-m-d_His') . '.xlsx';
+
+		$this->response->addHeader('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		$this->response->addHeader('Content-Disposition: attachment; filename="' . $filename . '"');
+		$this->response->addHeader('Cache-Control: max-age=0');
+
+		$writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+		ob_start();
+		$writer->save('php://output');
+		$this->response->setOutput(ob_get_clean());
 	}
 }
