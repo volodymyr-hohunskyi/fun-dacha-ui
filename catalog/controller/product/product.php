@@ -50,11 +50,6 @@ class Product extends \Opencart\System\Engine\Controller {
 			if ($this->customer->isLogged()) {
 				// Could store in database here if needed
 			}
-			
-			$this->document->setTitle($product_info['meta_title']);
-			$this->document->setDescription($product_info['meta_description']);
-			$this->document->setKeywords($product_info['meta_keyword']);
-			$this->document->addLink($this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $product_id), 'canonical');
 
 			$data['breadcrumbs'] = [];
 
@@ -65,6 +60,8 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			// Category
 			$this->load->model('catalog/category');
+
+			$seo_category_name = '';
 
 			if (isset($this->request->get['path'])) {
 				$path = '';
@@ -94,6 +91,7 @@ class Product extends \Opencart\System\Engine\Controller {
 				$category_info = $this->model_catalog_category->getCategory($category_id);
 
 				if ($category_info) {
+					$seo_category_name = $category_info['name'];
 					$url = '';
 
 					if (isset($this->request->get['sort'])) {
@@ -116,6 +114,19 @@ class Product extends \Opencart\System\Engine\Controller {
 						'text' => $category_info['name'],
 						'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $this->request->get['path'] . $url)
 					];
+				}
+			}
+
+			if ($seo_category_name === '') {
+				$product_categories = $this->model_catalog_product->getCategories($product_id);
+
+				foreach ($product_categories as $pc) {
+					$ci = $this->model_catalog_category->getCategory((int)$pc['category_id']);
+
+					if ($ci && !empty($ci['name'])) {
+						$seo_category_name = $ci['name'];
+						break;
+					}
 				}
 			}
 
@@ -256,6 +267,8 @@ class Product extends \Opencart\System\Engine\Controller {
 				'href' => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . $url . '&product_id=' . $product_id)
 			];
 
+			$this->applyProductSeoFallbacks($product_info, $seo_category_name);
+
 			$this->document->setTitle($product_info['meta_title']);
 			$this->document->setDescription($product_info['meta_description']);
 			$this->document->setKeywords($product_info['meta_keyword']);
@@ -265,6 +278,7 @@ class Product extends \Opencart\System\Engine\Controller {
 			$this->document->addStyle('catalog/view/javascript/jquery/magnific/magnific-popup.css');
 
 			$data['heading_title'] = $product_info['name'];
+			$data['image_alt'] = $this->buildProductImageAlt((string)$product_info['name'], $seo_category_name);
 
 			$data['text_minimum'] = sprintf($this->language->get('text_minimum'), $product_info['minimum']);
 			$data['text_login'] = sprintf($this->language->get('text_login'), $this->url->link('account/login', 'language=' . $this->config->get('config_language')), $this->url->link('account/register', 'language=' . $this->config->get('config_language')));
@@ -1029,6 +1043,80 @@ class Product extends \Opencart\System\Engine\Controller {
 	private function formatFrenchPiecesPhrase(int $n): string {
 		return $n === 1 ? '1 pièce' : $n . ' pièces';
 	}
+
+	/**
+	 * Fill missing meta title, description, keywords for PDP (Ukrainian e-commerce patterns).
+	 *
+	 * @param array<string, mixed> $product_info
+	 */
+	private function applyProductSeoFallbacks(array &$product_info, string $category_name): void {
+		$store = (string)$this->config->get('config_name');
+		$name = trim((string)($product_info['name'] ?? ''));
+
+		if ($name === '') {
+			return;
+		}
+
+		if (!trim((string)($product_info['meta_title'] ?? ''))) {
+			$part = $name . ' — купити насіння';
+
+			if ($category_name !== '') {
+				$part .= ' (' . $category_name . ')';
+			}
+
+			$part .= ' | ' . $store;
+			$product_info['meta_title'] = $this->truncateUtf8Length($part, 60);
+		}
+
+		if (!trim((string)($product_info['meta_description'] ?? ''))) {
+			$plain = strip_tags(html_entity_decode((string)($product_info['description'] ?? ''), ENT_QUOTES, 'UTF-8'));
+			$plain = preg_replace('/\s+/u', ' ', $plain);
+			$plain = trim((string)$plain);
+			$snippet = $plain !== '' ? mb_substr($plain, 0, 140) : ($name . ' — якісне насіння для городу та теплиці.');
+			$product_info['meta_description'] = $this->truncateUtf8Length($snippet . ' Доставка по Україні. ' . $store . '.', 165);
+		}
+
+		if (!trim((string)($product_info['meta_keyword'] ?? ''))) {
+			$kw = ['насіння', 'купити', $name];
+
+			if ($category_name !== '') {
+				$kw[] = $category_name;
+			}
+
+			if (!empty($product_info['tag'])) {
+				foreach (explode(',', (string)$product_info['tag']) as $t) {
+					$t = trim($t);
+
+					if ($t !== '') {
+						$kw[] = $t;
+					}
+				}
+			}
+
+			$product_info['meta_keyword'] = implode(', ', array_unique($kw));
+		}
+	}
+
+	private function buildProductImageAlt(string $name, string $category_name): string {
+		if ($category_name !== '') {
+			return $name . ' — насіння, ' . $category_name;
+		}
+
+		return $name . ' — насіння';
+	}
+
+	/**
+	 * Truncate to max characters (UTF-8), add ellipsis if trimmed.
+	 */
+	private function truncateUtf8Length(string $text, int $max): string {
+		$text = trim($text);
+
+		if (mb_strlen($text) <= $max) {
+			return $text;
+		}
+
+		return mb_substr($text, 0, max(1, $max - 1)) . '…';
+	}
 	
 	/**
 	 * Generate Product Schema.org JSON-LD
@@ -1213,7 +1301,7 @@ class Product extends \Opencart\System\Engine\Controller {
 		
 		$og = [
 			'og:type' => 'product',
-			'og:title' => $product_info['name'],
+			'og:title' => !empty($product_info['meta_title']) ? $product_info['meta_title'] : $product_info['name'],
 			'og:url' => $product_url,
 			'og:site_name' => $this->config->get('config_name'),
 		];
@@ -1263,7 +1351,7 @@ class Product extends \Opencart\System\Engine\Controller {
 	private function generateTwitterTags(array $product_info, int $product_id, array $data): array {
 		$twitter = [
 			'twitter:card' => 'summary_large_image',
-			'twitter:title' => $product_info['name'],
+			'twitter:title' => !empty($product_info['meta_title']) ? $product_info['meta_title'] : $product_info['name'],
 		];
 		
 		// Description

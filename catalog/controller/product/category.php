@@ -83,6 +83,8 @@ class Category extends \Opencart\System\Engine\Controller {
 			
 			if (!empty($category_info['meta_keyword'])) {
 				$this->document->setKeywords($category_info['meta_keyword']);
+			} else {
+				$this->document->setKeywords('насіння, купити, ' . $category_info['name'] . ', Україна');
 			}
 			
 			// Add canonical tag for category (without filters/sort/page parameters)

@@ -39,6 +39,7 @@ class HomeSaleCarousel extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->load->language('common/home_sale_carousel');
 		$this->load->model('catalog/product');
+		$this->load->model('catalog/category');
 		$this->load->model('tool/image');
 
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -123,6 +124,19 @@ class HomeSaleCarousel extends \Opencart\System\Engine\Controller {
 				$desc = oc_substr($desc, 0, $len) . '..';
 			}
 
+			$path_str = '';
+			$cat_rows = $this->model_catalog_product->getCategories((int)$result['product_id']);
+			$rep = $this->representativeCategoryId($cat_rows);
+
+			if ($rep > 0) {
+				$path_str = $this->model_catalog_category->getCategoryPathString($rep);
+			}
+
+			$product_href = $this->url->link(
+				'product/product',
+				'language=' . $this->config->get('config_language') . '&product_id=' . $result['product_id'] . ($path_str !== '' ? '&path=' . $path_str : '')
+			);
+
 			$product_data = [
 				'thumb'       => $image,
 				'name'        => $result['name'],
@@ -132,7 +146,7 @@ class HomeSaleCarousel extends \Opencart\System\Engine\Controller {
 				'tax'         => $tax,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
 				'rating'      => (int)$result['rating'],
-				'href'        => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $result['product_id']),
+				'href'        => $product_href,
 			] + $result;
 
 			$data['products'][] = $this->load->controller('product/thumb', $product_data);

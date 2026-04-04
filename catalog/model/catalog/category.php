@@ -123,4 +123,27 @@ class Category extends \Opencart\System\Engine\Model {
 			return 0;
 		}
 	}
+
+	/**
+	 * Path segment for product/category URLs (e.g. 100_102), from oc_category_path.
+	 */
+	public function getCategoryPathString(int $category_id): string {
+		if ($category_id <= 0) {
+			return '';
+		}
+
+		$query = $this->db->query("SELECT `path_id` FROM `" . DB_PREFIX . "category_path` WHERE `category_id` = '" . (int)$category_id . "' ORDER BY `level` ASC");
+
+		if ($query->num_rows) {
+			$ids = [];
+
+			foreach ($query->rows as $row) {
+				$ids[] = (int)$row['path_id'];
+			}
+
+			return implode('_', $ids);
+		}
+
+		return (string)(int)$category_id;
+	}
 }

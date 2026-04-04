@@ -605,6 +605,7 @@ class Article extends \Opencart\System\Engine\Controller {
 				'tag',
 				'date_added',
 				'seo_keyword',
+				'product_links',
 			],
 		], null, 'A1');
 
@@ -661,10 +662,12 @@ class Article extends \Opencart\System\Engine\Controller {
 				$date_added = date('Y-m-d H:i:s', strtotime((string)$date_added));
 			}
 
+			[$description_body, $product_links_cell] = $this->splitBlogDescriptionForExport((string)$row['description']);
+
 			$articles_ws->setCellValue('A' . $ar, $article_id);
 			$articles_ws->setCellValue('B' . $ar, $topic_name);
 			$articles_ws->setCellValue('C' . $ar, $row['name']);
-			$articles_ws->setCellValue('D' . $ar, $row['description']);
+			$articles_ws->setCellValue('D' . $ar, $description_body);
 			$articles_ws->setCellValue('E' . $ar, $row['image']);
 			$articles_ws->setCellValue('F' . $ar, $row['author']);
 			$articles_ws->setCellValue('G' . $ar, (int)$row['status']);
@@ -676,6 +679,7 @@ class Article extends \Opencart\System\Engine\Controller {
 			$articles_ws->setCellValue('M' . $ar, $row['tag']);
 			$articles_ws->setCellValue('N' . $ar, $date_added);
 			$articles_ws->setCellValue('O' . $ar, $seo_keyword);
+			$articles_ws->setCellValue('P' . $ar, $product_links_cell);
 			$ar++;
 		}
 
@@ -691,5 +695,40 @@ class Article extends \Opencart\System\Engine\Controller {
 		ob_start();
 		$writer->save('php://output');
 		$this->response->setOutput(ob_get_clean());
+	}
+
+	/**
+	 * Remove catalog link block from description for export; return lines for column P.
+	 *
+	 * @return array{0: string, 1: string}
+	 */
+	private function splitBlogDescriptionForExport(string $html): array {
+		if (stripos($html, 'blog-product-links') === false) {
+			return [$html, ''];
+		}
+
+		if (!preg_match('/<div class="blog-product-links"[\s\S]*?<\/div>/s', $html, $m)) {
+			return [$html, ''];
+		}
+
+		$block = $m[0];
+		$body = trim(str_replace($block, '', $html));
+		$links = $this->extractProductLinksCellFromHtmlBlock($block);
+
+		return [$body, $links];
+	}
+
+	private function extractProductLinksCellFromHtmlBlock(string $block): string {
+		$lines = [];
+
+		if (preg_match_all('/<a\s+href="([^"]+)"[^>]*>([^<]*)<\/a>/', $block, $m, PREG_SET_ORDER)) {
+			foreach ($m as $match) {
+				$href = $match[1];
+				$label = html_entity_decode(trim($match[2]), ENT_QUOTES, 'UTF-8');
+				$lines[] = $href . '|' . $label;
+			}
+		}
+
+		return implode("\n", $lines);
 	}
 }

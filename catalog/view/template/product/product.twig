@@ -38,12 +38,12 @@
           <div class="col-sm">
             <div class="image magnific-popup">
               {% if thumb %}
-                <a href="{{ popup }}" title="{{ heading_title }}"><img src="{{ thumb }}" title="{{ heading_title }}" alt="{{ heading_title }}" class="img-thumbnail mb-3"/></a>
+                <a href="{{ popup }}" title="{{ heading_title }}"><img src="{{ thumb }}" title="{{ heading_title }}" alt="{{ image_alt|default(heading_title) }}" class="img-thumbnail mb-3" fetchpriority="high" decoding="async"/></a>
               {% endif %}
               {% if images %}
                 <div>
                   {% for image in images %}
-                    <a href="{{ image.popup }}" title="{{ heading_title }}"><img src="{{ image.thumb }}" title="{{ heading_title }}" alt="{{ heading_title }}" class="img-thumbnail"/></a>&nbsp;
+                    <a href="{{ image.popup }}" title="{{ heading_title }}"><img src="{{ image.thumb }}" title="{{ heading_title }}" alt="{{ image_alt|default(heading_title) }} — фото {{ loop.index }}" loading="lazy" decoding="async" class="img-thumbnail"/></a>&nbsp;
                   {% endfor %}
                 </div>
               {% endif %}

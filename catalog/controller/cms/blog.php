@@ -393,6 +393,8 @@ class Blog extends \Opencart\System\Engine\Controller {
 
 			$data['heading_title'] = $article_info['name'];
 
+			$data['category_carousel'] = $this->load->controller('common/blog_category_carousel');
+
 			// Image
 			$this->load->model('tool/image');
 
@@ -405,6 +407,8 @@ class Blog extends \Opencart\System\Engine\Controller {
 			$data['description'] = html_entity_decode($article_info['description'], ENT_QUOTES, 'UTF-8');
 			// SEO: internal links cluster to category pages (commercial) from informational content
 			$data['seo_shop_links'] = $this->load->controller('common/seo_shop_links');
+			// Same product carousel as homepage (specials)
+			$data['product_carousel'] = $this->load->controller('common/home_sale_carousel');
 			$data['author'] = $article_info['author'];
 			$data['filter_author'] = $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&author=' . $article_info['author']);
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($article_info['date_added']));

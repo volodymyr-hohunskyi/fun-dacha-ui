@@ -1705,6 +1705,30 @@ footer.freshgo-footer {
   color: #000 !important;
 }
 
+/* Blog article: category tag carousel (top of article) */
+#cms-blog .blog-category-tags-carousel {
+  padding: 0.5rem 0 0.25rem;
+}
+#cms-blog .blog-category-tags-carousel .blog-category-tag {
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#cms-blog .blog-category-tags-carousel .blog-category-carousel-control {
+  width: 2rem;
+  opacity: 0.85;
+}
+#cms-blog .blog-category-tags-carousel .carousel-indicators {
+  margin-bottom: 0.35rem;
+}
+
+/* Blog article: product sale carousel (same module as home) */
+#cms-blog .blog-article-product-carousel .home-sale-carousel-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
 /* Home sale carousel — same layout as reviews carousel */
 .home-sale-carousel-title {
   font-size: 1.125rem;
