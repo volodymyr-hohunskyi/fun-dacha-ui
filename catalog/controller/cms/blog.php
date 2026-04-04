@@ -393,8 +393,6 @@ class Blog extends \Opencart\System\Engine\Controller {
 
 			$data['heading_title'] = $article_info['name'];
 
-			$data['category_carousel'] = $this->load->controller('common/blog_category_carousel');
-
 			// Image
 			$this->load->model('tool/image');
 
@@ -405,26 +403,13 @@ class Blog extends \Opencart\System\Engine\Controller {
 			}
 
 			$data['description'] = html_entity_decode($article_info['description'], ENT_QUOTES, 'UTF-8');
-			// SEO: internal links cluster to category pages (commercial) from informational content
-			$data['seo_shop_links'] = $this->load->controller('common/seo_shop_links');
-			// Same product carousel as homepage (specials)
-			$data['product_carousel'] = $this->load->controller('common/home_sale_carousel');
+			$data['article_links_carousel'] = $this->load->controller('common/blog_article_links_carousel', [
+				'html'        => $data['description'],
+				'article_id'  => $article_id,
+			]);
 			$data['author'] = $article_info['author'];
 			$data['filter_author'] = $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&author=' . $article_info['author']);
 			$data['date_added'] = date($this->language->get('date_format_short'), strtotime($article_info['date_added']));
-
-			$data['tags'] = [];
-
-			if ($article_info['tag']) {
-				$tags = explode(',', trim($article_info['tag'], ','));
-
-				foreach ($tags as $tag) {
-					$data['tags'][] = [
-						'tag'  => trim($tag),
-						'href' => $this->url->link('cms/blog', 'language=' . $this->config->get('config_language') . '&tag=' . trim($tag))
-					];
-				}
-			}
 
 			$data['comment'] = $this->config->get('config_comment_status') ? $this->load->controller('cms/comment') : '';
 			$data['comment_total'] = $this->model_cms_article->getTotalComments($article_id, ['parent_id' => 0]);
