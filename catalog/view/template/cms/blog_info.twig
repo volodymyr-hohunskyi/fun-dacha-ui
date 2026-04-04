@@ -15,6 +15,7 @@
       {% endif %}
       <p>{{ text_by }} <a href="{{ filter_author }}">{{ author }}</a> - {{ date_added }} - {{ comment_total }} {{ text_comment }}</p>
       <div>{{ description }}</div>
+      {{ seo_shop_links }}
       {% if tags %}
         <p>{{ text_tags }}
           {% for tag in tags %}

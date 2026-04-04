@@ -18,12 +18,10 @@ class Home extends \Opencart\System\Engine\Controller {
 		$language_id = $this->config->get('config_language_id');
 		$store_name = $this->config->get('config_name');
 
-		// Set meta tags with enhanced SEO content (not displayed in UI)
-		// Title with SEO keywords
-		$meta_title = 'Насіння овочів та квітів - Купити якісне насіння в Україні | ' . $store_name;
-		
-		// Enhanced meta description with all SEO keywords (for search engines only)
-		$enhanced_description = 'Ласкаво просимо до інтернет-магазину ' . $store_name . '! Ми є провідним постачальником якісного насіння овочів та квітів в Україні. У нашому каталозі представлено понад 500 сортів та гібридів від перевірених виробників з гарантією якості та схожості. Широкий асортимент: насіння томатів, огірків, капусти, перцю, моркви, цибулі, буряків та багатьох інших культур. Якість гарантована, швидка доставка Новою Поштою по всій Україні, конкурентні ціни. Обирайте найкраще насіння для вашої ділянки та отримуйте багаті урожаї! Ми допоможемо вам створити ідеальний город з якісним насінням.';
+		// Default homepage SEO (overridden by System → Settings → Store description per language)
+		$meta_title = 'Інтернет-магазин насіння овочів та квітів в Україні | ' . $store_name;
+
+		$enhanced_description = 'Купити насіння овочів і квітів з доставкою по Україні. У каталозі ' . $store_name . ' — понад 500 сортів, перевірена схожість, добрива та супутні товари для городу. Швидка доставка Новою Поштою.';
 		
 		// Use configured meta tags if available, otherwise use enhanced SEO versions
 		if (isset($description[$language_id])) {

@@ -1,0 +1,14 @@
+{# Internal linking cluster: commercial categories — injected on blog article pages #}
+{% if links %}
+<aside class="seo-shop-links card border-secondary mt-4 mb-3" aria-label="{{ heading }}">
+  <div class="card-body">
+    <h2 class="h5 card-title">{{ heading }}</h2>
+    <p class="small text-muted mb-2">{{ text_intro }}</p>
+    <ul class="list-unstyled row row-cols-1 row-cols-sm-2 g-2 mb-0">
+      {% for link in links %}
+        <li class="col"><a href="{{ link.href }}">{{ link.name }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+</aside>
+{% endif %}

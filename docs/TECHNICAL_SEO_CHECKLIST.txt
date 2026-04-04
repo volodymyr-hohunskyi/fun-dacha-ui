@@ -1,0 +1,31 @@
+Technical SEO — fun-dacha (after deploying steps 1–4 code)
+================================================================
+
+Sitemap
+- URL: https://fun-dacha.com.ua/index.php?route=information/sitemap
+- robots.txt Sitemap line must match production HTTPS host.
+- After deploy: submit sitemap in Google Search Console (Indexing → Sitemaps).
+- Blog articles are included in XML (cms/blog.info URLs).
+
+robots.txt
+- Review Disallow rules vs. real URL structure; avoid blocking assets needed for rendering.
+- Search/cart/checkout/account remain disallowed — OK for SEO.
+
+Clean URLs
+- Admin → Design → SEO URL: enable and add keywords for categories, products, blog articles.
+
+On-page (manual, admin)
+- Per category/product/article: meta title, meta description, H1 (article title = H1; category name = H1).
+- Product/category images: descriptive alt in admin where available.
+
+Site speed (basics)
+- Compress images; lazy-load product images if not already.
+- Enable caching / CDN per hosting.
+- Lighthouse on home, one category, one blog article.
+
+Mobile
+- Test checkout and filters on a real phone; fix tap targets if needed.
+
+Monitoring
+- GSC: coverage, impressions, CTR, queries.
+- GA4: organic traffic, conversions.

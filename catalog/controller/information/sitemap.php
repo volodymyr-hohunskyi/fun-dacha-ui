@@ -85,7 +85,28 @@ class Sitemap extends \Opencart\System\Engine\Controller {
             $output .= '<lastmod>' . date('Y-m-d', strtotime($information['date_modified'] ?? 'now')) . '</lastmod>';
             $output .= '</url>';
         }
-        
+
+        // CMS blog articles (informational SEO pages)
+        $this->load->model('cms/article');
+        $articles = $this->model_cms_article->getArticles([
+            'start' => 0,
+            'limit' => 10000,
+            'sort'  => 'date_added',
+            'order' => 'DESC',
+        ]);
+        foreach ($articles as $article) {
+            $article_url = $this->url->link('cms/blog.info', 'language=' . $language . '&article_id=' . (int)$article['article_id'], true);
+            $lastmod = !empty($article['date_modified']) && $article['date_modified'] !== '0000-00-00 00:00:00'
+                ? $article['date_modified']
+                : ($article['date_added'] ?? 'now');
+            $output .= '<url>';
+            $output .= '<loc>' . htmlspecialchars($article_url, ENT_XML1, 'UTF-8') . '</loc>';
+            $output .= '<changefreq>weekly</changefreq>';
+            $output .= '<priority>0.65</priority>';
+            $output .= '<lastmod>' . date('Y-m-d', strtotime($lastmod)) . '</lastmod>';
+            $output .= '</url>';
+        }
+
         $output .= '</urlset>';
         
         $this->response->addHeader('Content-Type: application/xml; charset=utf-8');
