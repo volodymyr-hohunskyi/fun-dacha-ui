@@ -1707,6 +1707,52 @@ class ExportImport extends \Opencart\System\Engine\Model {
 
 
 	/**
+	 * Discounts sheet: type P uses OpenCart convention (10 = 10%). Excel "Percentage" cells expose
+	 * getValue() as 0.1 for 10% — that must become 10 or the storefront applies 0.1% and DB looks like 0.01/0.1.
+	 * Also parses formatted cells like "12,5 %" when present.
+	 *
+	 * @param mixed                                               $price        raw cell value from getCell()
+	 * @param mixed                                               $type         P / F / S
+	 * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet|null $worksheet
+	 * @param int                                                 $row_0based   same $i as uploadDiscounts loop (0 = header row)
+	 * @param int                                                 $price_col    1-based column index (Discounts: price is column 5)
+	 */
+	protected function normalizeProductDiscountPriceForImport( $price, $type, $worksheet, $row_0based, $price_col ) {
+		$t = strtoupper( trim( (string) $type ) );
+		if ($t === '') {
+			$t = 'P';
+		}
+		if ($t !== 'P') {
+			return is_numeric( $price ) ? (float) $price : 0.0;
+		}
+		$p = is_numeric( $price ) ? (float) $price : 0.0;
+		$spreadsheet_row = $row_0based + 1;
+		if ( $worksheet !== null && $spreadsheet_row >= 1 && $price_col >= 1 ) {
+			try {
+				$cell = $worksheet->getCellByColumnAndRow( $price_col, $spreadsheet_row );
+				if ( $cell !== null ) {
+					$fmt = $cell->getFormattedValue();
+					if ( is_string( $fmt ) && $fmt !== '' && preg_match( '/(\d+(?:[.,]\d+)?)\s*%/u', $fmt, $m ) ) {
+						$n = (float) str_replace( ',', '.', str_replace( ' ', '', $m[1] ) );
+						if ( $n > 0.0 ) {
+							return $n;
+						}
+					}
+				}
+			} catch ( \Throwable $e ) {
+				// use numeric heuristic below
+			}
+		}
+		// Internal fraction 0.1 → 10; 0.01 → 1 (1% in Excel).
+		if ( $p > 0.0 && $p <= 1.0 ) {
+			return $p * 100.0;
+		}
+
+		return $p;
+	}
+
+
+	/**
 	 * product_discount.special: 1 = sale/special row (storefront red price); 0 = volume / non-special tier.
 	 * Accepts TRUE/YES/1/on, Excel booleans, empty handled by caller defaults.
 	 */
@@ -1858,10 +1904,12 @@ class ExportImport extends \Opencart\System\Engine\Model {
 			$discount['customer_group'] = $customer_group;
 			$discount['quantity'] = $quantity;
 			$discount['priority'] = $priority;
-			$discount['price'] = $price;
 			if (version_compare(VERSION,'4.1.0.0','>=')) {
+				$discount['price'] = $this->normalizeProductDiscountPriceForImport( $price, $type, $data, $i, 5 );
 				$discount['type'] = $type;
 				$discount['special'] = $special;
+			} else {
+				$discount['price'] = $price;
 			}
 			$discount['date_start'] = $date_start;
 			$discount['date_end'] = $date_end;
