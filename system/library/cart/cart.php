@@ -225,19 +225,29 @@ class Cart {
 					}
 
 					// Product discounts: percentage (P) applies to (base + options), not to base alone — same order as pack pricing (OPTION → discount).
-					$product_discount_query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_discount` WHERE `product_id` = '" . (int)$cart['product_id'] . "' AND `customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `quantity` <= '" . (int)$product_total . "' AND ((`date_start` = '0000-00-00' OR `date_start` < NOW()) AND (`date_end` = '0000-00-00' OR `date_end` > NOW())) ORDER BY `quantity` DESC, `priority` ASC, `price` ASC LIMIT 1");
+					// Pick row by highest applicable quantity tier, then priority, then lowest effective line price (raw `price` ASC is wrong for P vs S).
+					$line_before_discount = $price;
+					$discount_rows = $this->db->query("SELECT * FROM `" . DB_PREFIX . "product_discount` WHERE `product_id` = '" . (int)$cart['product_id'] . "' AND `customer_group_id` = '" . (int)$this->config->get('config_customer_group_id') . "' AND `quantity` <= '" . (int)$product_total . "' AND ((`date_start` = '0000-00-00' OR `date_start` < NOW()) AND (`date_end` = '0000-00-00' OR `date_end` > NOW()))")->rows;
 
-					if ($product_discount_query->num_rows) {
-						if ($product_discount_query->row['type'] == 'F') {
-							// Fixed Price
-							$price = $product_discount_query->row['price'] + $option_price;
-						} elseif ($product_discount_query->row['type'] == 'P') {
-							// Percentage on full line (base + option modifiers)
-							$price -= ($price * ($product_discount_query->row['price'] / 100));
-						} elseif ($product_discount_query->row['type'] == 'S') {
-							// Subtract
-							$price -= $product_discount_query->row['price'];
-						}
+					if ($discount_rows) {
+						$max_q = max(array_map(static function ($r) {
+							return (int)$r['quantity'];
+						}, $discount_rows));
+						$candidates = array_values(array_filter($discount_rows, static function ($r) use ($max_q) {
+							return (int)$r['quantity'] === $max_q;
+						}));
+						usort($candidates, function ($a, $b) use ($line_before_discount, $option_price) {
+							$pa = (int)$a['priority'];
+							$pb = (int)$b['priority'];
+							if ($pa !== $pb) {
+								return $pa <=> $pb;
+							}
+							$ea = $this->cartLineAfterProductDiscount($line_before_discount, $option_price, $a);
+							$eb = $this->cartLineAfterProductDiscount($line_before_discount, $option_price, $b);
+
+							return $ea <=> $eb;
+						});
+						$price = $this->cartLineAfterProductDiscount($line_before_discount, $option_price, $candidates[0]);
 					}
 
 					// Stock
@@ -631,5 +641,26 @@ class Cart {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Unit line price after one product_discount row (F / P / S) — must match branch logic above callers.
+	 *
+	 * @param float                $line_before_discount base + option modifiers (or subscription line)
+	 * @param float                $option_price         sum of option modifiers (for type F)
+	 * @param array<string, mixed> $row                  product_discount row
+	 */
+	private function cartLineAfterProductDiscount(float $line_before_discount, float $option_price, array $row): float {
+		if ($row['type'] == 'F') {
+			return (float)$row['price'] + $option_price;
+		}
+		if ($row['type'] == 'P') {
+			return $line_before_discount - ($line_before_discount * ((float)$row['price'] / 100));
+		}
+		if ($row['type'] == 'S') {
+			return $line_before_discount - (float)$row['price'];
+		}
+
+		return (float)$row['price'] + $option_price;
 	}
 }
