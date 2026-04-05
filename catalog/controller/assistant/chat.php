@@ -173,8 +173,8 @@ class Chat extends \Opencart\System\Engine\Controller {
 		$categoriesById = [];
 
 		foreach ($db['categoryTree'] ?? [] as $cat) {
-			$name = $cat['name']['uk'] ?? $cat['name']['en'] ?? '';
-			$kw   = [mb_strtolower($name)];
+			$name = $this->model_assistant_assistant->getCategoryTreeDisplayName($cat);
+			$kw   = $name !== '' ? [mb_strtolower($name)] : [];
 
 			if (!empty($cat['slug'])) {
 				$kw[] = mb_strtolower(str_replace('-', ' ', (string) $cat['slug']));

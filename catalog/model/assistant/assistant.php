@@ -87,6 +87,19 @@ class Assistant extends \Opencart\System\Engine\Model {
 		return (string) $field;
 	}
 
+	/**
+	 * categoryTree entries use either flat `name` (string) or `name.uk` / `name.en` (see assistant_db.json).
+	 *
+	 * @param array<string, mixed> $cat
+	 */
+	public function getCategoryTreeDisplayName(array $cat): string {
+		if (isset($cat['name']) && is_array($cat['name'])) {
+			return (string)($cat['name']['uk'] ?? $cat['name']['en'] ?? '');
+		}
+
+		return (string)($cat['name'] ?? '');
+	}
+
 	public function getTopCategories(int $limit = 8): array {
 		$db     = $this->getDb();
 		$emojis = $this->getCategoryEmojis();
@@ -95,7 +108,7 @@ class Assistant extends \Opencart\System\Engine\Model {
 		foreach ($db['categoryTree'] ?? [] as $cat) {
 			$result[] = [
 				'id'    => $cat['id'],
-				'name'  => $cat['name']['uk'] ?? $cat['name']['en'] ?? '',
+				'name'  => $this->getCategoryTreeDisplayName($cat),
 				'slug'  => $cat['slug'] ?? '',
 				'emoji' => $emojis[$cat['id']] ?? '🌱',
 			];
@@ -635,17 +648,36 @@ class Assistant extends \Opencart\System\Engine\Model {
 			];
 		}
 
+		// Prefer longer keywords so e.g. «квіти» matches flowers, not a stray one-letter match from another row.
+		$pairs = [];
 		foreach ($nav['categories'] ?? [] as $navCat) {
 			foreach ($navCat['keywords'] ?? [] as $kw) {
-				if ($kw !== '' && mb_strpos($q, $kw) !== false) {
-					return [
-						'text'       => 'Переходьте до розділу ' . $navCat['name'] . ':',
-						'actions'    => [
-							['type' => 'navigateTo', 'url' => $navCat['url'], 'label' => 'Переглянути ' . $navCat['name'] . ' →'],
-						],
-						'categoryId' => (int) $navCat['categoryId'],
-					];
+				$kw = (string)$kw;
+				if ($kw === '' || mb_strlen($kw) < 3) {
+					continue;
 				}
+				$pairs[] = ['cat' => $navCat, 'kw' => $kw];
+			}
+		}
+
+		usort(
+			$pairs,
+			static function (array $a, array $b): int {
+				return mb_strlen($b['kw']) <=> mb_strlen($a['kw']);
+			}
+		);
+
+		foreach ($pairs as $pair) {
+			$kw     = $pair['kw'];
+			$navCat = $pair['cat'];
+			if (mb_strpos($q, $kw) !== false) {
+				return [
+					'text'       => 'Переходьте до розділу ' . $navCat['name'] . ':',
+					'actions'    => [
+						['type' => 'navigateTo', 'url' => $navCat['url'], 'label' => 'Переглянути ' . $navCat['name'] . ' →'],
+					],
+					'categoryId' => (int) $navCat['categoryId'],
+				];
 			}
 		}
 

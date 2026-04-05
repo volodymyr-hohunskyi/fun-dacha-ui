@@ -24,6 +24,23 @@ class SeoShopLinks extends \Opencart\System\Engine\Controller {
 			];
 		}
 
+		// Admin sort often puts «Томати» first; for blog internal links, surface «Квіти» before other categories.
+		$flower = [];
+		$rest   = [];
+		foreach ($links as $link) {
+			if (mb_stripos($link['name'], 'квіт') !== false) {
+				$flower[] = $link;
+			} else {
+				$rest[] = $link;
+			}
+		}
+		$sortByName = static function (array $a, array $b): int {
+			return strcmp(mb_strtolower($a['name'], 'UTF-8'), mb_strtolower($b['name'], 'UTF-8'));
+		};
+		usort($flower, $sortByName);
+		usort($rest, $sortByName);
+		$links = array_merge($flower, $rest);
+
 		$data['heading'] = $this->language->get('heading_title');
 		$data['text_intro'] = $this->language->get('text_intro');
 		$data['links'] = $links;
