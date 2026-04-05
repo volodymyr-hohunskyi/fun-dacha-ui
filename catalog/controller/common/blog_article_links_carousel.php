@@ -45,19 +45,11 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 	 * @return array<int, array{href: string, name: string}>
 	 */
 	private function extractCatalogLinks(string $html): array {
-		libxml_use_internal_errors(true);
-		$doc = new \DOMDocument();
-		@$doc->loadHTML('<?xml encoding="UTF-8">' . $html);
-		$xpath = new \DOMXPath($doc);
 		$seen = [];
 		$out = [];
 
-		foreach ($xpath->query('//a[@href]') as $a) {
-			if (!($a instanceof \DOMElement)) {
-				continue;
-			}
-
-			$href = trim($a->getAttribute('href'));
+		foreach ($this->iterateAnchors($html) as $row) {
+			[$href, $text] = $row;
 
 			if ($href === '' || $href === '#' || str_starts_with(strtolower($href), 'javascript:') || str_starts_with(strtolower($href), 'mailto:') || str_starts_with(strtolower($href), 'tel:')) {
 				continue;
@@ -66,10 +58,6 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 			$absolute = $this->normalizeToAbsoluteUrl($href);
 
 			if ($absolute === null) {
-				continue;
-			}
-
-			if (!$this->isInternalUrl($absolute)) {
 				continue;
 			}
 
@@ -85,10 +73,10 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 
 			$seen[$key] = true;
 
-			$name = trim(preg_replace('/\s+/u', ' ', $a->textContent));
+			$name = trim(preg_replace('/\s+/u', ' ', $text));
 
 			if ($name === '') {
-				$name = $key;
+				$name = $this->shortLinkLabel($absolute);
 			}
 
 			$out[] = [
@@ -98,6 +86,60 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 		}
 
 		return $out;
+	}
+
+	/**
+	 * @return \Generator<int, array{0: string, 1: string}>
+	 */
+	private function iterateAnchors(string $html): \Generator {
+		libxml_use_internal_errors(true);
+		$wrapped = '<?xml encoding="UTF-8"><div id="blog-article-links-root">' . $html . '</div>';
+		$doc = new \DOMDocument();
+		@$doc->loadHTML($wrapped);
+		$xpath = new \DOMXPath($doc);
+		$found = 0;
+
+		foreach ($xpath->query('//a[@href]') as $a) {
+			if (!($a instanceof \DOMElement)) {
+				continue;
+			}
+
+			$found++;
+			$href = trim($a->getAttribute('href'));
+			$text = $a->textContent;
+
+			yield [$href, $text];
+		}
+
+		if ($found > 0) {
+			return;
+		}
+
+		if (preg_match_all('/<a\s[^>]*\bhref\s*=\s*("([^"]*)"|\'([^\']*)\')[^>]*>/i', $html, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $m) {
+				$href = $m[2] !== '' ? $m[2] : $m[3];
+				$href = html_entity_decode($href, ENT_QUOTES, 'UTF-8');
+				yield [$href, ''];
+			}
+		}
+	}
+
+	private function shortLinkLabel(string $url): string {
+		$p = parse_url($url);
+
+		if ($p === false) {
+			return $url;
+		}
+
+		$path = trim((string)($p['path'] ?? ''), '/');
+
+		if ($path !== '') {
+			$parts = explode('/', $path);
+
+			return (string)end($parts);
+		}
+
+		return $url;
 	}
 
 	private function normalizeToAbsoluteUrl(string $href): ?string {
@@ -124,30 +166,6 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 		}
 
 		return $base . '/' . $href;
-	}
-
-	private function isInternalUrl(string $absolute): bool {
-		$hosts = [];
-
-		foreach ([$this->config->get('config_url'), $this->config->get('config_ssl')] as $h) {
-			if (!$h) {
-				continue;
-			}
-
-			$p = parse_url((string)$h);
-
-			if (!empty($p['host'])) {
-				$hosts[strtolower($p['host'])] = true;
-			}
-		}
-
-		$link = parse_url($absolute);
-
-		if (empty($link['host'])) {
-			return true;
-		}
-
-		return isset($hosts[strtolower($link['host'])]);
 	}
 
 	private function isCatalogDestination(string $absoluteUrl): bool {
@@ -183,6 +201,14 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 			return true;
 		}
 
+		if (!empty($query['_route_'])) {
+			$segments = $this->pathToSegments((string)$query['_route_']);
+
+			if ($this->seoSegmentsMatchCatalog($segments)) {
+				return true;
+			}
+		}
+
 		$path = trim((string)($parts['path'] ?? ''), '/');
 
 		if ($path === '') {
@@ -193,8 +219,22 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 			return false;
 		}
 
-		$segments = array_values(array_filter(explode('/', $path), static fn ($s) => $s !== ''));
+		$segments = $this->pathToSegments($path);
 
+		return $this->seoSegmentsMatchCatalog($segments);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function pathToSegments(string $path): array {
+		return array_values(array_filter(explode('/', trim($path, '/')), static fn ($s) => $s !== ''));
+	}
+
+	/**
+	 * @param array<int, string> $segments
+	 */
+	private function seoSegmentsMatchCatalog(array $segments): bool {
 		for ($i = 0; $i < count($segments); $i++) {
 			$keyword = implode('/', array_slice($segments, $i));
 			$seo = $this->model_design_seo_url->getSeoUrlByKeyword($keyword);
