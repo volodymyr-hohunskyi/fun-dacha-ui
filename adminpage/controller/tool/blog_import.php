@@ -5,7 +5,7 @@ namespace Opencart\Admin\Controller\Tool;
  * Use via: index.php?route=tool/blog_import.import&user_token=YOUR_TOKEN
  *
  * Excel: shared/import/blog_import.xlsx or shared/data/blog_import.xlsx
- * Column P (product_links): optional; appended to HTML description (see appendBlogProductLinksHtml).
+ * Put catalog links in column D (description) as HTML, e.g. &lt;p&gt;&lt;a href="..."&gt;...&lt;/a&gt;&lt;/p&gt;.
  */
 class BlogImport extends \Opencart\System\Engine\Controller {
 	public function import(): void {
@@ -79,13 +79,11 @@ class BlogImport extends \Opencart\System\Engine\Controller {
 			$meta_description = $articles_sheet->getCell('K' . $r)->getValue();
 			$meta_keyword = $articles_sheet->getCell('L' . $r)->getValue();
 			$tag = $articles_sheet->getCell('M' . $r)->getValue();
-			$product_links_cell = $articles_sheet->getCell('P' . $r)->getValue();
 			$seo_keyword = trim($articles_sheet->getCell('O' . $r)->getValue());
 			if (!$language_id && $languages) {
 				$language_id = (int) array_values($languages)[0]['language_id'];
 			}
 			$description = (string) $description;
-			$description .= $this->appendBlogProductLinksHtml($product_links_cell);
 			$article_data = [
 				'topic_id' => $topic_id,
 				'author' => $author ?: 'Гогунська Людмила',
@@ -119,56 +117,5 @@ class BlogImport extends \Opencart\System\Engine\Controller {
 		}
 		$this->response->addHeader('Content-Type: application/json');
 		$this->response->setOutput(json_encode($json));
-	}
-
-	/**
-	 * Column P `product_links`: lines of `https://...|Anchor text` or plain URL (anchor = URL).
-	 * Appends a small HTML block to the article body for internal links to products/categories.
-	 *
-	 * @param mixed $cell
-	 */
-	private function appendBlogProductLinksHtml($cell): string {
-		if ($cell === null || $cell === '') {
-			return '';
-		}
-
-		$raw = trim((string) $cell);
-
-		if ($raw === '') {
-			return '';
-		}
-
-		$lines = preg_split('/\r\n|\n|\r/', $raw);
-		$items = [];
-
-		foreach ($lines as $line) {
-			$line = trim($line);
-
-			if ($line === '') {
-				continue;
-			}
-
-			$href = $line;
-			$label = $line;
-
-			if (str_contains($line, '|')) {
-				$parts = explode('|', $line, 2);
-				$href = trim($parts[0]);
-				$label = trim($parts[1] ?? $href);
-			}
-
-			if ($href === '') {
-				continue;
-			}
-
-			$items[] = '<li><a href="' . htmlspecialchars($href, ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($label, ENT_QUOTES, 'UTF-8') . '</a></li>';
-		}
-
-		if ($items === []) {
-			return '';
-		}
-
-		return '<div class="blog-product-links"><p><strong>Корисні посилання каталогу</strong></p><ul>'
-			. implode('', $items) . '</ul></div>';
 	}
 }
