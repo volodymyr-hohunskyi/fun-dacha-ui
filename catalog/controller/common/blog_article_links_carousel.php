@@ -20,6 +20,8 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 			return '';
 		}
 
+		$html = oc_decode_html_entities_deep($html);
+
 		$this->load->model('design/seo_url');
 
 		$links = $this->extractCatalogLinks($html);
@@ -97,28 +99,29 @@ class BlogArticleLinksCarousel extends \Opencart\System\Engine\Controller {
 		$doc = new \DOMDocument();
 		@$doc->loadHTML($wrapped);
 		$xpath = new \DOMXPath($doc);
-		$found = 0;
 
 		foreach ($xpath->query('//a[@href]') as $a) {
 			if (!($a instanceof \DOMElement)) {
 				continue;
 			}
 
-			$found++;
 			$href = trim($a->getAttribute('href'));
 			$text = $a->textContent;
 
 			yield [$href, $text];
 		}
 
-		if ($found > 0) {
-			return;
-		}
-
 		if (preg_match_all('/<a\s[^>]*\bhref\s*=\s*("([^"]*)"|\'([^\']*)\')[^>]*>/i', $html, $matches, PREG_SET_ORDER)) {
 			foreach ($matches as $m) {
 				$href = $m[2] !== '' ? $m[2] : $m[3];
 				$href = html_entity_decode($href, ENT_QUOTES, 'UTF-8');
+				yield [$href, ''];
+			}
+		}
+
+		if (preg_match_all('#https?://[^\s"\'<>]+#iu', $html, $plain, PREG_SET_ORDER)) {
+			foreach ($plain as $m) {
+				$href = rtrim($m[0], '.,;:)');
 				yield [$href, ''];
 			}
 		}

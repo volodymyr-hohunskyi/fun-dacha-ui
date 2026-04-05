@@ -139,3 +139,26 @@ if (!function_exists('str_contains')) {
 		return $find === '' || strpos($string, $find) !== false;
 	}
 }
+
+/**
+ * Decode HTML entities repeatedly (handles double-encoded content from Excel / imports).
+ */
+function oc_decode_html_entities_deep(string $html): string {
+	$out = $html;
+	$prev = '';
+	$i = 0;
+
+	while ($out !== $prev && $i < 6) {
+		$prev = $out;
+		$flags = ENT_QUOTES;
+
+		if (defined('ENT_HTML5')) {
+			$flags |= ENT_HTML5;
+		}
+
+		$out = html_entity_decode($out, $flags, 'UTF-8');
+		$i++;
+	}
+
+	return $out;
+}

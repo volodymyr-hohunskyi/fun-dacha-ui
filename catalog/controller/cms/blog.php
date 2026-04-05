@@ -402,7 +402,7 @@ class Blog extends \Opencart\System\Engine\Controller {
 				$data['image'] = '';
 			}
 
-			$data['description'] = html_entity_decode($article_info['description'], ENT_QUOTES, 'UTF-8');
+			$data['description'] = oc_decode_html_entities_deep((string)$article_info['description']);
 			$data['article_links_carousel'] = $this->load->controller('common/blog_article_links_carousel', [
 				'html'        => $data['description'],
 				'article_id'  => $article_id,
