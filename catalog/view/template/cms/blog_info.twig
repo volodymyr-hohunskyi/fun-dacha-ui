@@ -9,14 +9,22 @@
     {{ column_left }}
     <div id="content" class="col">
       {{ content_top }}
-      <h1>{{ heading_title }}</h1>
-      {% if image %}
-        <img src="{{ image }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="img-thumbnail mb-2"/>
-      {% endif %}
-      <p>{{ text_by }} <a href="{{ filter_author }}">{{ author }}</a> - {{ date_added }} - {{ comment_total }} {{ text_comment }}</p>
-      <div>{{ description }}</div>
+      <article class="blog-article">
+        <h1 class="blog-article__title">{{ heading_title }}</h1>
+        <div class="blog-article__meta">
+          <span><i class="fa-regular fa-user"></i> {{ author }}</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ date_added }}</span>
+          {% if comment_total > 0 %}
+            <span><i class="fa-regular fa-comment"></i> {{ comment_total }} {{ text_comment }}</span>
+          {% endif %}
+        </div>
+        {% if image %}
+          <img src="{{ image }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="blog-article__image" loading="lazy"/>
+        {% endif %}
+        <div class="blog-article__content">{{ description }}</div>
+      </article>
       {% if comment %}
-        <div id="comment-container">{{ comment }}</div>
+        <div id="comment-container" class="blog-comments">{{ comment }}</div>
       {% endif %}
       {{ content_bottom }}
     </div>

@@ -1,5 +1,5 @@
 {{ header }}
-<div id="product-category" class="container">
+<div id="cms-blog" class="container">
   <ul class="breadcrumb">
     {% for breadcrumb in breadcrumbs %}
       <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
@@ -9,35 +9,44 @@
     {{ column_left }}
     <div id="content" class="col">
       {{ content_top }}
-      <h1>{{ heading_title }}</h1>
-      {% if image %}
-        <img src="{{ image }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="img-thumbnail mb-3"/>
-      {% endif %}
-      {% if description %}
-        <div class="mb-3">{{ description }}</div>
-      {% endif %}
+      <div class="blog-header">
+        <h1 class="blog-header__title">{{ heading_title }}</h1>
+        {% if description %}
+          <p class="blog-header__desc">{{ description }}</p>
+        {% endif %}
+      </div>
       {% if articles %}
-        {% for article in articles %}
-          <div class="mb-3">
-            <h2><a href="{{ article.href }}">{{ article.name }}</a></h2>
-            {% if article.image %}
-              <div><a href="{{ article.href }}"><img src="{{ article.image }}" title="{{ article.name }}" alt="{{ article.name }}" class="img-thumbnail mb-1"/></a></div>
-            {% endif %}
-            <ul class="list-inline">
-              <li class="list-inline-item">{{ text_by }} <a href="{{ article.filter_author }}">{{ article.author }}</a></li>
-              <li class="list-inline-item">{{ article.date_added }}</li>
-              <li class="list-inline-item">{{ article.comment_total }} {{ text_comment }}</li>
-            </ul>
-            <p class="mb-3">{{ article.description }}</p>
-            <div class="text-end"><a href="{{ article.href }}" class="btn btn-primary">{{ button_continue }}</a></div>
-          </div>
-        {% endfor %}
-        <div class="row">
-          <div class="col-sm-6 text-start">{{ pagination }}</div>
-          <div class="col-sm-6 text-end">{{ results }}</div>
+        <div class="blog-grid">
+          {% for article in articles %}
+            <article class="blog-card">
+              {% if article.image %}
+                <a href="{{ article.href }}" class="blog-card__image-link">
+                  <img src="{{ article.image }}" alt="{{ article.name }}" title="{{ article.name }}" class="blog-card__image" loading="lazy"/>
+                </a>
+              {% endif %}
+              <div class="blog-card__body">
+                <div class="blog-card__meta">
+                  <span class="blog-card__date"><i class="fa-regular fa-calendar"></i> {{ article.date_added }}</span>
+                  {% if article.comment_total > 0 %}
+                    <span class="blog-card__comments"><i class="fa-regular fa-comment"></i> {{ article.comment_total }}</span>
+                  {% endif %}
+                </div>
+                <h2 class="blog-card__title"><a href="{{ article.href }}">{{ article.name }}</a></h2>
+                <p class="blog-card__excerpt">{{ article.description }}</p>
+                <a href="{{ article.href }}" class="blog-card__read-more">{{ button_continue }} <i class="fa-solid fa-arrow-right"></i></a>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+        <div class="blog-pagination">
+          <div class="blog-pagination__nav">{{ pagination }}</div>
+          <div class="blog-pagination__results">{{ results }}</div>
         </div>
       {% else %}
-        <p class="text-center">{{ text_no_results }}</p>
+        <div class="blog-empty">
+          <i class="fa-solid fa-newspaper blog-empty__icon"></i>
+          <p class="blog-empty__text">{{ text_no_results }}</p>
+        </div>
       {% endif %}
       {{ content_bottom }}
     </div>

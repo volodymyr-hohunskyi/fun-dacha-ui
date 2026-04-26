@@ -1,5 +1,8 @@
-<div class="list-group mb-3">
+<div class="blog-topics">
+  <h4 class="blog-topics__title"><i class="fa-solid fa-folder-open"></i> Теми</h4>
+  <ul class="blog-topics__list">
     {% for topic in topics %}
-    <a href="{{ topic.href }}" class="list-group-item{% if topic.topic_id == topic_id %} active{% endif %}">{{ topic.name }}</a>
-  {% endfor %}
+      <li><a href="{{ topic.href }}" class="blog-topics__link{% if topic.topic_id == topic_id %} blog-topics__link--active{% endif %}">{{ topic.name }}</a></li>
+    {% endfor %}
+  </ul>
 </div>

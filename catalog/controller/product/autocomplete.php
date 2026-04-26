@@ -23,8 +23,7 @@ class Autocomplete extends \Opencart\System\Engine\Controller {
 		}
 
 		$filter_data = [
-			'filter_name'        => $term,
-			'filter_description' => false,
+			'filter_search'      => $term,
 			'sort'               => 'p.sort_order',
 			'order'              => 'ASC',
 			'start'              => 0,

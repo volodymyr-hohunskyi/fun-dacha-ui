@@ -4,10 +4,22 @@
       "Bash(grep -r '$_SERVER\\\\|file_get_contents.*http\\\\|curl' /Users/vgogunsky/Projects/fun-dacha-ui/catalog '--include=*.php')",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(git checkout *)",
+      "WebFetch(domain:fun-dacha.com.ua)",
+      "WebFetch(domain:www.seedsavers.org)",
+      "WebFetch(domain:www.thompson-morgan.com)",
+      "WebFetch(domain:www.johnnyseeds.com)",
+      "WebFetch(domain:www.bakker.com)",
+      "WebFetch(domain:www.burpee.com)",
+      "Bash(./build.sh *)",
+      "Bash(git commit *)"
     ]
   },
   "disabledMcpjsonServers": [
     "radar-mcp-server"
-  ]
+  ],
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
+  }
 }
