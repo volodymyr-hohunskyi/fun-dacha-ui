@@ -68,13 +68,9 @@
           {% if quick_specs is defined and quick_specs %}
             <div class="pdp-quick-specs">
               {% for spec in quick_specs %}
-                <div class="pdp-quick-specs__item">
-                  <i class="fa-solid {{ spec.icon }} pdp-quick-specs__icon"></i>
-                  <div>
-                    <span class="pdp-quick-specs__label">{{ spec.name }}</span>
-                    <span class="pdp-quick-specs__value">{{ spec.value }}</span>
-                  </div>
-                </div>
+                <span class="pdp-quick-specs__tag">
+                  <i class="fa-solid {{ spec.icon }}"></i> {{ spec.value }}
+                </span>
               {% endfor %}
             </div>
           {% endif %}

@@ -2526,22 +2526,26 @@ div.required .col-form-label:before, div.required .form-label:before {
 /* ── Product Card Attribute Badges ── */
 .product-thumb__badges {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.25rem;
+  flex-direction: column;
+  gap: 0.2rem;
+  margin-top: 0.3rem;
   margin-bottom: 0.35rem;
 }
 .product-thumb__attr-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.65rem;
-  font-weight: 600;
-  padding: 0.15rem 0.45rem;
-  border-radius: 999px;
-  line-height: 1.3;
-  white-space: nowrap;
-  i { font-size: 0.6rem; }
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  white-space: normal;
+  i {
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    position: relative;
+    top: -0.02em;
+  }
   &--maturity {
     background: rgba(32, 125, 67, 0.08);
     color: var(--color-primary-dark);
@@ -2556,51 +2560,28 @@ div.required .col-form-label:before, div.required .form-label:before {
   }
 }
 
-/* ── PDP Quick Specs Grid ── */
+/* ── PDP Quick Specs ── */
 .pdp-quick-specs {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0.75rem 0;
-  padding: 0.75rem;
-  background: var(--color-cream-bg, #FFF8F0);
-  border-radius: var(--border-radius, 8px);
+  gap: 0.35rem;
+  margin: 0.5rem 0;
 }
-.pdp-quick-specs__item {
-  display: flex;
+.pdp-quick-specs__tag {
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  flex: 0 0 auto;
-  min-width: 140px;
-  padding: 0.35rem 0.625rem;
-  background: #fff;
-  border-radius: var(--border-radius-sm, 4px);
-  border: 1px solid var(--color-border-light, #e8e8e8);
-}
-.pdp-quick-specs__icon {
-  color: var(--color-primary);
-  font-size: 0.9rem;
-  width: 1.25rem;
-  text-align: center;
-  flex-shrink: 0;
-}
-.pdp-quick-specs__label {
-  display: block;
-  font-size: 0.65rem;
-  color: var(--color-text-muted);
-  line-height: 1.2;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-.pdp-quick-specs__value {
-  display: block;
-  font-size: 0.8125rem;
-  font-weight: 600;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.6rem;
+  border-radius: 4px;
+  background: var(--color-cream-bg, #FFF8F0);
   color: var(--color-text-primary);
-  line-height: 1.3;
-}
-@media (max-width: 575px) {
-  .pdp-quick-specs__item { min-width: 120px; }
+  border: 1px solid var(--color-border-light, #e8e8e8);
+  i {
+    color: var(--color-primary);
+    font-size: 0.7rem;
+  }
 }
 
 /* ── Cross-sell Section ── */
