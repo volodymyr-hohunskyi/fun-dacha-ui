@@ -18,7 +18,7 @@ class HeroBanner extends \Opencart\System\Engine\Controller {
 		$this->load->model('tool/image');
 
 		$catalog_dir = defined('DIR_APPLICATION') ? DIR_APPLICATION : dirname(__DIR__, 2) . '/';
-		$config_path = $catalog_dir . 'config/hero-banner.json';
+		$config_path = $catalog_dir . 'data/hero-banner.json';
 		$image_dir = defined('DIR_IMAGE') ? DIR_IMAGE : (dirname($catalog_dir) . '/image/');
 
 		if (!is_file($config_path)) {

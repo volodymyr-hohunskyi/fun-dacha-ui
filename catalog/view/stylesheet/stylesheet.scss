@@ -1752,7 +1752,7 @@ div.required .col-form-label:before, div.required .form-label:before {
   position: relative;
   background-size: cover;
   background-position: center;
-  min-height: 420px;
+  height: 420px;
   &.active { display: block; }
 }
 .hero-slide__overlay {
@@ -1764,7 +1764,7 @@ div.required .col-form-label:before, div.required .form-label:before {
 .hero-slide__row {
   position: relative;
   z-index: 2;
-  min-height: 420px;
+  height: 420px;
 }
 .hero-slide__content {
   padding: 3rem 2rem;
@@ -1777,6 +1777,10 @@ div.required .col-form-label:before, div.required .form-label:before {
   margin-bottom: 0.75rem;
   line-height: 1.1;
   text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .hero-slide__subtitle {
   font-size: clamp(1rem, 2vw, 1.25rem);
@@ -1784,6 +1788,10 @@ div.required .col-form-label:before, div.required .form-label:before {
   margin-bottom: 1.5rem;
   line-height: 1.6;
   max-width: 480px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .hero-slide__btn {
   display: inline-flex;
@@ -1894,8 +1902,8 @@ div.required .col-form-label:before, div.required .form-label:before {
 }
 
 @media (max-width: 767.98px) {
-  .hero-slide { min-height: 320px; }
-  .hero-slide__row { min-height: 320px; }
+  .hero-slide { height: 320px; }
+  .hero-slide__row { height: 320px; }
   .hero-slide__content { padding: 2rem 1rem; }
   .hero-slide__overlay {
     background: linear-gradient(180deg, rgba(15,59,71,0.8) 0%, rgba(15,59,71,0.4) 100%);
