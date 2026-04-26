@@ -1,5 +1,4 @@
 /* Fun Dacha Brand - CSS variables from single source (_brand-variables.scss) */
-@use "sass:meta";
 @import "brand-variables";
 
 :root {
@@ -25,9 +24,9 @@
   --color-border-medium: #{$border-medium};
 
   /* Typography */
-  --font-display: #{meta.inspect($font-family-display)};
-  --font-heading: #{meta.inspect($font-family-heading)};
-  --font-body: #{meta.inspect($font-family-body)};
+  --font-display: #{inspect($font-family-display)};
+  --font-heading: #{inspect($font-family-heading)};
+  --font-body: #{inspect($font-family-body)};
   --weight-heading-bold: 700;
   --weight-heading-semibold: 600;
   --weight-body-regular: 400;
