@@ -1,0 +1,25 @@
+{% if seasons %}
+<section class="home-seasons">
+  <div class="home-seasons__bg"></div>
+  <div class="container position-relative">
+    <div class="home-seasons__header">
+      <div>
+        <h2 class="home-seasons__title"><i class="fa-solid fa-calendar-days"></i> {{ heading_title }}</h2>
+        <p class="home-seasons__subtitle">{{ month_name }} — найкращий час для посадки</p>
+      </div>
+    </div>
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-{{ seasons|length > 3 ? 4 : seasons|length }} g-3">
+      {% for season in seasons %}
+        <div class="col">
+          <a href="{{ season.href }}" class="home-seasons__card" style="--card-color: {{ season.color }};">
+            <span class="home-seasons__card-emoji">{{ season.emoji }}</span>
+            <h3 class="home-seasons__card-name">{{ season.name }}</h3>
+            <p class="home-seasons__card-desc">{{ season.description|length > 90 ? season.description|slice(0, 90) ~ '...' : season.description }}</p>
+            <span class="home-seasons__card-link">Переглянути <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}

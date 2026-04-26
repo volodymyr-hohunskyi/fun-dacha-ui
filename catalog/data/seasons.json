@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "vesnyana-posadka",
+    "name_uk": "Весняна посадка",
+    "name_en": "Spring Planting",
+    "description_uk": "Що саджати навесні у відкритий ґрунт — перевірені сорти овочів із високою схожістю для раннього та середнього врожаю. Томати, огірки, редис, морква та зелень.",
+    "icon": "fa-sun",
+    "emoji": "\ud83c\udf31",
+    "color": "#4CAF50",
+    "months": [3, 4, 5],
+    "category_ids": [103, 110, 130, 170, 180, 240],
+    "product_ids": [],
+    "sort_order": 1,
+    "status": 1
+  },
+  {
+    "slug": "rozsada-kviten",
+    "name_uk": "Розсада квітень",
+    "name_en": "April Seedlings",
+    "description_uk": "Час сіяти розсаду! Томати, перець, баклажани та квіти — все, що потрібно посіяти у квітні для пересадки у травні-червні.",
+    "icon": "fa-seedling",
+    "emoji": "\ud83c\udf37",
+    "color": "#8BC34A",
+    "months": [3, 4],
+    "category_ids": [101, 102, 140, 141, 150, 330],
+    "product_ids": [],
+    "sort_order": 2,
+    "status": 1
+  },
+  {
+    "slug": "teplytsia-traven",
+    "name_uk": "Теплиця травень",
+    "name_en": "Greenhouse May",
+    "description_uk": "Висаджуємо в теплицю — високорослі томати, огірки, перець та баклажани. Сорти та гібриди, підібрані для закритого ґрунту.",
+    "icon": "fa-house",
+    "emoji": "\ud83c\udfe1",
+    "color": "#00BCD4",
+    "months": [4, 5, 6],
+    "category_ids": [101, 102, 110, 140, 150],
+    "product_ids": [],
+    "sort_order": 3,
+    "status": 1
+  },
+  {
+    "slug": "osinniy-posiv",
+    "name_uk": "Осінній посів",
+    "name_en": "Autumn Sowing",
+    "description_uk": "Осінній город — час сіяти редис, шпинат, салати, цибулю та часник на зиму. Короткий сезон, швидкий результат.",
+    "icon": "fa-leaf",
+    "emoji": "\ud83c\udf42",
+    "color": "#FF9800",
+    "months": [8, 9, 10],
+    "category_ids": [130, 160, 240, 250, 120],
+    "product_ids": [],
+    "sort_order": 4,
+    "status": 1
+  },
+  {
+    "slug": "zimovi-zagotovky",
+    "name_uk": "Зимові заготовки",
+    "name_en": "Winter Prep",
+    "description_uk": "Сорти для тривалого зберігання та консервування — капуста, буряк, морква, гарбуз. Збирайте врожай та готуйтеся до зими.",
+    "icon": "fa-snowflake",
+    "emoji": "\u2744\ufe0f",
+    "color": "#607D8B",
+    "months": [9, 10, 11],
+    "category_ids": [120, 121, 180, 170, 210, 290],
+    "product_ids": [],
+    "sort_order": 5,
+    "status": 1
+  }
+]

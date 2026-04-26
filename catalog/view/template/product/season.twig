@@ -1,0 +1,87 @@
+{{ header }}
+<div id="product-season" class="container">
+  <div class="row">{{ column_left }}
+    <div id="content" class="col">
+      {{ content_top }}
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          {% for breadcrumb in breadcrumbs %}
+            {% if loop.last %}
+              <li class="breadcrumb-item active">{{ breadcrumb.text }}</li>
+            {% else %}
+              <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ol>
+      </nav>
+      <div class="season-page__hero" style="--season-color: {{ color }};">
+        <div class="season-page__emoji">{{ emoji }}</div>
+        <div>
+          <h1 class="season-page__title">{{ heading_title }}</h1>
+          {% if description %}
+            <p class="season-page__desc">{{ description }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {% if products %}
+        <div class="bundle-page__actions">
+          <button type="button" class="btn bundle-page__add-all" id="season-add-all" aria-label="{{ text_add_all }}">
+            <i class="fa-solid fa-cart-plus"></i> {{ text_add_all }}
+          </button>
+        </div>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-xl-6">
+          {% for product in products %}
+            <div class="col mb-3">{{ product }}</div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="text-center py-4">{{ text_empty }}</p>
+      {% endif %}
+      {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
+</div>
+<script>
+document.getElementById('season-add-all')?.addEventListener('click', function() {
+  const btn = this;
+  const items = {{ product_ids|json_encode|raw }};
+  let added = 0;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+
+  function addNext() {
+    if (added >= items.length) {
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Додано!';
+      setTimeout(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-cart-plus"></i> {{ text_add_all }}';
+      }, 2000);
+      return;
+    }
+
+    const item = items[added];
+    const form = new FormData();
+    form.append('product_id', item.product_id);
+    form.append('quantity', item.quantity);
+
+    fetch('{{ cart_add_url }}', {
+      method: 'POST',
+      body: form
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      added++;
+      addNext();
+    })
+    .catch(function() {
+      added++;
+      addNext();
+    });
+  }
+
+  addNext();
+});
+</script>
+{{ footer }}
