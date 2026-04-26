@@ -1,0 +1,46 @@
+[
+  {
+    "slug": "nabir-dlya-teplytsi",
+    "name_uk": "Набір для теплиці",
+    "name_en": "Greenhouse Kit",
+    "description_uk": "Все необхідне для успішного вирощування в теплиці — перевірені сорти томатів і огірків, ефективні добрива та засоби захисту рослин. Підібрано для максимального врожаю в закритому ґрунті.",
+    "icon": "fa-house",
+    "category_ids": [101, 102, 110, 407, 403],
+    "product_ids": [],
+    "sort_order": 1,
+    "status": 1
+  },
+  {
+    "slug": "start-horodnika",
+    "name_uk": "Старт городника",
+    "name_en": "Beginner Gardener",
+    "description_uk": "Ідеальний набір для початківців — невибагливі сорти овочів з високою схожістю, базові добрива та захисні засоби. Все, щоб ваш перший город приніс радість і врожай.",
+    "icon": "fa-seedling",
+    "category_ids": [103, 110, 130, 170, 407],
+    "product_ids": [],
+    "sort_order": 2,
+    "status": 1
+  },
+  {
+    "slug": "vse-dlya-salativ",
+    "name_uk": "Все для салатів",
+    "name_en": "Salad Kit",
+    "description_uk": "Свіжі салати просто з грядки — листові салати, пряні трави, черрі-томати та зелень. Вирощуйте корисне та смачне вдома.",
+    "icon": "fa-leaf",
+    "category_ids": [240, 250, 103],
+    "product_ids": [],
+    "sort_order": 3,
+    "status": 1
+  },
+  {
+    "slug": "nabir-kvitiv",
+    "name_uk": "Набір квітів",
+    "name_en": "Flower Kit",
+    "description_uk": "Створіть квітучий сад — однорічні та багаторічні квіти на будь-який смак, а також добрива для пишного цвітіння.",
+    "icon": "fa-spa",
+    "category_ids": [330, 407],
+    "product_ids": [],
+    "sort_order": 4,
+    "status": 1
+  }
+]

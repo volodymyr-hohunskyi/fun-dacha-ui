@@ -1,0 +1,21 @@
+{% if bundles %}
+<section class="home-bundles">
+  <div class="container">
+    <h2 class="section-heading text-start mb-4">{{ heading_title }}</h2>
+    <div class="row row-cols-2 row-cols-md-4 g-3">
+      {% for bundle in bundles %}
+        <div class="col">
+          <a href="{{ bundle.href }}" class="home-bundles__card">
+            <div class="home-bundles__icon">
+              <i class="fa-solid {{ bundle.icon }}"></i>
+            </div>
+            <h3 class="home-bundles__name">{{ bundle.name }}</h3>
+            <p class="home-bundles__desc">{{ bundle.description|length > 80 ? bundle.description|slice(0, 80) ~ '…' : bundle.description }}</p>
+            <span class="home-bundles__link">Переглянути <i class="fa-solid fa-arrow-right"></i></span>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
