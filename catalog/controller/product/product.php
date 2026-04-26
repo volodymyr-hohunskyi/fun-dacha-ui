@@ -480,6 +480,8 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$data['attribute_groups'] = $this->model_catalog_product->getAttributes($product_id);
 
+			$data['quick_specs'] = $this->extractQuickSpecs($data['attribute_groups']);
+
 			$this->enrichPackOptionValues($product_info, $data['options']);
 
 			$this->applyPdpPackDisplay($data);
@@ -487,6 +489,8 @@ class Product extends \Opencart\System\Engine\Controller {
 			$data['pdp_size_intro'] = $this->buildPdpSinglePackIntro($data['attribute_groups'] ?? [], $data['pdp_pack_unit_label'] ?? '');
 
 			$data['related'] = $this->load->controller('product/related');
+
+			$data['cross_sell'] = $this->load->controller('product/cross_sell');
 
 			$data['tags'] = [];
 
@@ -1368,5 +1372,34 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 		
 		return $twitter;
+	}
+
+	private function extractQuickSpecs(array $attribute_groups): array {
+		$spec_icons = [
+			'Стиглість'    => 'fa-clock',
+			'Вирощування'  => 'fa-seedling',
+			'Врожайність'  => 'fa-wheat-awn',
+			'Стійкість'    => 'fa-shield-halved',
+			'Колір'        => 'fa-palette',
+			'Форма'        => 'fa-shapes',
+			'Призначення'  => 'fa-utensils',
+		];
+
+		$specs = [];
+
+		foreach ($attribute_groups as $group) {
+			foreach ($group['attribute'] as $attr) {
+				$name = trim($attr['name']);
+				if (isset($spec_icons[$name]) && !empty(trim($attr['text']))) {
+					$specs[] = [
+						'name'  => $name,
+						'value' => trim($attr['text']),
+						'icon'  => $spec_icons[$name],
+					];
+				}
+			}
+		}
+
+		return $specs;
 	}
 }

@@ -28,6 +28,9 @@ class Related extends \Opencart\System\Engine\Controller {
 
 		[$thumb_w, $thumb_h] = Thumb::listThumbDimensions($this->config);
 
+		$badge_product_ids = array_column($results, 'product_id');
+		$all_badges = $this->model_catalog_product->getBadgeAttributes($badge_product_ids);
+
 		foreach ($results as $result) {
 			$description = trim(strip_tags(html_entity_decode($result['description'], ENT_QUOTES, 'UTF-8')));
 
@@ -66,6 +69,7 @@ class Related extends \Opencart\System\Engine\Controller {
 				'special'     => $special,
 				'tax'         => $tax,
 				'minimum'     => $result['minimum'] > 0 ? $result['minimum'] : 1,
+				'badges'      => $all_badges[(int)$result['product_id']] ?? [],
 				'href'        => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $result['product_id'])
 			] + $result;
 

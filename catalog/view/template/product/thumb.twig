@@ -8,6 +8,13 @@
   <div class="content">
     <div class="description">
       <h4><a href="{{ href }}">{{ name }}</a></h4>
+      {% if badges is defined and badges %}
+        <div class="product-thumb__badges">
+          {% for badge in badges %}
+            <span class="product-thumb__attr-badge product-thumb__attr-badge--{{ badge.type }}"><i class="fa-solid {{ badge.icon }}"></i> {{ badge.label }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
       {% if review_status and rating %}
         <div class="rating">
           {% for i in 1..5 %}

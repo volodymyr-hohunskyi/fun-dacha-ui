@@ -1,0 +1,10 @@
+{% if products %}
+  <section class="cross-sell-section">
+    <h3 class="cross-sell-section__heading"><i class="fa-solid fa-basket-shopping"></i> {{ text_heading }}</h3>
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-xl-6">
+      {% for product in products %}
+        <div class="col mb-3">{{ product }}</div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}

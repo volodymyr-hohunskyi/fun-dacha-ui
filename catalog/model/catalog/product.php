@@ -534,6 +534,62 @@ class Product extends \Opencart\System\Engine\Model {
 		return $product_attribute_group_data;
 	}
 
+	public function getBadgeAttributes(array $product_ids): array {
+		if (empty($product_ids)) {
+			return [];
+		}
+
+		$badge_attr_names = ['Стиглість', 'Вирощування'];
+		$icon_map = [
+			'Стиглість'    => ['type' => 'maturity',    'icon' => 'fa-clock'],
+			'Вирощування'  => ['type' => 'cultivation', 'icon' => 'fa-seedling'],
+		];
+
+		$escaped_names = [];
+		foreach ($badge_attr_names as $name) {
+			$escaped_names[] = "'" . $this->db->escape($name) . "'";
+		}
+
+		$escaped_ids = [];
+		foreach ($product_ids as $pid) {
+			$escaped_ids[] = (int)$pid;
+		}
+
+		$lang_id = (int)$this->config->get('config_language_id');
+
+		$query = $this->db->query("SELECT `pa`.`product_id`, `ad`.`name`, `pa`.`text` FROM `" . DB_PREFIX . "product_attribute` `pa` LEFT JOIN `" . DB_PREFIX . "attribute` `a` ON (`pa`.`attribute_id` = `a`.`attribute_id`) LEFT JOIN `" . DB_PREFIX . "attribute_description` `ad` ON (`a`.`attribute_id` = `ad`.`attribute_id` AND `ad`.`language_id` = '" . $lang_id . "') WHERE `pa`.`product_id` IN (" . implode(',', $escaped_ids) . ") AND `pa`.`language_id` = '" . $lang_id . "' AND `ad`.`name` IN (" . implode(',', $escaped_names) . ")");
+
+		$result = [];
+
+		foreach ($query->rows as $row) {
+			$pid = (int)$row['product_id'];
+			$attr_name = $row['name'];
+			$text = trim($row['text']);
+
+			if ($text === '') {
+				continue;
+			}
+
+			$meta = $icon_map[$attr_name] ?? ['type' => 'default', 'icon' => 'fa-tag'];
+
+			if ($meta['type'] === 'cultivation' && mb_stripos($text, 'теплиц') !== false) {
+				$meta['icon'] = 'fa-house';
+			}
+
+			if (!isset($result[$pid])) {
+				$result[$pid] = [];
+			}
+
+			$result[$pid][] = [
+				'label' => $text,
+				'type'  => $meta['type'],
+				'icon'  => $meta['icon'],
+			];
+		}
+
+		return $result;
+	}
+
 	/**
 	 * Edit Option Quantity
 	 *

@@ -2523,6 +2523,104 @@ div.required .col-form-label:before, div.required .form-label:before {
   }
 }
 
+/* ── Product Card Attribute Badges ── */
+.product-thumb__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.35rem;
+}
+.product-thumb__attr-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.45rem;
+  border-radius: 999px;
+  line-height: 1.3;
+  white-space: nowrap;
+  i { font-size: 0.6rem; }
+  &--maturity {
+    background: rgba(32, 125, 67, 0.08);
+    color: var(--color-primary-dark);
+  }
+  &--cultivation {
+    background: rgba(139, 94, 60, 0.08);
+    color: var(--color-secondary, #8B5E3C);
+  }
+  &--default {
+    background: var(--color-neutral-bg, #f5f5f5);
+    color: var(--color-text-muted);
+  }
+}
+
+/* ── PDP Quick Specs Grid ── */
+.pdp-quick-specs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: var(--color-cream-bg, #FFF8F0);
+  border-radius: var(--border-radius, 8px);
+}
+.pdp-quick-specs__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  min-width: 140px;
+  padding: 0.35rem 0.625rem;
+  background: #fff;
+  border-radius: var(--border-radius-sm, 4px);
+  border: 1px solid var(--color-border-light, #e8e8e8);
+}
+.pdp-quick-specs__icon {
+  color: var(--color-primary);
+  font-size: 0.9rem;
+  width: 1.25rem;
+  text-align: center;
+  flex-shrink: 0;
+}
+.pdp-quick-specs__label {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--color-text-muted);
+  line-height: 1.2;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.pdp-quick-specs__value {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+@media (max-width: 575px) {
+  .pdp-quick-specs__item { min-width: 120px; }
+}
+
+/* ── Cross-sell Section ── */
+.cross-sell-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--color-border-light, #e8e8e8);
+}
+.cross-sell-section__heading {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin-bottom: 1rem;
+  i {
+    color: var(--color-primary);
+    margin-right: 0.375rem;
+  }
+}
+
 /* ── Blog Page ── */
 .blog-header {
   margin-bottom: 2rem;
