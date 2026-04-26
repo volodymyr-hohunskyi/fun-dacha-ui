@@ -1,59 +1,70 @@
 {% if not assistant_embed %}
-<button type="button" id="ai-assistant-toggle" class="ai-assistant-trigger" aria-label="{{ text_open }}">
-  <span class="ai-assistant-trigger__icon" aria-hidden="true">🌱</span>
-  <span class="ai-assistant-trigger__label">{{ text_assistant }}</span>
+<button type="button" id="ai-assistant-toggle" class="ai-trigger" aria-label="{{ text_open }}">
+  <span class="ai-trigger__icon" aria-hidden="true"><i class="fa-solid fa-leaf"></i></span>
 </button>
 {% endif %}
 
-<div id="ai-assistant-panel" class="ai-assistant-panel{% if assistant_embed %} ai-assistant-panel--embedded ai-assistant-panel--open{% endif %}" {% if assistant_embed %}aria-hidden="false"{% else %}aria-hidden="true"{% endif %} role="dialog" aria-modal="false" aria-label="{{ text_assistant }}">
-  <div class="ai-assistant-panel__header">
-    <span class="ai-assistant-panel__title">🌱 {{ text_assistant }}</span>
-    {% if not assistant_embed %}
-    <button type="button" class="ai-assistant-panel__close" id="ai-assistant-close" aria-label="{{ text_close }}">✕</button>
-    {% endif %}
+<div id="ai-assistant-panel" class="ai-panel{% if assistant_embed %} ai-panel--embedded ai-panel--open{% endif %}" {% if assistant_embed %}aria-hidden="false"{% else %}aria-hidden="true"{% endif %} role="dialog" aria-modal="false" aria-label="{{ text_assistant }}">
+  <div class="ai-panel__header">
+    <div class="ai-panel__header-left">
+      <span class="ai-panel__avatar"><i class="fa-solid fa-leaf"></i></span>
+      <div>
+        <span class="ai-panel__title">{{ text_assistant }}</span>
+        <span class="ai-panel__status">Онлайн</span>
+      </div>
+    </div>
+    <div class="ai-panel__header-actions">
+      {% if not assistant_embed and assistant_page_url %}
+        <a href="{{ assistant_page_url }}" class="ai-panel__action-btn" aria-label="{{ text_open_full_page }}" title="{{ text_open_full_page }}"><i class="fa-solid fa-expand"></i></a>
+      {% endif %}
+      <button type="button" class="ai-panel__action-btn" id="ai-assistant-reset" aria-label="{{ text_start_over }}" title="{{ text_start_over }}"><i class="fa-solid fa-rotate-left"></i></button>
+      {% if not assistant_embed %}
+        <button type="button" class="ai-panel__action-btn" id="ai-assistant-close" aria-label="{{ text_close }}"><i class="fa-solid fa-xmark"></i></button>
+      {% endif %}
+    </div>
   </div>
 
-  <div class="ai-assistant-panel__toolbar">
-    <button type="button" class="ai-assistant-panel__reset" id="ai-assistant-reset">{{ text_start_over }}</button>
-    {% if not assistant_embed and assistant_page_url %}
-    <a href="{{ assistant_page_url }}" class="ai-assistant-panel__fullpage">{{ text_open_full_page }}</a>
-    {% endif %}
-  </div>
-
-  <div class="ai-assistant-panel__body" id="ai-chat-scroll">
-    <div class="ai-assistant-panel__messages" id="ai-chat-messages" role="log" aria-live="polite">
+  <div class="ai-panel__body" id="ai-chat-scroll">
+    <div class="ai-panel__messages" id="ai-chat-messages" role="log" aria-live="polite">
       <div class="ai-welcome" id="ai-welcome-screen">
-        <div class="ai-welcome__icon" aria-hidden="true">🌱</div>
-        <p class="ai-welcome__text">{{ text_welcome }}</p>
+        <div class="ai-welcome__avatar" aria-hidden="true"><i class="fa-solid fa-seedling"></i></div>
+        <h3 class="ai-welcome__heading">{{ text_welcome }}</h3>
         <p class="ai-welcome__sub">{{ text_welcome_sub }}</p>
-        <div class="ai-intent-list">
-          <button type="button" class="ai-intent-btn" data-intent="consult" data-message="{{ text_intent_consult }}">{{ text_intent_consult }}</button>
-          <button type="button" class="ai-intent-btn" data-intent="payment" data-message="{{ text_intent_payment }}">{{ text_intent_payment }}</button>
-          <button type="button" class="ai-intent-btn" data-intent="delivery" data-message="{{ text_intent_delivery }}">{{ text_intent_delivery }}</button>
+        <div class="ai-welcome__intents">
+          <button type="button" class="ai-welcome__intent-btn" data-intent="consult" data-message="{{ text_intent_consult }}">
+            <i class="fa-solid fa-comments"></i>
+            <span>{{ text_intent_consult }}</span>
+          </button>
+          <button type="button" class="ai-welcome__intent-btn" data-intent="payment" data-message="{{ text_intent_payment }}">
+            <i class="fa-solid fa-credit-card"></i>
+            <span>{{ text_intent_payment }}</span>
+          </button>
+          <button type="button" class="ai-welcome__intent-btn" data-intent="delivery" data-message="{{ text_intent_delivery }}">
+            <i class="fa-solid fa-truck-fast"></i>
+            <span>{{ text_intent_delivery }}</span>
+          </button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="ai-assistant-panel__quick-replies" id="ai-quick-replies" aria-label="{{ text_suggestions }}"></div>
+  <div class="ai-panel__quick-replies" id="ai-quick-replies" aria-label="{{ text_suggestions }}"></div>
 
-  <div class="ai-assistant-panel__footer">
-    <p class="ai-assistant-panel__search-hint" id="ai-search-hint" aria-live="polite">{{ text_search_hint }}</p>
-    <div class="ai-assistant-panel__footer-input-row">
+  <div class="ai-panel__footer">
+    <div class="ai-panel__input-row">
       <label class="visually-hidden" for="ai-chat-input">{{ text_placeholder }}</label>
-      <textarea id="ai-chat-input" class="ai-assistant-panel__input" rows="1" placeholder="{{ text_placeholder }}" autocomplete="off"></textarea>
-      <button type="button" id="ai-chat-send" class="ai-assistant-panel__send">{{ text_send }}</button>
+      <textarea id="ai-chat-input" class="ai-panel__input" rows="1" placeholder="{{ text_placeholder }}" autocomplete="off"></textarea>
+      <button type="button" id="ai-chat-send" class="ai-panel__send" aria-label="{{ text_send }}"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+    <div class="ai-panel__footer-meta">
+      <a href="{{ callback_url }}" class="ai-panel__callback" id="ai-callback-btn"><i class="fa-solid fa-phone"></i> {{ text_callback }}</a>
     </div>
   </div>
 
-  <div class="ai-assistant-panel__callback">
-    <a href="{{ callback_url }}" class="ai-callback-btn" id="ai-callback-btn">📞 {{ text_callback }}</a>
-  </div>
-
-  <div class="ai-assistant-panel__loading" id="ai-assistant-loading" aria-hidden="true">
-    <span class="ai-assistant-panel__loading-dot"></span>
-    <span class="ai-assistant-panel__loading-dot"></span>
-    <span class="ai-assistant-panel__loading-dot"></span>
+  <div class="ai-panel__loading" id="ai-assistant-loading" aria-hidden="true">
+    <span class="ai-panel__loading-dot"></span>
+    <span class="ai-panel__loading-dot"></span>
+    <span class="ai-panel__loading-dot"></span>
   </div>
 </div>
 

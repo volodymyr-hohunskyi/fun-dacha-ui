@@ -1,5 +1,5 @@
 /**
- * Fun Dacha garden assistant — chat UI, IndexedDB transcript, jQuery AJAX.
+ * Fun Dacha garden assistant — chat UI v2, IndexedDB transcript, jQuery AJAX.
  */
 (function ($) {
   'use strict';
@@ -26,14 +26,8 @@
   var $reset = null;
 
   function idbOpen(cb) {
-    if (useLs) {
-      cb(null);
-      return;
-    }
-    if (idbDb) {
-      cb(idbDb);
-      return;
-    }
+    if (useLs) { cb(null); return; }
+    if (idbDb) { cb(idbDb); return; }
     var req = indexedDB.open(IDB_NAME, 1);
     req.onupgradeneeded = function () {
       var db = req.result;
@@ -41,13 +35,8 @@
         db.createObjectStore(IDB_STORE);
       }
     };
-    req.onsuccess = function () {
-      idbDb = req.result;
-      cb(idbDb);
-    };
-    req.onerror = function () {
-      cb(null);
-    };
+    req.onsuccess = function () { idbDb = req.result; cb(idbDb); };
+    req.onerror = function () { cb(null); };
   }
 
   function idbGet(cb) {
@@ -55,106 +44,59 @@
       try {
         var raw = localStorage.getItem('fun_dacha_assistant_v1');
         cb(raw ? JSON.parse(raw) : null);
-      } catch (e) {
-        cb(null);
-      }
+      } catch (e) { cb(null); }
       return;
     }
     idbOpen(function (db) {
-      if (!db) {
-        cb(null);
-        return;
-      }
+      if (!db) { cb(null); return; }
       try {
         var tx = db.transaction(IDB_STORE, 'readonly');
-        var st = tx.objectStore(IDB_STORE);
-        var g = st.get(IDB_KEY);
-        g.onsuccess = function () {
-          cb(g.result || null);
-        };
-        g.onerror = function () {
-          cb(null);
-        };
-      } catch (e) {
-        cb(null);
-      }
+        var g = tx.objectStore(IDB_STORE).get(IDB_KEY);
+        g.onsuccess = function () { cb(g.result || null); };
+        g.onerror = function () { cb(null); };
+      } catch (e) { cb(null); }
     });
   }
 
   function idbSet(data, cb) {
     if (useLs) {
-      try {
-        localStorage.setItem('fun_dacha_assistant_v1', JSON.stringify(data));
-      } catch (e) {}
-      if (cb) {
-        cb();
-      }
+      try { localStorage.setItem('fun_dacha_assistant_v1', JSON.stringify(data)); } catch (e) {}
+      if (cb) cb();
       return;
     }
     idbOpen(function (db) {
-      if (!db) {
-        if (cb) {
-          cb();
-        }
-        return;
-      }
+      if (!db) { if (cb) cb(); return; }
       try {
         var tx = db.transaction(IDB_STORE, 'readwrite');
         tx.objectStore(IDB_STORE).put(data, IDB_KEY);
-        tx.oncomplete = function () {
-          if (cb) {
-            cb();
-          }
-        };
-        tx.onerror = function () {
-          if (cb) {
-            cb();
-          }
-        };
-      } catch (e) {
-        if (cb) {
-          cb();
-        }
-      }
+        tx.oncomplete = function () { if (cb) cb(); };
+        tx.onerror = function () { if (cb) cb(); };
+      } catch (e) { if (cb) cb(); }
     });
   }
 
-  function idbClear(cb) {
-    idbSet({ v: 1, items: [] }, cb);
-  }
+  function idbClear(cb) { idbSet({ v: 1, items: [] }, cb); }
 
   function saveItem(item) {
     idbGet(function (data) {
       var d = data && data.items ? data : { v: 1, items: [] };
       d.items.push(item);
-      if (d.items.length > 50) {
-        d.items = d.items.slice(-50);
-      }
+      if (d.items.length > 50) d.items = d.items.slice(-50);
       idbSet(d);
     });
   }
 
   function escHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   }
 
-  /** OC url->link() already uses &amp;; avoid double-encoding in href. */
   function escHref(url) {
-    var u = String(url || '').replace(/&amp;/g, '&');
-    return escHtml(u);
+    return escHtml(String(url || '').replace(/&amp;/g, '&'));
   }
 
-  /** Server-built route/category/product + optional client override after SPA-like nav. */
   function getPageContext() {
     var base = cfg.pageContext || {};
-    if (
-      window.aiAssistantPageContext &&
-      typeof window.aiAssistantPageContext === 'object'
-    ) {
+    if (window.aiAssistantPageContext && typeof window.aiAssistantPageContext === 'object') {
       return $.extend({}, base, window.aiAssistantPageContext);
     }
     return base;
@@ -174,33 +116,28 @@
   }
 
   function setPanelLoading(on) {
-    if (!$loading || !$loading.length) {
-      return;
-    }
+    if (!$loading || !$loading.length) return;
     $loading.attr('aria-hidden', on ? 'false' : 'true');
-    $panel.toggleClass('ai-assistant-panel--busy', !!on);
+    $panel.toggleClass('ai-panel--busy', !!on);
   }
 
   function appendUserMessage(text, skipSave) {
     var $msg = $('<div class="ai-message ai-message--user"></div>');
-    $msg.text(text);
+    var $body = $('<div class="ai-message__body"></div>').text(text);
+    $msg.append($body);
     $messages.append($msg);
     scrollBottom();
-    if (!skipSave) {
-      saveItem({ role: 'user', text: text });
-    }
+    if (!skipSave) saveItem({ role: 'user', text: text });
   }
 
   function appendAiMessage(text, actions, skipSave) {
     var $bubble = $('<div class="ai-message ai-message--ai"></div>');
-    var $avatar = $('<span class="ai-message__avatar" aria-hidden="true">🌱</span>');
+    var $avatar = $('<span class="ai-message__avatar" aria-hidden="true"><i class="fa-solid fa-leaf"></i></span>');
     var $body = $('<div class="ai-message__body"></div>');
     $body.html(renderMarkdown(text || ''));
 
     (actions || []).forEach(function (action) {
-      if (!action || !action.type) {
-        return;
-      }
+      if (!action || !action.type) return;
       if (action.type === 'showProducts' && action.products) {
         $body.append(renderProductCarousel(action.products));
       }
@@ -221,9 +158,7 @@
     $bubble.append($avatar, $body);
     $messages.append($bubble);
     scrollBottom();
-    if (!skipSave) {
-      saveItem({ role: 'assistant', text: text, actions: actions || [] });
-    }
+    if (!skipSave) saveItem({ role: 'assistant', text: text, actions: actions || [] });
   }
 
   function groupProductAttributes(attrs) {
@@ -231,19 +166,11 @@
     (attrs || []).forEach(function (a) {
       var g = (a.group && String(a.group).trim()) || '__default__';
       var n = (a.name && String(a.name).trim()) || '';
-      if (!n) {
-        return;
-      }
+      if (!n) return;
       var v = a.value != null && a.value !== '' ? String(a.value) : '';
-      if (!byGroup[g]) {
-        byGroup[g] = {};
-      }
-      if (!byGroup[g][n]) {
-        byGroup[g][n] = [];
-      }
-      if (v && byGroup[g][n].indexOf(v) === -1) {
-        byGroup[g][n].push(v);
-      }
+      if (!byGroup[g]) byGroup[g] = {};
+      if (!byGroup[g][n]) byGroup[g][n] = [];
+      if (v && byGroup[g][n].indexOf(v) === -1) byGroup[g][n].push(v);
     });
     return byGroup;
   }
@@ -251,25 +178,16 @@
   function renderGroupedProductAttributes(attrs) {
     var grouped = groupProductAttributes(attrs);
     var keys = Object.keys(grouped);
-    if (!keys.length) {
-      return '';
-    }
+    if (!keys.length) return '';
     var showGroupTitles = keys.length > 1;
     var html = '';
     keys.forEach(function (gKey) {
       if (showGroupTitles && gKey !== '__default__') {
-        html +=
-          '<div class="ai-attr-group__heading">' + escHtml(gKey) + '</div>';
+        html += '<div class="ai-attr-group__heading">' + escHtml(gKey) + '</div>';
       }
       var rows = grouped[gKey];
       Object.keys(rows).forEach(function (name) {
-        var vals = rows[name].join(', ');
-        html +=
-          '<div class="ai-attr-row"><b>' +
-          escHtml(name) +
-          ':</b> ' +
-          escHtml(vals) +
-          '</div>';
+        html += '<div class="ai-attr-row"><b>' + escHtml(name) + ':</b> ' + escHtml(rows[name].join(', ')) + '</div>';
       });
     });
     return html;
@@ -278,67 +196,44 @@
   function renderProductCarousel(products) {
     var $wrap = $('<div class="ai-product-carousel"></div>');
     products.forEach(function (p) {
-      var price =
-        p.priceFormatted ||
-        (p.price > 0 ? p.price + ' ₴' : '—');
+      var price = p.priceFormatted || (p.price > 0 ? p.price + ' ₴' : '—');
       var stock = p.inStock
         ? '<span class="ai-badge ai-badge--in">В наявності</span>'
-        : '<span class="ai-badge ai-badge--out">Уточнюйте наявність</span>';
+        : '<span class="ai-badge ai-badge--out">Уточнюйте</span>';
       var attrLines = renderGroupedProductAttributes(p.attributes || []);
       var imgSrc = p.image ? cfg.imageBase + p.image : '';
       var productUrl = cfg.productUrl + String(p.id);
-
       var html =
         '<div class="ai-product-card__img">' +
         (imgSrc ? '<img src="' + escHtml(imgSrc) + '" alt="" loading="lazy">' : '') +
         '</div>' +
         '<div class="ai-product-card__info">' +
-        '<div class="ai-product-card__name">' +
-        escHtml(p.name) +
-        '</div>' +
-        '<div class="ai-product-card__cat">' +
-        escHtml(p.category || '') +
-        '</div>' +
+        '<div class="ai-product-card__name">' + escHtml(p.name) + '</div>' +
+        '<div class="ai-product-card__cat">' + escHtml(p.category || '') + '</div>' +
         '<div class="ai-product-card__attrs">' +
-        (attrLines
-          ? '<div class="ai-attr-groups">' + attrLines + '</div>'
-          : '') +
-        '</div>' +
-        stock +
-        '<div class="ai-product-card__price">' +
-        escHtml(price) +
-        '</div>' +
-        '<a href="' +
-        escHref(productUrl) +
-        '" class="ai-product-card__cta">Детальніше →</a>' +
+        (attrLines ? '<div class="ai-attr-groups">' + attrLines + '</div>' : '') +
+        '</div>' + stock +
+        '<div class="ai-product-card__price">' + escHtml(price) + '</div>' +
+        '<a href="' + escHref(productUrl) + '" class="ai-product-card__cta">Детальніше →</a>' +
         '</div>';
-
-      var $card = $('<article class="ai-product-card"></article>').html(html);
-      $wrap.append($card);
+      $wrap.append($('<article class="ai-product-card"></article>').html(html));
     });
     return $('<div class="ai-carousel-wrap-inner"></div>').append($wrap);
   }
 
   function renderFilterChips(question, filters) {
     var $wrap = $('<div class="ai-filter-group"></div>');
-    $wrap.append(
-      $('<div class="ai-filter-group__label"></div>').text(question || 'Оберіть:')
-    );
+    $wrap.append($('<div class="ai-filter-group__label"></div>').text(question || 'Оберіть:'));
     var $chips = $('<div class="ai-filter-group__chips"></div>');
     (filters || []).forEach(function (f) {
       $('<button type="button" class="ai-chip"></button>')
-        .text(f.name)
-        .attr('data-filter-id', f.id)
-        .on('click', function () {
-          sendMessage(f.name);
-        })
+        .text(f.name).attr('data-filter-id', f.id)
+        .on('click', function () { sendMessage(f.name); })
         .appendTo($chips);
     });
     $('<button type="button" class="ai-chip ai-chip--skip"></button>')
       .text('Не важливо')
-      .on('click', function () {
-        sendMessage('Не важливо');
-      })
+      .on('click', function () { sendMessage('Не важливо'); })
       .appendTo($chips);
     return $wrap.append($chips);
   }
@@ -346,103 +241,65 @@
   function renderArticleCard(article) {
     var href = article.href || cfg.callbackUrl || '#';
     return $('<div class="ai-article-card"></div>').html(
-      '<div class="ai-article-card__icon">📖 Стаття</div>' +
-        '<div class="ai-article-card__title">' +
-        escHtml(article.title || '') +
-        '</div>' +
-        '<div class="ai-article-card__summary">' +
-        escHtml((article.summary || '').substring(0, 220)) +
-        (article.summary && article.summary.length > 220 ? '…' : '') +
-        '</div>' +
-        '<a href="' +
-        escHref(href) +
-        '" class="ai-article-card__cta">Блог →</a>'
+      '<div class="ai-article-card__icon"><i class="fa-solid fa-book-open"></i> Стаття</div>' +
+      '<div class="ai-article-card__title">' + escHtml(article.title || '') + '</div>' +
+      '<div class="ai-article-card__summary">' +
+      escHtml((article.summary || '').substring(0, 220)) +
+      (article.summary && article.summary.length > 220 ? '…' : '') + '</div>' +
+      '<a href="' + escHref(href) + '" class="ai-article-card__cta">Читати →</a>'
     );
   }
 
   function renderNavigateTagRow(items) {
     var $row = $('<div class="ai-navigate-tags" role="group"></div>');
     (items || []).forEach(function (item) {
-      if (!item || !item.url) {
-        return;
-      }
-      var $a = $('<a></a>')
-        .addClass('ai-navigate-tags__btn')
-        .attr('href', String(item.url).replace(/&amp;/g, '&'))
-        .text(item.label || '→');
-      $row.append($a);
+      if (!item || !item.url) return;
+      $row.append(
+        $('<a></a>').addClass('ai-navigate-tags__btn')
+          .attr('href', String(item.url).replace(/&amp;/g, '&'))
+          .text(item.label || '→')
+      );
     });
     return $row;
   }
 
   function renderNavigateCta(url, label) {
     return $('<div class="ai-navigate-cta"></div>').html(
-      '<a href="' +
-        escHref(url) +
-        '" class="ai-navigate-cta__btn">' +
-        escHtml(label || 'Перейти →') +
-        '</a>'
+      '<a href="' + escHref(url) + '" class="ai-navigate-cta__btn">' + escHtml(label || 'Перейти →') + '</a>'
     );
   }
 
   function renderQuickReplies(kind) {
-    if (!$replies || !$replies.length) {
-      return;
-    }
+    if (!$replies || !$replies.length) return;
     $replies.empty();
     var list = [];
-    if (kind === 'start') {
-      list = ['Томати', 'Огірки', 'Перець', 'Квіти'];
-    } else if (kind === 'products') {
-      list = ['Є щось дешевше?', 'Показати ще варіанти', 'Почати спочатку'];
-    } else if (kind === 'info') {
-      list = ['Консультація', 'Каталог', 'Акції'];
-    } else {
-      list = ['Каталог', 'Акції', 'Почати спочатку'];
-    }
+    if (kind === 'start') list = ['Томати', 'Огірки', 'Перець', 'Квіти'];
+    else if (kind === 'products') list = ['Є щось дешевше?', 'Показати ще', 'Почати спочатку'];
+    else if (kind === 'info') list = ['Консультація', 'Каталог', 'Акції'];
+    else list = ['Каталог', 'Акції', 'Почати спочатку'];
     list.forEach(function (s) {
       $('<button type="button" class="ai-quick-reply"></button>')
-        .text(s)
-        .on('click', function () {
-          sendMessage(s);
-        })
-        .appendTo($replies);
+        .text(s).on('click', function () { sendMessage(s); }).appendTo($replies);
     });
   }
 
   function handleActions(actions) {
-    var types = (actions || []).map(function (a) {
-      return a.type;
-    });
-    if (types.indexOf('showProducts') >= 0) {
-      renderQuickReplies('products');
-    } else if (
-      types.indexOf('navigateTo') >= 0 ||
-      types.indexOf('navigateTags') >= 0 ||
-      types.indexOf('showInfo') >= 0
-    ) {
-      renderQuickReplies('info');
-    } else {
-      renderQuickReplies('general');
-    }
+    var types = (actions || []).map(function (a) { return a.type; });
+    if (types.indexOf('showProducts') >= 0) renderQuickReplies('products');
+    else if (types.indexOf('navigateTo') >= 0 || types.indexOf('navigateTags') >= 0 || types.indexOf('showInfo') >= 0) renderQuickReplies('info');
+    else renderQuickReplies('general');
   }
 
   function sendMessage(text) {
-    if (!text) {
-      return;
-    }
+    if (!text) return;
     $welcome.hide();
     appendUserMessage(text);
     setPanelLoading(true);
-    if ($replies) {
-      $replies.empty();
-    }
+    if ($replies) $replies.empty();
 
     if (text === 'Почати спочатку') {
       $.ajax({
-        url: cfg.resetUrl,
-        method: 'POST',
-        dataType: 'json',
+        url: cfg.resetUrl, method: 'POST', dataType: 'json',
         complete: function () {
           idbClear();
           $welcome.show();
@@ -450,14 +307,13 @@
           setPanelLoading(false);
           appendAiMessage(cfg.i18n ? cfg.i18n.resetDone : 'OK', [], true);
           renderQuickReplies('start');
-        },
+        }
       });
       return;
     }
 
     $.ajax({
-      url: cfg.ajaxUrl,
-      method: 'POST',
+      url: cfg.ajaxUrl, method: 'POST',
       contentType: 'application/json; charset=utf-8',
       data: JSON.stringify({ message: text, context: getPageContext() }),
       dataType: 'json',
@@ -473,15 +329,13 @@
       error: function () {
         setPanelLoading(false);
         appendAiMessage(cfg.i18n ? cfg.i18n.error : 'Error', []);
-      },
+      }
     });
   }
 
   function doSend() {
     var text = ($input.val() || '').trim();
-    if (!text) {
-      return;
-    }
+    if (!text) return;
     $input.val('');
     $input.css('height', 'auto');
     sendMessage(text);
@@ -495,11 +349,8 @@
       }
       $welcome.hide();
       data.items.forEach(function (item) {
-        if (item.role === 'user') {
-          appendUserMessage(item.text, true);
-        } else {
-          appendAiMessage(item.text, item.actions || [], true);
-        }
+        if (item.role === 'user') appendUserMessage(item.text, true);
+        else appendAiMessage(item.text, item.actions || [], true);
       });
       scrollBottom();
       renderQuickReplies('general');
@@ -521,53 +372,43 @@
 
     if (cfg.embedMode === 'full') {
       state.isOpen = true;
-      $panel.addClass('ai-assistant-panel--open').attr('aria-hidden', false);
+      $panel.addClass('ai-panel--open').attr('aria-hidden', false);
     }
 
     if ($toggle.length) {
       $toggle.on('click', function () {
         state.isOpen = !state.isOpen;
-        $panel.toggleClass('ai-assistant-panel--open', state.isOpen).attr('aria-hidden', !state.isOpen);
-        if (state.isOpen) {
-          $input.trigger('focus');
-          scrollBottom();
-        }
+        $panel.toggleClass('ai-panel--open', state.isOpen).attr('aria-hidden', !state.isOpen);
+        if (state.isOpen) { $input.trigger('focus'); scrollBottom(); }
       });
     }
 
     if ($close.length) {
       $close.on('click', function () {
         state.isOpen = false;
-        $panel.removeClass('ai-assistant-panel--open').attr('aria-hidden', true);
+        $panel.removeClass('ai-panel--open').attr('aria-hidden', true);
       });
     }
 
-    $(document).on('click', '.ai-intent-btn', function () {
+    $(document).on('click', '.ai-welcome__intent-btn', function () {
       var msg = $(this).data('message') || $(this).text();
       sendMessage(msg);
-      if (($(this).data('intent') || '') === 'consult') {
-        renderQuickReplies('start');
-      }
+      if (($(this).data('intent') || '') === 'consult') renderQuickReplies('start');
     });
 
     $send.on('click', doSend);
     $input.on('keydown', function (e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        doSend();
-      }
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doSend(); }
     });
     $input.on('input', function () {
       this.style.height = 'auto';
-      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      this.style.height = Math.min(this.scrollHeight, 100) + 'px';
     });
 
     $reset.on('click', function () {
       setPanelLoading(true);
       $.ajax({
-        url: cfg.resetUrl,
-        method: 'POST',
-        dataType: 'json',
+        url: cfg.resetUrl, method: 'POST', dataType: 'json',
         complete: function () {
           idbClear(function () {
             $welcome.show();
@@ -576,7 +417,7 @@
             appendAiMessage(cfg.i18n ? cfg.i18n.resetDone : 'OK', [], true);
             renderQuickReplies('start');
           });
-        },
+        }
       });
     });
 
