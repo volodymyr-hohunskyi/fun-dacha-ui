@@ -16,7 +16,7 @@ class TrustBar extends \Opencart\System\Engine\Controller {
 			],
 			[
 				'icon'  => 'fa-seedling',
-				'title' => '980+ сортів',
+				'title' => '1000+ сортів',
 				'text'  => 'Перевірене насіння',
 			],
 			[

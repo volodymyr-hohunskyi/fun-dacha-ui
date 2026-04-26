@@ -18,7 +18,7 @@ class WhyOurSeeds extends \Opencart\System\Engine\Controller {
 			['icon' => 'fa-cloud-sun',      'title' => $this->language->get('trust_climate')],
 			['icon' => 'fa-truck-fast',     'title' => $this->language->get('trust_delivery')],
 			['icon' => 'fa-headset',        'title' => $this->language->get('trust_advice')],
-			['icon' => 'fa-shield-halved',  'title' => $this->language->get('trust_guarantee') ?: 'Гарантія якості'],
+			['icon' => 'fa-shield-halved',  'title' => 'Гарантія якості'],
 		];
 
 		$data['library_href'] = $this->url->link('cms/blog', 'language=' . $this->config->get('config_language'));
