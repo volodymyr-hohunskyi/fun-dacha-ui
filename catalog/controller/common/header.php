@@ -115,6 +115,12 @@ class Header extends \Opencart\System\Engine\Controller {
 		$data['cart'] = $this->load->controller('common/cart');
 		$data['menu'] = $this->load->controller('common/menu');
 
+		$data['search_action'] = $this->url->link('common/search.redirect', 'language=' . $this->config->get('config_language'));
+		$data['search_value'] = $this->request->get['search'] ?? '';
+
+		$data['text_shopping_cart'] = $this->language->get('text_shopping_cart');
+		$data['text_checkout'] = $this->language->get('text_checkout');
+
 		return $this->load->view('common/header', $data);
 	}
 	

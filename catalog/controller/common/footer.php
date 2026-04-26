@@ -87,6 +87,21 @@ class Footer extends \Opencart\System\Engine\Controller {
 			$this->model_tool_online->addOnline(oc_get_ip(), $this->customer->getId(), $url, $referer);
 		}
 
+		$data['home'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
+
+		$this->load->model('catalog/category');
+		$top_cats = $this->model_catalog_category->getCategories(0);
+		$data['categories'] = [];
+		$count = 0;
+		foreach ($top_cats as $cat) {
+			if ($count >= 6) break;
+			$data['categories'][] = [
+				'name' => strip_tags(html_entity_decode($cat['name'], ENT_QUOTES, 'UTF-8')),
+				'href' => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $cat['category_id']),
+			];
+			$count++;
+		}
+
 		$data['cookie'] = $this->load->controller('common/cookie');
 
 		$route = isset($this->request->get['route']) ? (string) $this->request->get['route'] : '';

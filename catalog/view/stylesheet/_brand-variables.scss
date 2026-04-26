@@ -1,23 +1,44 @@
 // =============================================================================
-// Fun Dacha — brand tokens (primary + typography)
+// Fun Dacha — brand tokens (colors, typography, spacing)
 // =============================================================================
 
-// Brand colors
+// ── Brand colors ──
 $primary:           #207D43;
-$primary-dark:      #1a6a38;   // Hover / pressed
-$primary-light:     #2d9554;   // Lighter accents / gradients
-$footer-bg:         #0F3B47;   // Dark teal/navy
+$primary-dark:      #1a6a38;
+$primary-light:     #2d9554;
 $secondary:         #8B5E3C;
-$neutral-bg:        #f7f7f7;
+$footer-bg:         #0F3B47;
 $white:             #FFFFFF;
 $black:             #000;
 
-// Typography — Bebas Neue (loaded in common/header.twig)
-$font-family-heading: "Bebas Neue", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-$font-family-body: "Bebas Neue", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-$font-family-display: "Bebas Neue", system-ui, sans-serif;
+// ── Extended palette ──
+$cream-bg:          #FFF8F0;
+$cream-dark:        #F5EDE3;
+$surface:           #FFFFFF;
+$neutral-bg:        #f7f7f7;
+$text-primary:      #1A1A1A;
+$text-body:         #4A4A4A;
+$text-muted-custom: #7A7A7A;
+$danger:            #D94040;
+$warning:           #E8A838;
+$star-yellow:       #F5A623;
+$border-light:      #E8E8E8;
+$border-medium:     #D0D0D0;
 
-// Bootstrap variable mappings
+// ── Typography ──
+// Display: Bebas Neue — hero banners and display headings only
+$font-family-display: "Bebas Neue", system-ui, sans-serif;
+// Headings: Montserrat — section titles, product names, nav
+$font-family-heading: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+// Body: Open Sans — paragraphs, form labels, descriptions
+$font-family-body: "Open Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+
+// ── Spacing ──
+$section-spacing:   3rem;
+$section-spacing-sm: 2rem;
+$card-padding:      1rem;
+
+// ── Bootstrap variable mappings ──
 $blue:              $primary;
 $green:             $primary;
 $gray-100:          $neutral-bg;
@@ -25,8 +46,8 @@ $gray-900:          #303030;
 $font-family-sans-serif: $font-family-body;
 $headings-font-family:   $font-family-heading;
 $body-bg:           $white;
-$border-radius:     10px;
-$border-radius-sm:  6px;
-$border-radius-lg:  10px;
-$border-radius-xl:  10px;
-$border-radius-2xl: 10px;
+$border-radius:     8px;
+$border-radius-sm:  4px;
+$border-radius-lg:  12px;
+$border-radius-xl:  12px;
+$border-radius-2xl: 12px;

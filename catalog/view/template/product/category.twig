@@ -5,70 +5,78 @@
 </script>
 {% endif %}
 <div id="product-category" class="container">
-  <ul class="breadcrumb">
-    {% for breadcrumb in breadcrumbs %}
-      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-    {% endfor %}
-  </ul>
-  <div class="row">{% if filter_widget %}<aside id="column-left" class="col-12 col-md-3 d-none d-md-block">{{ filter_widget }}</aside>{% endif %}
+  <nav class="category-breadcrumb" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item{% if loop.last %} active{% endif %}">
+          {% if loop.last %}{{ breadcrumb.text }}{% else %}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </nav>
+
+  <div class="row">
+    {% if filter_widget %}
+      <aside id="column-left" class="col-md-3 d-none d-md-block">{{ filter_widget }}</aside>
+      <div class="offcanvas offcanvas-start d-md-none" tabindex="-1" id="offcanvas-filters" aria-labelledby="offcanvas-filters-label">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title" id="offcanvas-filters-label">Фільтри</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрити"></button>
+        </div>
+        <div class="offcanvas-body">{{ filter_widget }}</div>
+      </div>
+    {% endif %}
+
     <div id="content" class="col">{{ content_top }}
       <h1>{{ heading_title }}</h1>
-      {% if image or description %}
-        <div class="row mb-4">
-          {% if image %}
-            <div class="col-md-3 mb-3 mb-md-0"><img src="{{ image }}" alt="{{ heading_title }}" title="{{ heading_title }}" class="img-thumbnail"/></div>
-          {% endif %}
-          {% if description %}
-            <div class="{% if image %}col-md-9{% else %}col-12{% endif %}">
-              <div class="category-description">
-                {{ description }}
-              </div>
-            </div>
-          {% endif %}
+
+      {% if description %}
+        <div class="category-desc-collapse mb-3">
+          <div class="category-desc-text">{{ description }}</div>
         </div>
-        <hr/>
       {% endif %}
 
       {% if products %}
-        <div class="row">
-          <div class="col-lg-5 col-6">
-            <div class="input-group mb-3">
-              <label for="input-sort" class="input-group-text">{{ text_sort }}</label>
-              <select id="input-sort" class="form-select" onchange="location = this.value;">
-                {% for sorts in sorts %}
-                  <option value="{{ sorts.href }}"{% if sorts.value == '%s-%s'|format(sort, order) %} selected{% endif %}>{{ sorts.text }}</option>
-                {% endfor %}
-              </select>
-            </div>
-          </div>
-          <div class="col-lg-3 col-6">
-            <div class="input-group mb-3">
-              <label for="input-limit" class="input-group-text">{{ text_limit }}</label>
-              <select id="input-limit" class="form-select" onchange="location = this.value;">
-                {% for limits in limits %}
-                  <option value="{{ limits.href }}"{% if limits.value == limit %} selected{% endif %}>{{ limits.text }}</option>
-                {% endfor %}
-              </select>
-            </div>
+        <div class="category-toolbar">
+          {% if filter_widget %}
+            <button class="btn btn-outline-primary btn-sm d-md-none category-toolbar__filter-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-filters">
+              <i class="fa-solid fa-sliders me-1"></i> Фільтри
+            </button>
+          {% endif %}
+          {% if product_total is defined %}
+            <span class="category-toolbar__count">Знайдено {{ product_total }} товарів</span>
+          {% endif %}
+          <div class="category-toolbar__sort ms-auto">
+            <select id="input-sort" class="form-select form-select-sm" onchange="location = this.value;">
+              {% for sorts in sorts %}
+                <option value="{{ sorts.href }}"{% if sorts.value == '%s-%s'|format(sort, order) %} selected{% endif %}>{{ sorts.text }}</option>
+              {% endfor %}
+            </select>
           </div>
         </div>
 
-        <div id="product-list" class="row row-cols-1 row-cols-sm-2 row-cols-md-2 row-cols-lg-4">
+        <div id="product-list" class="row row-cols-2 row-cols-sm-2 row-cols-md-2 row-cols-lg-4 g-3">
           {% for product in products %}
-            <div class="col mb-3">{{ product }}</div>
+            <div class="col">{{ product }}</div>
           {% endfor %}
         </div>
 
-        <div class="row">
-          <div class="col-sm-6 text-start">{{ pagination }}</div>
-          <div class="col-sm-6 text-end">{{ results }}</div>
+        <div class="category-pagination">
+          <div>{{ pagination }}</div>
+          <div class="category-pagination__results">{{ results }}</div>
         </div>
       {% endif %}
+
       {% if not products %}
-        <p>{{ text_no_results }}</p>
-        <div class="text-end"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
+        <div class="category-empty">
+          <i class="fa-solid fa-seedling fa-3x text-muted mb-3"></i>
+          <p>{{ text_no_results }}</p>
+          <a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a>
+        </div>
       {% endif %}
-      {{ content_bottom }}</div>
-    {{ column_right }}</div>
+      {{ content_bottom }}
+    </div>
+    {{ column_right }}
+  </div>
 </div>
 {{ footer }}

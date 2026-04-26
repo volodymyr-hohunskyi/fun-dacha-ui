@@ -1,22 +1,17 @@
 <section class="why-our-seeds-section">
   <div class="container">
-    <h3 class="mb-4">{{ heading_title }}</h3>
-    <div class="row align-items-start">
-      <div class="col-md-4 mb-4 mb-md-0">
-        <img src="{{ image }}" alt="{{ heading_title }}" class="img-fluid rounded"/>
-      </div>
-      <div class="col-md-8">
-        <p class="text-body-secondary mb-4">{{ text_intro }}</p>
-        <ul class="list-unstyled mb-0">
-          {% for block in trust_blocks %}
-            <li class="d-flex align-items-center mb-2">
-              <i class="fa-solid fa-check text-success me-2"></i>
-              <span>{{ block }}</span>
-            </li>
-          {% endfor %}
-        </ul>
-        <a href="{{ library_href }}" class="btn btn-outline-primary mt-3">{{ text_library }}</a>
-      </div>
+    <h3 class="section-heading mb-3">{{ heading_title }}</h3>
+    <p class="why-our-seeds__intro">{{ text_intro }}</p>
+    <div class="why-our-seeds__grid">
+      {% for feature in features %}
+        <div class="why-our-seeds__card">
+          <div class="why-our-seeds__icon">
+            <i class="fa-solid {{ feature.icon }}"></i>
+          </div>
+          <span class="why-our-seeds__title">{{ feature.title }}</span>
+        </div>
+      {% endfor %}
     </div>
+    <a href="{{ library_href }}" class="btn btn-outline-primary mt-3">{{ text_library }}</a>
   </div>
 </section>

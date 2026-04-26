@@ -38,6 +38,8 @@ class Cart extends \Opencart\System\Engine\Controller {
 		// Count unique products (not total quantity)
 		$product_count = count($this->cart->getProducts());
 		$data['text_items'] = sprintf($this->language->get('text_items'), $product_count);
+		$data['product_count'] = $product_count;
+		$data['total_formatted'] = $price_status ? $this->currency->format($total, $this->session->data['currency']) : '';
 
 		// Products
 		$data['products'] = [];

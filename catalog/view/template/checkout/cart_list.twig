@@ -14,109 +14,110 @@
   {% if attention %}
     <div class="alert alert-info"><i class="fa-solid fa-circle-info"></i> {{ attention }} <button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
   {% endif %}
+
   <h1>{{ heading_title }}</h1>
-  <div id="output-cart" class="table-responsive">
-    <table class="table table-bordered">
-      <thead>
-        <tr>
-          <th class="text-center">{{ column_image }}</th>
-          <th>{{ column_name }}</th>
-          <th class="text-end align-middle">{{ column_price }}</th>
-          <th class="text-center">{{ column_quantity }}</th>
-          <th class="text-center"></th>
-          <th class="text-end align-middle">{{ column_total }}</th>
-        </tr>
-      </thead>
-      <tbody>
+
+  <div class="row cart-layout">
+    <div class="col-lg-8">
+      <div id="output-cart" class="cart-items">
         {% for product in products %}
-          <tr>
-            <td class="text-center">
+          <div class="cart-item">
+            <div class="cart-item__image">
               {% if product.thumb %}
-                <a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-thumbnail"/></a>
-              {% else %}
-                <span class="text-muted" style="min-width: 50px; min-height: 50px; display: inline-block;"></span>
+                <a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" loading="lazy"/></a>
               {% endif %}
-            </td>
-            <td class="text-start text-wrap"><a href="{{ product.href }}" class="fw-semibold">{{ product.name }}</a>{% if not product.stock %} <span class="text-danger">***</span>{% endif %}
+            </div>
+            <div class="cart-item__details">
+              <a href="{{ product.href }}" class="cart-item__name">{{ product.name }}</a>
+              {% if not product.stock %}<span class="cart-item__unavailable">Немає в наявності</span>{% endif %}
               {% if product.cart_pack %}
-              <div class="cart-pack-summary mt-1 small text-muted">{{ product.cart_pack.pack_label }}</div>
+                <div class="cart-item__pack">{{ product.cart_pack.pack_label }}</div>
               {% endif %}
-              <ul class="list-unstyled mb-0{% if product.cart_pack %} mt-1{% endif %}">
-                {% for option in product.option %}
-                  {% if not product.cart_pack %}
-                  <li>
-                    <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
-                  </li>
-                  {% endif %}
-                {% endfor %}
-                {% if product.subscription %}
-                  <li>
-                    <small> - {{ text_subscription }}: {{ product.subscription }}</small>
-                  </li>
+              {% for option in product.option %}
+                {% if not product.cart_pack %}
+                  <div class="cart-item__option">{{ option.name }}: {% if option.pack_display_html %}{{ option.pack_display_html|raw }}{% else %}{{ option.value }}{% endif %}</div>
                 {% endif %}
-                {% if product.reward %}
-                  <li>
-                    <small> - {{ text_points }}: {{ product.reward }}</small>
-                  </li>
+              {% endfor %}
+              <div class="cart-item__price-mobile d-lg-none">
+                {% if product.cart_pack %}
+                  {% if product.cart_pack.line_was %}<span class="cart-item__sale">{{ product.cart_pack.line_sale }}</span> <span class="cart-item__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}
+                {% elseif product.price_was %}
+                  <span class="cart-item__sale">{{ product.price }}</span> <span class="cart-item__was">{{ product.price_was }}</span>
+                {% else %}
+                  {{ product.price }}
                 {% endif %}
-              </ul>
-            </td>
-            <td class="text-end align-middle cart-price-cell">{% if product.cart_pack %}<div class="cart-price-cell__main">{% if product.cart_pack.line_was %}<span class="price-display__sale">{{ product.cart_pack.line_sale }}</span> <span class="price-display__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}</div>{% if product.cart_pack.tier_subtitle %}<div class="cart-price-cell__tiers small text-muted mt-1 text-wrap">{{ product.cart_pack.tier_subtitle }}</div>{% endif %}{% elseif product.price_was %}<span class="price-display__sale">{{ product.price }}</span> <span class="price-display__was">{{ product.price_was }}</span>{% else %}{{ product.price }}{% endif %}</td>
-            <td class="text-center align-middle cart-table__cell-qty">
+              </div>
+            </div>
+            <div class="cart-item__qty">
               <form method="post" data-oc-target="#shopping-cart" id="form-quantity-{{ product.cart_id }}" class="mb-0">
-                <div class="input-group input-group-qty-compact d-flex justify-content-center flex-nowrap">
-                  <button type="button" class="btn btn-primary btn-qty-step text-white" onclick="changeCartQuantity({{ product.cart_id }}, -1)"><i class="fa-solid fa-minus" aria-hidden="true"></i></button>
-                  <input type="text" name="quantity" value="{{ product.quantity }}" size="1" class="form-control form-control-sm text-center{% if product.minimum %} is-invalid{% endif %}" onchange="updateCartQuantity({{ product.cart_id }})"/>
-                  <button type="button" class="btn btn-primary btn-qty-step text-white" onclick="changeCartQuantity({{ product.cart_id }}, 1)"><i class="fa-solid fa-plus" aria-hidden="true"></i></button>
+                <div class="input-group input-group-qty-compact flex-nowrap">
+                  <button type="button" class="btn btn-outline-secondary btn-qty-step" onclick="changeCartQuantity({{ product.cart_id }}, -1)"><i class="fa-solid fa-minus"></i></button>
+                  <input type="text" name="quantity" value="{{ product.quantity }}" size="1" class="form-control form-control-sm text-center" onchange="updateCartQuantity({{ product.cart_id }})"/>
+                  <button type="button" class="btn btn-outline-secondary btn-qty-step" onclick="changeCartQuantity({{ product.cart_id }}, 1)"><i class="fa-solid fa-plus"></i></button>
                 </div>
                 <input type="hidden" name="key" value="{{ product.cart_id }}"/>
               </form>
-              {% if product.minimum %}
-                <small class="invalid-feedback d-block">{{ product.minimum }}</small>
-              {% endif %}</td>
-            <td class="text-center align-middle cart-table__cell-remove" style="padding-left: 10px; padding-right: 10px;">
-              <a href="{{ product.remove }}" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger btn-sm"><i class="fa-solid fa-circle-xmark"></i></a>
-            </td>
-            <td class="text-end align-middle">{{ product.total }}</td>
-          </tr>
+            </div>
+            <div class="cart-item__price d-none d-lg-block">
+              {% if product.cart_pack %}
+                {% if product.cart_pack.line_was %}<span class="cart-item__sale">{{ product.cart_pack.line_sale }}</span> <span class="cart-item__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}
+              {% elseif product.price_was %}
+                <span class="cart-item__sale">{{ product.price }}</span> <span class="cart-item__was">{{ product.price_was }}</span>
+              {% else %}
+                {{ product.price }}
+              {% endif %}
+            </div>
+            <div class="cart-item__total">{{ product.total }}</div>
+            <a href="{{ product.remove }}" class="cart-item__remove" title="{{ button_remove }}"><i class="fa-solid fa-xmark"></i></a>
+          </div>
         {% endfor %}
-      </tbody>
-      <tfoot id="checkout-total">
-        {% for total in totals %}
-          <tr>
-            <td colspan="5" class="text-end align-middle"><strong>{{ total.title }}</strong></td>
-            <td class="text-end align-middle">{{ total.text }}</td>
-          </tr>
-        {% endfor %}
-      </tfoot>
-    </table>
-  </div>
+      </div>
 
-  {% if modules %}
-    <h2>{{ text_next }}</h2>
-    <p>{{ text_next_choice }}</p>
-    <div id="accordion" class="accordion">
-      {% for module in modules %}
-        {{ module }}
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <br/>
-  <div class="row g-2 cart-stack-actions align-items-stretch">
-    <div class="col-12 col-sm-6 d-flex align-items-stretch">
-      <a href="{{ continue }}" class="btn btn-light w-100 border cart-stack-actions__btn align-self-stretch">{{ button_shopping }}</a>
-    </div>
-    <div class="col-12 col-sm-6 d-flex align-items-stretch justify-content-sm-end">
-      {% if checkout and can_proceed_to_checkout %}
-        <a href="{{ checkout }}" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn align-self-stretch">{{ button_checkout }}</a>
-      {% else %}
-        <button type="button" id="checkout-button" class="btn btn-primary w-100 w-sm-auto cart-stack-actions__btn align-self-stretch" disabled title="{% if min_order_error %}{{ min_order_error }}{% else %}{{ text_minimum_order_not_met }}{% endif %}">{{ button_checkout }}</button>
+      {% if modules %}
+        <div class="cart-modules mt-3">
+          <h2>{{ text_next }}</h2>
+          <p>{{ text_next_choice }}</p>
+          <div id="accordion" class="accordion">
+            {% for module in modules %}
+              {{ module }}
+            {% endfor %}
+          </div>
+        </div>
       {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      <div class="cart-summary">
+        <h3 class="cart-summary__title">Ваше замовлення</h3>
+        <div class="cart-summary__totals" id="checkout-total">
+          {% for total in totals %}
+            <div class="cart-summary__row{% if loop.last %} cart-summary__row--total{% endif %}">
+              <span>{{ total.title }}</span>
+              <span>{{ total.text }}</span>
+            </div>
+          {% endfor %}
+        </div>
+        <div class="cart-summary__actions">
+          {% if checkout and can_proceed_to_checkout %}
+            <a href="{{ checkout }}" id="checkout-button" class="btn btn-primary w-100 btn-lg">{{ button_checkout }} <i class="fa-solid fa-arrow-right ms-2"></i></a>
+          {% else %}
+            <button type="button" id="checkout-button" class="btn btn-primary w-100 btn-lg" disabled>{{ button_checkout }}</button>
+          {% endif %}
+          <a href="{{ continue }}" class="btn btn-outline-secondary w-100 mt-2">{{ button_shopping }}</a>
+        </div>
+        <div class="cart-summary__trust">
+          <div class="cart-summary__trust-item"><i class="fa-solid fa-truck-fast"></i> Нова Пошта 1-3 дні</div>
+          <div class="cart-summary__trust-item"><i class="fa-solid fa-money-bill-wave"></i> Оплата при отриманні</div>
+          <div class="cart-summary__trust-item"><i class="fa-solid fa-shield-halved"></i> Безпечне замовлення</div>
+        </div>
+      </div>
     </div>
   </div>
 {% else %}
-  <h1>{{ heading_title }}</h1>
-  <p>{{ text_no_results }}</p>
-  <div class="text-end"><a href="{{ continue }}" class="btn btn-primary">{{ button_continue }}</a></div>
+  <div class="cart-empty">
+    <i class="fa-solid fa-cart-shopping fa-4x"></i>
+    <h2 class="cart-empty__title">{{ heading_title }}</h2>
+    <p class="cart-empty__text">{{ text_no_results }}</p>
+    <a href="{{ continue }}" class="btn btn-primary btn-lg">Перейти до каталогу <i class="fa-solid fa-arrow-right ms-2"></i></a>
+  </div>
 {% endif %}

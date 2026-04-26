@@ -1,57 +1,48 @@
 </main>
-<footer class="freshgo-footer">
-  <div class="freshgo-footer-content">
+<footer class="site-footer">
+  <div class="site-footer__main">
     <div class="container">
       <div class="row">
         <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <h5>{{ text_contact_us }}</h5>
-          <p class="freshgo-footer-store-name">{{ name }}</p>
-          {% if address %}
-            <p><i class="fa-solid fa-location-dot me-2"></i>{{ address }}</p>
+          <h5 class="site-footer__heading">Про нас</h5>
+          <p class="site-footer__store">{{ name }}</p>
+          {% for information in informations %}
+            <a href="{{ information.href }}" class="site-footer__link">{{ information.title }}</a>
+          {% endfor %}
+          {% if blog %}
+            <a href="{{ blog }}" class="site-footer__link">{{ text_blog }}</a>
           {% endif %}
-          <p><i class="fa-solid fa-phone me-2"></i>{{ telephone }}</p>
-          <p><i class="fa-solid fa-envelope me-2"></i>{{ email }}</p>
         </div>
         <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <h5>{{ text_information }}</h5>
-          <ul class="list-unstyled">
-            {% if blog %}
-              <li><a href="{{ blog }}">{{ text_blog }}</a></li>
-            {% endif %}
-            {% for information in informations %}
-              <li><a href="{{ information.href }}">{{ information.title }}</a></li>
-            {% endfor %}
-          </ul>
+          <h5 class="site-footer__heading">Каталог</h5>
+          {% for category in categories %}
+            <a href="{{ category.href }}" class="site-footer__link">{{ category.name }}</a>
+          {% endfor %}
+          <a href="{{ special }}" class="site-footer__link">{{ text_special }}</a>
         </div>
         <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <h5>{{ text_news }}</h5>
-          <ul class="list-unstyled">
-            {% if blog %}
-              <li><a href="{{ blog }}">{{ text_blog }}</a></li>
-            {% endif %}
-            <li><a href="{{ special }}">{{ text_special }}</a></li>
-          </ul>
+          <h5 class="site-footer__heading">Допомога</h5>
+          <a href="{{ contact }}" class="site-footer__link">{{ text_contact }}</a>
+          {% if gdpr %}
+            <a href="{{ gdpr }}" class="site-footer__link">{{ text_gdpr }}</a>
+          {% endif %}
+          <a href="{{ sitemap }}" class="site-footer__link">{{ text_sitemap }}</a>
         </div>
         <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <h5>{{ text_service }}</h5>
-          <ul class="list-unstyled">
-            <li><a href="{{ contact }}">{{ text_contact }}</a></li>
-            {% if gdpr %}
-              <li><a href="{{ gdpr }}">{{ text_gdpr }}</a></li>
-            {% endif %}
-            <li><a href="{{ sitemap }}">{{ text_sitemap }}</a></li>
-          </ul>
+          <h5 class="site-footer__heading">{{ text_contact_us }}</h5>
+          {% if address %}
+            <p class="site-footer__contact"><i class="fa-solid fa-location-dot"></i> {{ address }}</p>
+          {% endif %}
+          <p class="site-footer__contact"><i class="fa-solid fa-phone"></i> {{ telephone }}</p>
+          <p class="site-footer__contact"><i class="fa-solid fa-envelope"></i> {{ email }}</p>
+          <p class="site-footer__contact"><i class="fa-solid fa-clock"></i> Пн-Пт 9:00-18:00</p>
         </div>
       </div>
     </div>
   </div>
-  <div class="freshgo-footer-bottom">
+  <div class="site-footer__bottom">
     <div class="container">
-      <div class="row align-items-center">
-        <div class="col-12 text-center py-3">
-          <p class="mb-0">{{ powered }}</p>
-        </div>
-      </div>
+      <p class="mb-0">{{ powered }}</p>
     </div>
   </div>
 </footer>

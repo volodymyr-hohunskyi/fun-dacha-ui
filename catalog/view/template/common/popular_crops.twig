@@ -1,17 +1,21 @@
 {% if categories %}
 <section class="popular-crops-section">
   <div class="container">
-    <h2 class="popular-crops-title text-start mb-4">{{ heading_title }}</h2>
-    <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-4">
+    <h2 class="section-heading text-start mb-4">{{ heading_title }}</h2>
+    <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-3">
       {% for category in categories %}
         <div class="col">
-          <div class="popular-crop-card">
-            <a href="{{ category.href }}" class="popular-crop-link d-block text-decoration-none">
-              <div class="popular-crop-image">
-                <img src="{{ category.image }}" alt="{{ category.name }}" class="img-fluid"/>
-              </div>
-            </a>
-          </div>
+          <a href="{{ category.href }}" class="popular-crop-card">
+            <div class="popular-crop-image">
+              <img src="{{ category.image }}" alt="{{ category.name }}" loading="lazy"/>
+            </div>
+            <div class="popular-crop-overlay">
+              <span class="popular-crop-name">{{ category.name }}</span>
+              {% if category.product_count %}
+                <span class="popular-crop-count">{{ category.product_count }} товарів</span>
+              {% endif %}
+            </div>
+          </a>
         </div>
       {% endfor %}
     </div>

@@ -116,6 +116,7 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 		if ($route == 'common/home') {
 			$home_modules = [
 				$this->load->controller('common/hero_banner'),
+				$this->load->controller('common/trust_bar'),
 				$this->load->controller('common/popular_crops'),
 				$this->load->controller('common/home_sale_carousel'),
 				$this->load->controller('common/why_our_seeds'),
@@ -123,6 +124,7 @@ class ContentTop extends \Opencart\System\Engine\Controller {
 				$this->load->controller('common/blog_carousel'),
 				$this->load->controller('common/home_recently_viewed'),
 				$this->load->controller('common/home_brands'),
+				$this->load->controller('common/newsletter'),
 			];
 			$data['modules'] = array_filter($home_modules);
 		}

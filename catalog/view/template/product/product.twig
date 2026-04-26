@@ -25,11 +25,15 @@
 {% endfor %}
 {% endif %}
 <div id="product-info" class="container">
-  <ul class="breadcrumb">
-    {% for breadcrumb in breadcrumbs %}
-      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-    {% endfor %}
-  </ul>
+  <nav class="category-breadcrumb" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item{% if loop.last %} active{% endif %}">
+          {% if loop.last %}{{ breadcrumb.text }}{% else %}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </nav>
   <div class="row">{{ column_left }}
     <div id="content" class="col">
       {{ content_top }}
@@ -62,13 +66,13 @@
             <li>{{ text_stock }} {{ stock }}</li>
           </ul>
           {% if review_status %}
-            <div class="rating">
+            <div class="rating pdp-rating">
               <p>
                 {% for i in 1..5 %}
                   {% if rating < i %}
-                    <span class="fa-stack"><i class="fa-regular fa-star fa-stack-1x"></i></span>
+                    <i class="fa-regular fa-star"></i>
                   {% else %}
-                    <span class="fa-stack"><i class="fa-solid fa-star fa-stack-1x"></i><i class="fa-regular fa-star fa-stack-1x"></i></span>
+                    <i class="fa-solid fa-star"></i>
                   {% endif %}
                 {% endfor %}
                 <a href="#" onclick="$('a[href=\'#tab-review\']').tab('show'); return false;">{{ text_reviews }}</a> / <a href="#" onclick="$('a[href=\'#tab-review\']').tab('show'); setTimeout(function(){ document.getElementById('pdp-write-review') &amp;&amp; document.getElementById('pdp-write-review').scrollIntoView({behavior:'smooth', block:'start'}); }, 150); return false;">{{ text_write }}</a></p>
@@ -331,6 +335,12 @@
   </div>
 </section>
 
+              <div class="pdp-trust-badges mt-3">
+                <div class="pdp-trust-badge"><i class="fa-solid fa-truck-fast"></i> Нова Пошта 1-3 дні</div>
+                <div class="pdp-trust-badge"><i class="fa-solid fa-money-bill-wave"></i> Оплата при отриманні</div>
+                <div class="pdp-trust-badge"><i class="fa-solid fa-circle-check"></i> Гарантія сходження</div>
+              </div>
+
               {% if minimum > 1 %}
                 <div class="alert alert-warning"><i class="fa-solid fa-circle-info"></i> {{ text_minimum }}</div>
               {% endif %}
@@ -339,58 +349,57 @@
         </div>
       </div>
 
-      <div class="pdp-detail-sections mt-4">
-        {% if attribute_groups %}
-          <section class="pdp-detail-section" aria-labelledby="pdp-heading-characteristics">
-            <h2 id="pdp-heading-characteristics" class="pdp-detail-section__title">{{ text_pdp_characteristics }}</h2>
-            <div class="pdp-quick-facts">
-              {% for attribute_group in attribute_groups %}
-                {% if attribute_group.name|lower|trim != text_pdp_characteristics|lower|trim %}
-                  <h3 class="pdp-detail-subheading">{{ attribute_group.name }}</h3>
-                {% endif %}
-                <dl class="row pdp-dl mb-3">
-                  {% for attribute in attribute_group.attribute %}
-                    <dt class="col-sm-4 col-lg-3 pdp-dl__dt">{{ attribute.name }}</dt>
-                    <dd class="col-sm-8 col-lg-9 pdp-dl__dd">{{ attribute.text }}</dd>
-                  {% endfor %}
-                </dl>
-              {% endfor %}
+      <div class="pdp-tabs mt-4">
+        <ul class="nav nav-tabs" role="tablist">
+          {% if description %}
+            <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-description" type="button" role="tab">Опис</button></li>
+          {% endif %}
+          {% if attribute_groups %}
+            <li class="nav-item" role="presentation"><button class="nav-link{% if not description %} active{% endif %}" data-bs-toggle="tab" data-bs-target="#tab-specs" type="button" role="tab">Характеристики</button></li>
+          {% endif %}
+          <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-shipping" type="button" role="tab">Доставка</button></li>
+          {% if review_status %}
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-review" type="button" role="tab">{{ tab_review }}</button></li>
+          {% endif %}
+        </ul>
+        <div class="tab-content">
+          {% if description %}
+            <div id="tab-description" class="tab-pane fade show active" role="tabpanel">
+              <div class="pdp-tab-body pdp-growing-text">{{ description }}</div>
             </div>
-          </section>
-        {% endif %}
-
-        {% if description %}
-          <section class="pdp-detail-section" aria-labelledby="pdp-heading-growing">
-            <h2 id="pdp-heading-growing" class="pdp-detail-section__title">{{ text_pdp_growing_heading }}</h2>
-            <div class="pdp-detail-section__body pdp-growing-text">
-              {{ description }}
+          {% endif %}
+          {% if attribute_groups %}
+            <div id="tab-specs" class="tab-pane fade{% if not description %} show active{% endif %}" role="tabpanel">
+              <div class="pdp-tab-body">
+                {% for attribute_group in attribute_groups %}
+                  {% if attribute_group.name|lower|trim != text_pdp_characteristics|lower|trim %}
+                    <h3 class="pdp-detail-subheading">{{ attribute_group.name }}</h3>
+                  {% endif %}
+                  <dl class="row pdp-dl mb-3">
+                    {% for attribute in attribute_group.attribute %}
+                      <dt class="col-sm-4 col-lg-3 pdp-dl__dt">{{ attribute.name }}</dt>
+                      <dd class="col-sm-8 col-lg-9 pdp-dl__dd">{{ attribute.text }}</dd>
+                    {% endfor %}
+                  </dl>
+                {% endfor %}
+              </div>
             </div>
-          </section>
-        {% endif %}
-
-        <section class="pdp-detail-section" aria-labelledby="pdp-heading-shipping">
-          <h2 id="pdp-heading-shipping" class="pdp-detail-section__title">{{ text_pdp_shipping_heading }}</h2>
-          <div class="pdp-detail-section__body">
-            <p class="mb-0">{{ text_pdp_shipping }}</p>
+          {% endif %}
+          <div id="tab-shipping" class="tab-pane fade" role="tabpanel">
+            <div class="pdp-tab-body">
+              <h3 class="pdp-detail-subheading">{{ text_pdp_shipping_heading }}</h3>
+              <p>{{ text_pdp_shipping }}</p>
+              <h3 class="pdp-detail-subheading">{{ text_pdp_guarantee_heading }}</h3>
+              <p>{{ text_pdp_guarantee }}</p>
+            </div>
           </div>
-        </section>
-
-        <section class="pdp-detail-section" aria-labelledby="pdp-heading-guarantee">
-          <h2 id="pdp-heading-guarantee" class="pdp-detail-section__title">{{ text_pdp_guarantee_heading }}</h2>
-          <div class="pdp-detail-section__body">
-            <p class="mb-0">{{ text_pdp_guarantee }}</p>
-          </div>
-        </section>
+          {% if review_status %}
+            <div id="tab-review" class="tab-pane fade" role="tabpanel">
+              <div class="pdp-tab-body">{{ review }}</div>
+            </div>
+          {% endif %}
+        </div>
       </div>
-
-      {% if review_status %}
-      <ul class="nav nav-tabs mt-4">
-        <li class="nav-item"><a href="#tab-review" data-bs-toggle="tab" class="nav-link active">{{ tab_review }}</a></li>
-      </ul>
-      <div class="tab-content">
-        <div id="tab-review" class="tab-pane fade show active mb-4">{{ review }}</div>
-      </div>
-      {% endif %}
       {{ related }}
       {{ content_bottom }}
     </div>

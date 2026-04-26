@@ -470,6 +470,7 @@ class Category extends \Opencart\System\Engine\Controller {
 			$data['sort'] = $sort;
 			$data['order'] = $order;
 			$data['limit'] = $limit;
+			$data['product_total'] = $product_total;
 
 			$data['continue'] = $this->url->link('common/home', 'language=' . $this->config->get('config_language'));
 

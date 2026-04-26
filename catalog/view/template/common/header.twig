@@ -8,7 +8,7 @@
   <base href="{{ base }}"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
   {% if description %}
     <meta name="description" content="{{ description }}"/>
   {% endif %}
@@ -20,6 +20,7 @@
   <link href="{{ icons }}" rel="stylesheet" type="text/css"/>
   <link href="{{ stylesheet }}" type="text/css" rel="stylesheet"/>
   <script src="catalog/view/javascript/common.js" type="text/javascript"></script>
+  <script src="catalog/view/javascript/search-autocomplete.js" type="text/javascript" defer></script>
   {% if icon %}
     <link rel="icon" href="{{ icon }}" type="image/png">
   {% endif %}
@@ -61,36 +62,46 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
     gtag('config', 'G-S3KC3XHHCC');
   </script>
 </head>
 <body>
 <div id="container">
   <div id="alert"></div>
-  <nav id="top" class="freshgo-top-bar">
+
+  {# ── TIER 1: Utility Bar (green, trust messaging) ── #}
+  <div id="utility-bar" class="utility-bar">
     <div class="container">
       <div class="row align-items-center">
-        <div class="col-4 d-none d-md-block">
-          <a href="{{ contact }}" class="text-white text-decoration-none"><i class="fa-solid fa-phone"></i> {{ telephone }}</a>
+        <div class="col-auto d-none d-md-block">
+          <a href="{{ contact }}" class="utility-bar__link"><i class="fa-solid fa-truck-fast"></i> Доставка Новою Поштою</a>
         </div>
-        <div class="col-12 col-md-4 text-center">
-          <span class="text-white d-none d-md-inline">{{ text_welcome_store }}</span>
+        <div class="col text-center d-none d-lg-block">
+          <span class="utility-bar__text"><i class="fa-solid fa-seedling"></i> 980+ сортів насіння</span>
         </div>
-        <div class="col-8 col-md-4 text-end">
+        <div class="col-12 col-md-auto text-center text-md-end">
+          <a href="{{ contact }}" class="utility-bar__link"><i class="fa-solid fa-phone"></i> {{ telephone }}</a>
           {{ currency }}
           {{ language }}
-          <a href="{{ shopping_cart }}" title="{{ text_shopping_cart }}" class="text-white text-decoration-none ms-2"><i class="fa-solid fa-cart-shopping"></i> <span class="d-none d-lg-inline">{{ text_shopping_cart }}</span></a>
-          <a href="{{ checkout }}" title="{{ text_checkout }}" class="text-white text-decoration-none ms-2"><i class="fa-solid fa-share"></i> <span class="d-none d-lg-inline">{{ text_checkout }}</span></a>
         </div>
       </div>
     </div>
-  </nav>
-  <header class="freshgo-header">
+  </div>
+
+  {# ── TIER 2: Main Header (logo + search + cart) ── #}
+  <header id="header-main" class="header-main">
     <div class="container">
       <div class="row align-items-center py-2">
+        {# Mobile hamburger #}
+        <div class="col-auto d-lg-none">
+          <button class="btn btn-link header-main__icon-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvas-nav" aria-label="Меню">
+            <i class="fa-solid fa-bars fa-lg"></i>
+          </button>
+        </div>
+
+        {# Logo #}
         <div class="col-auto">
-          <div id="logo">
+          <div id="logo" class="header-main__logo">
             {% if logo %}
               <a href="{{ home }}"><img src="{{ logo }}" title="{{ name }}" alt="{{ name }}" class="img-fluid"/></a>
             {% else %}
@@ -98,10 +109,68 @@
             {% endif %}
           </div>
         </div>
-        <div class="col">
-          {{ menu }}
+
+        {# Search — desktop #}
+        <div class="col d-none d-lg-block">
+          <div class="header-search" id="header-search">
+            <form action="{{ search_action }}" method="post" class="header-search__form">
+              <input type="text" name="search" value="{{ search_value }}" placeholder="Пошук насіння, добрив, інструментів..." class="form-control header-search__input" id="header-search-input" autocomplete="off"/>
+              <button type="submit" class="header-search__btn" aria-label="Пошук"><i class="fa-solid fa-magnifying-glass"></i></button>
+            </form>
+            <div class="header-search__results" id="header-search-results"></div>
+          </div>
+        </div>
+
+        {# Mobile search icon #}
+        <div class="col d-lg-none"></div>
+        <div class="col-auto d-lg-none">
+          <button class="btn btn-link header-main__icon-btn" type="button" data-bs-toggle="collapse" data-bs-target="#mobile-search" aria-label="Пошук">
+            <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+          </button>
+        </div>
+
+        {# Cart with badge #}
+        <div class="col-auto">
+          <div id="cart" class="header-cart">
+            {{ cart }}
+          </div>
+        </div>
+      </div>
+
+      {# Mobile search bar (collapsible) #}
+      <div class="collapse d-lg-none" id="mobile-search">
+        <div class="pb-2">
+          <form action="{{ search_action }}" method="post" class="header-search__form">
+            <input type="text" name="search" value="{{ search_value }}" placeholder="Пошук насіння..." class="form-control header-search__input" autocomplete="off"/>
+            <button type="submit" class="header-search__btn" aria-label="Пошук"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </form>
         </div>
       </div>
     </div>
   </header>
+
+  {# ── TIER 3: Category Navigation (desktop) ── #}
+  <nav id="category-nav" class="category-nav d-none d-lg-block">
+    <div class="container">
+      {{ menu }}
+    </div>
+  </nav>
+
+  {# ── Mobile Offcanvas Navigation ── #}
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas-nav" aria-labelledby="offcanvas-nav-label">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="offcanvas-nav-label">{{ name }}</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Закрити"></button>
+    </div>
+    <div class="offcanvas-body">
+      {{ menu }}
+      <hr>
+      <ul class="list-unstyled offcanvas-nav__links">
+        <li><a href="{{ contact }}"><i class="fa-solid fa-phone me-2"></i>{{ telephone }}</a></li>
+        <li><a href="{{ shopping_cart }}"><i class="fa-solid fa-cart-shopping me-2"></i>{{ text_shopping_cart }}</a></li>
+        <li><a href="{{ checkout }}"><i class="fa-solid fa-share me-2"></i>{{ text_checkout }}</a></li>
+      </ul>
+    </div>
+  </div>
+
   <main>

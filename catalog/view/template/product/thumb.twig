@@ -1,19 +1,32 @@
 <div class="product-thumb">
   <div class="image">
-    <a href="{{ href }}"><img src="{{ thumb }}" alt="{{ name }}" title="{{ name }}" class="img-fluid" loading="lazy"/></a>
+    {% if special %}
+      <span class="product-thumb__badge product-thumb__badge--sale">Акція</span>
+    {% endif %}
+    <a href="{{ href }}"><img src="{{ thumb }}" alt="{{ name }}" title="{{ name }}" loading="lazy"/></a>
   </div>
   <div class="content">
     <div class="description">
       <h4><a href="{{ href }}">{{ name }}</a></h4>
-      <p>{{ description }}</p>
+      {% if review_status and rating %}
+        <div class="rating">
+          {% for i in 1..5 %}
+            {% if rating < i %}
+              <i class="fa-regular fa-star"></i>
+            {% else %}
+              <i class="fa-solid fa-star"></i>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
       <div class="product-thumb__price-row">
         <div class="product-thumb__prices">
           {% if price %}
             {% if not special %}
               <span class="product-thumb__current">{{ price }}</span>
             {% else %}
-              <span class="product-thumb__sale price-display__sale">{{ special }}</span>
-              <span class="product-thumb__was price-display__was">{{ price }}</span>
+              <span class="product-thumb__sale">{{ special }}</span>
+              <span class="product-thumb__was">{{ price }}</span>
             {% endif %}
           {% endif %}
         </div>
@@ -25,17 +38,6 @@
           </form>
         </div>
       </div>
-      {% if review_status and rating %}
-        <div class="rating">
-          {% for i in 1..5 %}
-            {% if rating < i %}
-              <span class="fa-stack"><i class="fa-regular fa-star fa-stack-1x"></i></span>
-            {% else %}
-              <span class="fa-stack"><i class="fa-solid fa-star fa-stack-1x"></i><i class="fa-regular fa-star fa-stack-1x"></i></span>
-            {% endif %}
-          {% endfor %}
-        </div>
-      {% endif %}
     </div>
   </div>
 </div>

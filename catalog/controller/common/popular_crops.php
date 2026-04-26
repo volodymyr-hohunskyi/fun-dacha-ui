@@ -12,6 +12,7 @@ class PopularCrops extends \Opencart\System\Engine\Controller {
 	public function index(): string {
 		$this->load->language('common/popular_crops');
 		$this->load->model('catalog/category');
+		$this->load->model('catalog/product');
 		$this->load->model('tool/image');
 
 		$data['heading_title'] = $this->language->get('heading_title');
@@ -45,10 +46,11 @@ class PopularCrops extends \Opencart\System\Engine\Controller {
 				$image = $this->model_tool_image->resize('placeholder.png', 600, 450);
 			}
 			$data['categories'][] = [
-				'category_id' => $cat['category_id'],
-				'name'        => $cat['name'],
-				'image'       => $image,
-				'href'        => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $cat['category_id']),
+				'category_id'   => $cat['category_id'],
+				'name'          => $cat['name'],
+				'image'         => $image,
+				'product_count' => $this->model_catalog_product->getTotalProducts(['filter_category_id' => (int)$cat['category_id']]),
+				'href'          => $this->url->link('product/category', 'language=' . $this->config->get('config_language') . '&path=' . $cat['category_id']),
 			];
 			$found[(int)$cat['category_id']] = true;
 		}

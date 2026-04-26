@@ -1,58 +1,51 @@
 {% if slides %}
-<div class="hero-banner" data-interval="{{ interval }}">
-  {% if background %}
-  <div class="hero-banner-bg" style="background-image: url('{{ background }}');"></div>
-  {% endif %}
-  <div class="hero-banner-inner container position-relative">
+<section class="hero-banner" data-interval="{{ interval }}">
+  <div class="hero-banner__inner container position-relative">
     <div id="hero-carousel" class="hero-carousel">
       {% for slide in slides %}
-        <div class="hero-slide{% if slide.index == 0 %} active{% endif %}{% if use_slide_image_as_bg %} hero-slide-bg-image{% endif %}" data-index="{{ slide.index }}"{% if use_slide_image_as_bg %} style="background-image: url('{{ slide.image }}');"{% endif %}>
-          <div class="row align-items-center min-vh-50">
-            <div class="col-lg-6 hero-content">
-              <h1 class="hero-title animate-slide-in">{{ slide.title }}</h1>
-              <p class="hero-subtitle animate-slide-in">{{ slide.subtitle }}</p>
+        <div class="hero-slide{% if slide.index == 0 %} active{% endif %}" data-index="{{ slide.index }}" {% if slide.image %}style="background-image: url('{{ slide.image }}');"{% endif %}>
+          <div class="hero-slide__overlay"></div>
+          <div class="row align-items-center hero-slide__row">
+            <div class="col-lg-6 col-md-8 hero-slide__content">
+              <h1 class="hero-slide__title animate-slide-in">{{ slide.title }}</h1>
+              <p class="hero-slide__subtitle animate-slide-in">{{ slide.subtitle }}</p>
               {% if slide.button_link %}
-                <a href="{{ slide.button_link }}" class="btn btn-primary hero-btn animate-slide-in">{{ slide.button_text }}</a>
+                <a href="{{ slide.button_link }}" class="btn hero-slide__btn animate-slide-in">{{ slide.button_text }} <i class="fa-solid fa-arrow-right ms-2"></i></a>
               {% endif %}
             </div>
-            {% if not use_slide_image_as_bg and not background %}
-            <div class="col-lg-6 hero-image-col text-center">
-              <div class="hero-image-wrap">
-                <img src="{{ slide.image }}" alt="{{ slide.title }}" class="hero-image img-fluid"/>
-              </div>
-            </div>
-            {% endif %}
           </div>
         </div>
       {% endfor %}
     </div>
     {% if slides|length > 1 %}
-      <button type="button" class="hero-arrow hero-arrow-prev" aria-label="Previous"><i class="fa-solid fa-chevron-left fa-lg"></i></button>
-      <button type="button" class="hero-arrow hero-arrow-next" aria-label="Next"><i class="fa-solid fa-chevron-right fa-lg"></i></button>
+      <button type="button" class="hero-arrow hero-arrow--prev" aria-label="Попередній"><i class="fa-solid fa-chevron-left"></i></button>
+      <button type="button" class="hero-arrow hero-arrow--next" aria-label="Наступний"><i class="fa-solid fa-chevron-right"></i></button>
       <div class="hero-indicators">
         {% for slide in slides %}
-          <button type="button" class="hero-indicator{% if slide.index == 0 %} active{% endif %}" data-index="{{ slide.index }}" aria-label="Slide {{ slide.index + 1 }}"></button>
+          <button type="button" class="hero-indicator{% if slide.index == 0 %} active{% endif %}" data-index="{{ slide.index }}" aria-label="Слайд {{ slide.index + 1 }}"></button>
         {% endfor %}
       </div>
+      <button type="button" class="hero-pause" aria-label="Пауза"><i class="fa-solid fa-pause"></i></button>
     {% endif %}
   </div>
-</div>
+</section>
 <script>
 (function() {
   var hero = document.querySelector('.hero-banner');
   if (!hero || !hero.querySelector('.hero-slide')) return;
   var slides = hero.querySelectorAll('.hero-slide');
-  var prev = hero.querySelector('.hero-arrow-prev');
-  var next = hero.querySelector('.hero-arrow-next');
+  var prev = hero.querySelector('.hero-arrow--prev');
+  var next = hero.querySelector('.hero-arrow--next');
   var indicators = hero.querySelectorAll('.hero-indicator');
+  var pauseBtn = hero.querySelector('.hero-pause');
   var interval = parseInt(hero.dataset.interval || 5000, 10);
   var current = 0;
   var timer;
+  var paused = false;
 
   function goTo(i) {
     slides.forEach(function(s, idx) {
       s.classList.toggle('active', idx === i);
-      s.classList.toggle('fade-in', idx === i);
     });
     indicators.forEach(function(ind, idx) {
       ind.classList.toggle('active', idx === i);
@@ -60,18 +53,10 @@
     current = i;
   }
 
-  function nextSlide() {
-    goTo((current + 1) % slides.length);
-  }
+  function nextSlide() { goTo((current + 1) % slides.length); }
 
-  function startTimer() {
-    clearInterval(timer);
-    timer = setInterval(nextSlide, interval);
-  }
-
-  function stopTimer() {
-    clearInterval(timer);
-  }
+  function startTimer() { if (!paused) { clearInterval(timer); timer = setInterval(nextSlide, interval); } }
+  function stopTimer() { clearInterval(timer); }
 
   if (prev) prev.onclick = function() { stopTimer(); goTo((current - 1 + slides.length) % slides.length); startTimer(); };
   if (next) next.onclick = function() { stopTimer(); nextSlide(); startTimer(); };
@@ -79,14 +64,23 @@
     ind.onclick = function() { stopTimer(); goTo(i); startTimer(); };
   });
 
-  hero.addEventListener('mouseenter', function() {
-    stopTimer();
-    hero.classList.add('hero-arrows-visible');
-  });
-  hero.addEventListener('mouseleave', function() {
-    hero.classList.remove('hero-arrows-visible');
-    startTimer();
-  });
+  if (pauseBtn) {
+    pauseBtn.onclick = function() {
+      paused = !paused;
+      if (paused) {
+        stopTimer();
+        pauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        pauseBtn.setAttribute('aria-label', 'Відтворити');
+      } else {
+        startTimer();
+        pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        pauseBtn.setAttribute('aria-label', 'Пауза');
+      }
+    };
+  }
+
+  hero.addEventListener('mouseenter', function() { stopTimer(); });
+  hero.addEventListener('mouseleave', function() { startTimer(); });
 
   startTimer();
 })();

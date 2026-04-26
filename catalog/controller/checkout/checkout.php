@@ -79,6 +79,8 @@ class Checkout extends \Opencart\System\Engine\Controller {
 		$data['payment_method'] = $this->load->controller('checkout/payment_method');
 		$data['confirm'] = $this->load->controller('checkout/confirm');
 
+		$data['telephone'] = $this->config->get('config_telephone');
+
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['column_right'] = $this->load->controller('common/column_right');
 		$data['content_top'] = $this->load->controller('common/content_top');

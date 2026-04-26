@@ -1,10 +1,32 @@
 {{ header }}
 <div id="checkout-checkout" class="container" style="padding-bottom: 120px;">
-  <ul class="breadcrumb">
-    {% for breadcrumb in breadcrumbs %}
-      <li class="breadcrumb-item"><a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a></li>
-    {% endfor %}
-  </ul>
+  <nav class="category-breadcrumb" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      {% for breadcrumb in breadcrumbs %}
+        <li class="breadcrumb-item{% if loop.last %} active{% endif %}">
+          {% if loop.last %}{{ breadcrumb.text }}{% else %}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>{% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+  </nav>
+
+  <div class="checkout-stepper">
+    <div class="checkout-stepper__step checkout-stepper__step--active">
+      <span class="checkout-stepper__num">1</span>
+      <span class="checkout-stepper__label">Контактні дані</span>
+    </div>
+    <div class="checkout-stepper__line"></div>
+    <div class="checkout-stepper__step">
+      <span class="checkout-stepper__num">2</span>
+      <span class="checkout-stepper__label">Доставка</span>
+    </div>
+    <div class="checkout-stepper__line"></div>
+    <div class="checkout-stepper__step">
+      <span class="checkout-stepper__num">3</span>
+      <span class="checkout-stepper__label">Підтвердження</span>
+    </div>
+  </div>
+
   <div class="row">{{ column_left }}
     <div id="content" class="col">{{ content_top }}
       <h1>{{ heading_title }}</h1>
@@ -23,6 +45,12 @@
           </div>
         {% endif %}
         <div class="col">
+          <div class="checkout-trust-sidebar d-none d-md-block mb-4">
+            <div class="checkout-trust-sidebar__item"><i class="fa-solid fa-lock"></i> Безпечне замовлення</div>
+            <div class="checkout-trust-sidebar__item"><i class="fa-solid fa-money-bill-wave"></i> Оплата при отриманні</div>
+            <div class="checkout-trust-sidebar__item"><i class="fa-solid fa-rotate-left"></i> Повернення протягом 14 днів</div>
+            <div class="checkout-trust-sidebar__item"><i class="fa-solid fa-phone"></i> {{ telephone }}</div>
+          </div>
           {# Shipping method section removed - using only Nova Poshta extension #}
           <div id="checkout-payment-method" class="mb-4" style="display: none;">{{ payment_method }}</div>
           <div id="checkout-confirm">{{ confirm }}</div>

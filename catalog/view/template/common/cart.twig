@@ -1,65 +1,58 @@
-<div class="dropdown d-grid">
-  <button type="button" data-bs-toggle="dropdown" class="btn btn-lg btn-primary d-block dropdown-toggle"><i class="fa-solid fa-cart-shopping"></i> {{ text_items }}</button>
-  <ul class="dropdown-menu dropdown-menu-end p-2">
-    {% if products %}
-      <li>
-        <table class="table table-striped mb-2">
-          {% for product in products %}
-            <tr>
-              <td class="text-center w-25">{% if product.thumb %}<a href="{{ product.href }}"><img src="{{ product.thumb }}" alt="{{ product.name }}" title="{{ product.name }}" class="img-thumbnail"/></a>{% endif %}</td>
-              <td><a href="{{ product.href }}">{{ product.name }}</a>
-                {% if product.cart_pack %}
-                <div class="small text-muted">{{ product.cart_pack.pack_label }}</div>
-                <div class="small">{% if product.cart_pack.line_was %}<span class="price-display__sale">{{ product.cart_pack.line_sale }}</span> <span class="price-display__was">{{ product.cart_pack.line_was }}</span>{% else %}{{ product.cart_pack.line_sale }}{% endif %}</div>
-                {% endif %}
-                <ul class="list-unstyled mb-0">
-                  <li>
-                    <small> - {{ text_model }}: {{ product.model }}</small>
-                  </li>
-                  {% for option in product.option %}
-                    {% if not product.cart_pack %}
-                    <li>
-                      <small> - {{ option.name }}: {% if option.pack_display_html %}<span class="pack-opt-cart d-inline-block">{{ option.pack_display_html|raw }}</span>{% else %}{{ option.value }}{% endif %}</small>
-                    </li>
-                    {% endif %}
-                  {% endfor %}
-                  {% if product.subscription %}
-                    <li>
-                      <small> - {{ text_subscription }}: {{ product.subscription }}</small>
-                    </li>
-                  {% endif %}
-                  {% if product.reward %}
-                    <li>
-                      <small> - {{ text_points }}: {{ product.reward }}</small>
-                    </li>
-                  {% endif %}
-                </ul>
-              </td>
-              <td class="text-end text-nowrap">x {{ product.quantity }}</td>
-              <td class="text-end">{{ product.total }}</td>
-              <td class="text-end">
-                <form action="{{ remove }}" method="post" data-oc-toggle="ajax" data-oc-load="{{ list }}" data-oc-target="#cart">
-                  <input type="hidden" name="key" value="{{ product.cart_id }}">
-                  <button type="submit" data-bs-toggle="tooltip" title="{{ button_remove }}" class="btn btn-danger"><i class="fa-solid fa-circle-xmark"></i></button>
-                </form>
-              </td>
-            </tr>
-          {% endfor %}
-        </table>
-        <div>
-          <table class="table table-sm table-bordered mb-2">
-            {% for total in totals %}
-              <tr>
-                <td class="text-end"><strong>{{ total.title }}</strong></td>
-                <td class="text-end">{{ total.text }}</td>
-              </tr>
-            {% endfor %}
-          </table>
-          <p class="text-end"><a href="{{ cart }}"><strong><i class="fa-solid fa-cart-shopping"></i> {{ text_cart }}</strong></a>&nbsp;&nbsp;&nbsp;<a href="{{ checkout }}"><strong><i class="fa-solid fa-share"></i> {{ text_checkout }}</strong></a></p>
-        </div>
-      </li>
-    {% else %}
-      <li class="text-center p-4">{{ text_no_results }}</li>
+<div class="header-cart-widget dropdown">
+  <a href="{{ cart }}" class="header-cart-widget__trigger" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fa-solid fa-cart-shopping"></i>
+    {% if product_count > 0 %}
+    <span class="header-cart-widget__badge">{{ product_count }}</span>
     {% endif %}
-  </ul>
+    <span class="header-cart-widget__total d-none d-md-inline">{{ total_formatted }}</span>
+  </a>
+  <div class="dropdown-menu dropdown-menu-end header-cart-widget__dropdown">
+    {% if products %}
+      <div class="header-cart-widget__items">
+        {% for product in products[:3] %}
+        <div class="header-cart-widget__item">
+          {% if product.thumb %}
+          <a href="{{ product.href }}" class="header-cart-widget__thumb">
+            <img src="{{ product.thumb }}" alt="{{ product.name }}" loading="lazy"/>
+          </a>
+          {% endif %}
+          <div class="header-cart-widget__info">
+            <a href="{{ product.href }}" class="header-cart-widget__name">{{ product.name }}</a>
+            {% if product.cart_pack %}
+            <div class="header-cart-widget__meta">{{ product.cart_pack.pack_label }}</div>
+            {% endif %}
+            <div class="header-cart-widget__price">{{ product.quantity }} x {{ product.price }}</div>
+          </div>
+          <form action="{{ remove }}" method="post" data-oc-toggle="ajax" data-oc-load="{{ list }}" data-oc-target="#cart">
+            <input type="hidden" name="key" value="{{ product.cart_id }}">
+            <button type="submit" class="header-cart-widget__remove" aria-label="{{ button_remove }}"><i class="fa-solid fa-xmark"></i></button>
+          </form>
+        </div>
+        {% endfor %}
+        {% if products|length > 3 %}
+        <div class="header-cart-widget__more">
+          ...та ще {{ products|length - 3 }} товар(ів)
+        </div>
+        {% endif %}
+      </div>
+      <div class="header-cart-widget__totals">
+        {% for total in totals %}
+        <div class="header-cart-widget__total-row">
+          <span>{{ total.title }}</span>
+          <strong>{{ total.text }}</strong>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="header-cart-widget__actions">
+        <a href="{{ cart }}" class="btn btn-outline-primary btn-sm">{{ text_cart }}</a>
+        <a href="{{ checkout }}" class="btn btn-primary btn-sm">{{ text_checkout }}</a>
+      </div>
+    {% else %}
+      <div class="header-cart-widget__empty">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <p>{{ text_no_results }}</p>
+        <a href="{{ cart }}" class="btn btn-primary btn-sm">Перейти до каталогу</a>
+      </div>
+    {% endif %}
+  </div>
 </div>

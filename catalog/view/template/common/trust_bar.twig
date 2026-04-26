@@ -1,0 +1,17 @@
+<section class="trust-bar">
+  <div class="container">
+    <div class="trust-bar__grid">
+      {% for item in items %}
+        <div class="trust-bar__item">
+          <div class="trust-bar__icon">
+            <i class="fa-solid {{ item.icon }}"></i>
+          </div>
+          <div class="trust-bar__text">
+            <strong class="trust-bar__title">{{ item.title }}</strong>
+            <span class="trust-bar__desc">{{ item.text }}</span>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
