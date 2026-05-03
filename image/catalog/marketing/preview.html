@@ -1,0 +1,1566 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fun Dacha — Marketing Labels Preview</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@600;700;800;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Open Sans', sans-serif; background: #d0d0d0; padding: 2rem; color: #1A1A1A; }
+  h1 { font-family: 'Montserrat', sans-serif; color: #207D43; font-size: 28px; margin-bottom: .25rem; }
+  h2 { font-family: 'Montserrat', sans-serif; color: #1A1A1A; margin-top: 3rem; margin-bottom: 1rem; border-bottom: 3px solid #207D43; padding-bottom: .5rem; font-size: 20px; }
+  h2 small { font-size: 13px; font-weight: 600; color: #7A7A7A; margin-left: .5rem; }
+  .subtitle { color: #7A7A7A; margin-bottom: 2rem; }
+
+  /* ── Cards: gray chrome, white content ── */
+  .card {
+    background: #b8b8b8; border-radius: 14px; padding: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.12); text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .card__content {
+    background: #fff; border-radius: 10px; padding: 2rem;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 100%;
+  }
+  .card__content--dark { background: #1A1A1A; }
+  .card__content--cream { background: #FFF8F0; }
+  .card h3 { font-family: 'Montserrat', sans-serif; font-size: 12px; margin-top: 8px; color: #444; font-weight: 700; }
+  .card p { font-size: 11px; color: #666; max-width: 300px; margin-top: 2px; }
+  .grid { display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: flex-start; }
+
+  /* ── Logo HTML ── */
+  .logo-wrap { display: inline-flex; flex-direction: column; align-items: center; }
+  .logo-line { display: inline-flex; align-items: center; gap: 8px; line-height: 1; }
+  .logo-line--sm { gap: 5px; }
+  .logo-fun { font-family: 'Montserrat', sans-serif; font-weight: 900; color: #207D43; }
+  .logo-dacha { font-family: 'Montserrat', sans-serif; font-weight: 900; color: #1A1A1A; }
+  .logo-slogan { font-family: 'Open Sans', sans-serif; font-weight: 600; color: #4A4A4A; margin-top: 6px; }
+  .logo-fun--light { color: #2d9554; }
+  .logo-dacha--white { color: #fff; }
+  .logo-slogan--muted { color: #999; }
+  .logo-slogan--brown { color: #8B5E3C; }
+
+  /* ── Download button ── */
+  .btn-dl {
+    margin-top: 8px; padding: 5px 14px; border: 1.5px solid #207D43; border-radius: 6px;
+    background: #fff; color: #207D43; font-family: 'Montserrat', sans-serif;
+    font-weight: 700; font-size: 10px; cursor: pointer; letter-spacing: .5px;
+    transition: all .15s;
+  }
+  .btn-dl:hover { background: #207D43; color: #fff; }
+
+  /* ── Icon picker ── */
+  .icon-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 10px; width: 100%; max-width: 900px; margin-bottom: 2rem;
+  }
+  .icon-option {
+    background: #fff; border: 3px solid transparent; border-radius: 10px;
+    padding: 10px; cursor: pointer; transition: all .15s; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+  }
+  .icon-option:hover { border-color: #2d9554; transform: scale(1.05); }
+  .icon-option.active { border-color: #207D43; background: #e8f5ec; }
+  .icon-option svg { display: block; }
+  .icon-option span { font-size: 9px; font-family: 'Montserrat', sans-serif; font-weight: 600; color: #7A7A7A; }
+
+  /* ── Live preview ── */
+  .live-preview {
+    background: #fff; border-radius: 12px; padding: 2rem; margin-bottom: 2rem;
+    display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 2px 12px rgba(0,0,0,.1);
+  }
+  .live-preview .logo-line { gap: 10px; }
+
+  /* ── Sticker / label cards ── */
+  .sticker-content {
+    background: #fff; border-radius: 10px; padding: 1.5rem;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 100%; min-height: 200px;
+  }
+  .sticker-content--bundle {
+    border: 3px solid #207D43; border-radius: 14px; padding: 1.2rem 1.5rem;
+    position: relative; overflow: hidden;
+  }
+  .sticker-content--bundle::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 6px;
+    background: linear-gradient(90deg, #207D43, #2d9554, #207D43);
+  }
+  .bundle-icon { font-size: 36px; margin-bottom: 6px; }
+  .bundle-name { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 16px; color: #207D43; text-align: center; line-height: 1.2; }
+  .bundle-desc { font-family: 'Open Sans', sans-serif; font-size: 10px; color: #4A4A4A; text-align: center; margin-top: 6px; max-width: 220px; line-height: 1.4; }
+  .bundle-count { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 11px; color: #fff; background: #207D43; border-radius: 20px; padding: 3px 12px; margin-top: 8px; display: inline-block; }
+  .bundle-brand { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 8px; color: #7A7A7A; letter-spacing: 1.5px; margin-top: 10px; }
+
+  /* ── Promo badges ── */
+  .promo-badge {
+    border-radius: 50%; width: 160px; height: 160px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; text-align: center; position: relative;
+  }
+  .promo-badge--sale { background: #D94040; color: #fff; }
+  .promo-badge--new { background: #207D43; color: #fff; }
+  .promo-badge--ship { background: #0F3B47; color: #fff; }
+  .promo-badge--best { background: #E8A838; color: #1A1A1A; }
+  .promo-badge--eco { background: #2d9554; color: #fff; }
+  .promo-badge--gift { background: #8B5E3C; color: #fff; }
+  .promo-text-lg { font-weight: 900; font-size: 28px; line-height: 1; }
+  .promo-text-md { font-weight: 800; font-size: 14px; line-height: 1.1; margin-top: 2px; }
+  .promo-text-sm { font-weight: 600; font-size: 9px; line-height: 1.2; margin-top: 4px; opacity: .85; }
+
+  .promo-rect {
+    border-radius: 12px; padding: 16px 24px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif; text-align: center;
+  }
+  .promo-rect--cta { background: #207D43; color: #fff; min-width: 240px; }
+  .promo-rect--season { background: linear-gradient(135deg, #207D43 0%, #8B5E3C 100%); color: #fff; min-width: 240px; }
+  .promo-rect--url { background: #FFF8F0; border: 2.5px solid #207D43; color: #207D43; min-width: 260px; }
+
+  /* ── QR section ── */
+  .qr-sticker {
+    background: #fff; border-radius: 14px; padding: 1.5rem;
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; width: 100%; border: 2.5px solid #207D43;
+  }
+  .qr-sticker--dark { background: #1A1A1A; border-color: #2d9554; }
+  .qr-wrap { padding: 10px; background: #fff; border-radius: 8px; display: inline-block; }
+  .qr-label { font-family: 'Montserrat', sans-serif; font-weight: 800; font-size: 14px; margin-top: 10px; }
+  .qr-url { font-family: 'Open Sans', sans-serif; font-weight: 600; font-size: 10px; color: #7A7A7A; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Fun Dacha — Marketing Assets</h1>
+<p class="subtitle">Brand: <strong style="color:#207D43">#207D43</strong> | <strong style="color:#8B5E3C">#8B5E3C</strong> | <strong style="color:#0F3B47">#0F3B47</strong></p>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 1. Pick an Icon <small>Click to preview in logo</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="icon-grid" id="iconGrid">
+
+  <!-- 1. Seedling in pot -->
+  <div class="icon-option active" onclick="pickIcon(this)" data-name="Seedling in pot">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 90" width="50" height="64">
+      <path d="M12,52 L18,72 C19,75 22,77 25,77 L45,77 C48,77 51,75 52,72 L58,52 Z" fill="#A0703A" stroke="#8B5E3C" stroke-width="1.5"/>
+      <rect x="8" y="46" width="54" height="8" rx="4" fill="#8B5E3C"/>
+      <path d="M35,44 L35,14" stroke="#207D43" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <path d="M35,32 C24,24 12,20 4,16 C12,24 22,28 35,32 Z" fill="#207D43"/>
+      <path d="M35,20 C26,14 16,10 8,6 C16,12 24,16 35,20 Z" fill="#2d9554"/>
+      <path d="M35,26 C46,18 58,14 66,10 C58,18 48,22 35,26 Z" fill="#2d9554"/>
+      <path d="M35,14 C44,8 52,4 60,0 C52,6 44,10 35,14 Z" fill="#207D43"/>
+    </svg>
+    <span>Seedling pot</span>
+  </div>
+
+  <!-- 2. Sprout from soil -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Sprout">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70" width="50" height="64">
+      <ellipse cx="30" cy="58" rx="26" ry="8" fill="#8B5E3C"/>
+      <ellipse cx="30" cy="56" rx="22" ry="5" fill="#A0703A"/>
+      <path d="M30,54 L30,24" stroke="#207D43" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M30,38 C20,30 8,26 2,22 C10,30 20,34 30,38 Z" fill="#207D43"/>
+      <path d="M30,28 C40,20 52,16 58,12 C50,20 40,24 30,28 Z" fill="#2d9554"/>
+    </svg>
+    <span>Sprout</span>
+  </div>
+
+  <!-- 3. Sunflower -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Sunflower">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70" width="50" height="64">
+      <path d="M30,68 L30,38" stroke="#207D43" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M30,52 C22,46 12,44 6,42" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M10,40 C14,42 18,46 22,48" fill="#2d9554" stroke="#207D43" stroke-width="1"/>
+      <g transform="translate(30,22)">
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#E8A838" transform="rotate(0)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#E8A838" transform="rotate(45)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#E8A838" transform="rotate(90)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#E8A838" transform="rotate(135)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#F5A623" transform="rotate(22.5)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#F5A623" transform="rotate(67.5)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#F5A623" transform="rotate(112.5)"/>
+        <ellipse cx="0" cy="-14" rx="5" ry="8" fill="#F5A623" transform="rotate(157.5)"/>
+        <circle cx="0" cy="0" r="8" fill="#8B5E3C"/>
+        <circle cx="0" cy="0" r="5.5" fill="#A0703A"/>
+      </g>
+    </svg>
+    <span>Sunflower</span>
+  </div>
+
+  <!-- 4. Watering can -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Watering can">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 65" width="50" height="64">
+      <path d="M15,25 L15,50 C15,54 18,56 22,56 L48,56 C52,56 55,54 55,50 L55,25 Z" fill="#207D43" opacity=".85"/>
+      <rect x="12" y="22" width="46" height="6" rx="3" fill="#1a6a38"/>
+      <path d="M55,32 L65,20 L68,22 L60,36" fill="none" stroke="#207D43" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="68" cy="18" r="2" fill="#207D43"/>
+      <circle cx="66" cy="15" r="1.5" fill="#207D43"/>
+      <circle cx="70" cy="15" r="1.5" fill="#207D43"/>
+      <path d="M25,22 C25,12 20,8 15,6 C18,4 26,2 30,10 L30,22" fill="none" stroke="#1a6a38" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+    <span>Watering can</span>
+  </div>
+
+  <!-- 5. Leaf -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Leaf">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70" width="50" height="64">
+      <path d="M30,62 C30,62 30,30 30,20 C30,4 48,-2 56,4 C50,8 38,16 32,30 C28,40 30,55 30,62 Z" fill="#207D43"/>
+      <path d="M30,62 C30,62 30,30 30,20 C30,4 12,-2 4,4 C10,8 22,16 28,30 C32,40 30,55 30,62 Z" fill="#2d9554"/>
+      <path d="M30,20 L30,58" stroke="#1a6a38" stroke-width="1.5" fill="none" opacity=".4"/>
+      <path d="M30,30 L20,22" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M30,30 L40,22" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M30,40 L22,34" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M30,40 L38,34" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+    </svg>
+    <span>Leaf</span>
+  </div>
+
+  <!-- 6. Wheat stalk -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Wheat">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 70" width="50" height="64">
+      <path d="M25,68 L25,12" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M25,14 C20,8 14,6 10,6 C14,10 20,12 25,14 Z" fill="#E8A838"/>
+      <path d="M25,14 C30,8 36,6 40,6 C36,10 30,12 25,14 Z" fill="#F5A623"/>
+      <path d="M25,22 C20,16 14,14 10,14 C14,18 20,20 25,22 Z" fill="#E8A838"/>
+      <path d="M25,22 C30,16 36,14 40,14 C36,18 30,20 25,22 Z" fill="#F5A623"/>
+      <path d="M25,30 C20,24 14,22 10,22 C14,26 20,28 25,30 Z" fill="#E8A838"/>
+      <path d="M25,30 C30,24 36,22 40,22 C36,26 30,28 25,30 Z" fill="#F5A623"/>
+      <path d="M25,38 C20,32 14,30 10,30 C14,34 20,36 25,38 Z" fill="#E8A838"/>
+      <path d="M25,38 C30,32 36,30 40,30 C36,34 30,36 25,38 Z" fill="#F5A623"/>
+      <path d="M25,10 C25,4 25,2 25,0" stroke="#E8A838" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span>Wheat</span>
+  </div>
+
+  <!-- 7. Seed packet -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Seed packet">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 70" width="50" height="64">
+      <rect x="6" y="5" width="43" height="60" rx="4" fill="#FFF8F0" stroke="#8B5E3C" stroke-width="2"/>
+      <rect x="6" y="5" width="43" height="20" rx="4" fill="#207D43"/>
+      <rect x="6" y="21" width="43" height="4" fill="#207D43"/>
+      <text x="27.5" y="19" text-anchor="middle" fill="#fff" font-family="Montserrat,sans-serif" font-weight="800" font-size="8">SEEDS</text>
+      <ellipse cx="20" cy="42" rx="4" ry="5" fill="#8B5E3C" transform="rotate(-15,20,42)"/>
+      <ellipse cx="32" cy="40" rx="4" ry="5" fill="#A0703A" transform="rotate(10,32,40)"/>
+      <ellipse cx="26" cy="50" rx="3.5" ry="4.5" fill="#8B5E3C" transform="rotate(5,26,50)"/>
+      <path d="M22,36 C20,32 22,28 26,30" stroke="#207D43" stroke-width="1.5" fill="none"/>
+      <path d="M34,34 C36,30 34,26 30,28" stroke="#2d9554" stroke-width="1.5" fill="none"/>
+    </svg>
+    <span>Seed packet</span>
+  </div>
+
+  <!-- 8. Garden fork & spade -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Garden tools">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70" width="50" height="64">
+      <g transform="translate(20,0) rotate(8,15,35)">
+        <rect x="13" y="28" width="4" height="38" rx="2" fill="#8B5E3C"/>
+        <path d="M8,4 L8,26 L22,26 L22,4 C22,2 20,0 18,0 L12,0 C10,0 8,2 8,4 Z" fill="#888" stroke="#666" stroke-width="1"/>
+        <line x1="12" y1="4" x2="12" y2="22" stroke="#666" stroke-width="1"/>
+        <line x1="18" y1="4" x2="18" y2="22" stroke="#666" stroke-width="1"/>
+      </g>
+      <g transform="translate(30,2) rotate(-8,15,35)">
+        <rect x="13" y="24" width="4" height="42" rx="2" fill="#8B5E3C"/>
+        <path d="M6,0 C6,0 8,22 15,24 C22,22 24,0 24,0 C24,0 18,2 15,2 C12,2 6,0 6,0 Z" fill="#888" stroke="#666" stroke-width="1"/>
+      </g>
+    </svg>
+    <span>Tools</span>
+  </div>
+
+  <!-- 9. Three tulips -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Tulips">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70" width="50" height="64">
+      <path d="M20,68 L20,35" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M30,68 L30,30" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M40,68 L40,35" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M14,36 C14,24 20,18 20,18 C20,18 26,24 26,36 C23,38 17,38 14,36 Z" fill="#D94040"/>
+      <path d="M24,30 C24,18 30,10 30,10 C30,10 36,18 36,30 C33,32 27,32 24,30 Z" fill="#E05530"/>
+      <path d="M34,36 C34,24 40,18 40,18 C40,18 46,24 46,36 C43,38 37,38 34,36 Z" fill="#D94040"/>
+      <path d="M20,45 C14,40 8,38 6,38" stroke="#207D43" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="5" cy="37" rx="4" ry="2.5" fill="#2d9554" transform="rotate(-20,5,37)"/>
+    </svg>
+    <span>Tulips</span>
+  </div>
+
+  <!-- 10. Basket with veggies -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Harvest basket">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" width="50" height="64">
+      <path d="M10,35 L16,60 C17,64 20,66 24,66 L46,66 C50,66 53,64 54,60 L60,35 Z" fill="#C4883C" stroke="#8B5E3C" stroke-width="1.5"/>
+      <line x1="15" y1="42" x2="55" y2="42" stroke="#8B5E3C" stroke-width="1" opacity=".4"/>
+      <line x1="16" y1="50" x2="54" y2="50" stroke="#8B5E3C" stroke-width="1" opacity=".4"/>
+      <rect x="7" y="30" width="56" height="7" rx="3.5" fill="#A0703A" stroke="#8B5E3C" stroke-width="1"/>
+      <circle cx="25" cy="24" r="8" fill="#D94040"/>
+      <circle cx="25" cy="24" r="5" fill="#E05530"/>
+      <path d="M24,16 C24,12 26,12 26,16" stroke="#207D43" stroke-width="1.5" fill="none"/>
+      <ellipse cx="40" cy="22" rx="6" ry="8" fill="#E8A838"/>
+      <path d="M40,14 L40,10" stroke="#207D43" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="52" cy="26" r="5" fill="#207D43"/>
+      <circle cx="52" cy="26" r="3" fill="#2d9554"/>
+    </svg>
+    <span>Basket</span>
+  </div>
+
+  <!-- 11. Rose -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Rose">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 70" width="50" height="64">
+      <path d="M27,68 L27,35" stroke="#207D43" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M27,50 C20,44 12,42 8,42" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="7" cy="41" rx="5" ry="3" fill="#2d9554" transform="rotate(-25,7,41)"/>
+      <path d="M27,42 C34,36 42,34 46,34" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="47" cy="33" rx="5" ry="3" fill="#2d9554" transform="rotate(20,47,33)"/>
+      <g transform="translate(27,22)">
+        <circle cx="0" cy="0" r="12" fill="#D94040"/>
+        <path d="M0,-8 C4,-6 6,-2 4,2 C8,0 10,-4 8,-8 C6,-10 2,-10 0,-8 Z" fill="#c03030"/>
+        <path d="M-6,-4 C-4,0 -2,4 2,4 C-2,6 -6,4 -8,0 C-8,-2 -6,-4 -6,-4 Z" fill="#c03030"/>
+        <circle cx="0" cy="0" r="4" fill="#E05530"/>
+      </g>
+    </svg>
+    <span>Rose</span>
+  </div>
+
+  <!-- 12. Clover / shamrock -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Clover">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 70" width="50" height="64">
+      <path d="M30,65 L30,35" stroke="#1a6a38" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="30" cy="20" r="11" fill="#207D43"/>
+      <circle cx="19" cy="30" r="11" fill="#2d9554"/>
+      <circle cx="41" cy="30" r="11" fill="#2d9554"/>
+      <circle cx="30" cy="20" r="7" fill="#2d9554" opacity=".3"/>
+      <circle cx="19" cy="30" r="7" fill="#207D43" opacity=".3"/>
+      <circle cx="41" cy="30" r="7" fill="#207D43" opacity=".3"/>
+    </svg>
+    <span>Clover</span>
+  </div>
+
+  <!-- 13. Apple -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Apple">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 70" width="50" height="64">
+      <path d="M27,16 C12,16 6,28 6,40 C6,54 16,64 27,64 C38,64 48,54 48,40 C48,28 42,16 27,16 Z" fill="#D94040"/>
+      <path d="M27,16 C27,16 20,28 20,40 C20,52 27,64 27,64" fill="#c03030" opacity=".3"/>
+      <path d="M27,16 C24,10 22,6 24,2" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M26,8 C30,4 36,4 40,8" fill="#207D43"/>
+      <ellipse cx="16" cy="30" rx="4" ry="6" fill="#fff" opacity=".15" transform="rotate(-15,16,30)"/>
+    </svg>
+    <span>Apple</span>
+  </div>
+
+  <!-- 14. Bee -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Bee">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="50" height="64">
+      <ellipse cx="30" cy="35" rx="14" ry="11" fill="#E8A838"/>
+      <rect x="22" y="30" width="16" height="3" fill="#1A1A1A" rx="1"/>
+      <rect x="22" y="36" width="16" height="3" fill="#1A1A1A" rx="1"/>
+      <circle cx="30" cy="24" r="8" fill="#E8A838"/>
+      <circle cx="26" cy="22" r="2" fill="#1A1A1A"/>
+      <circle cx="34" cy="22" r="2" fill="#1A1A1A"/>
+      <path d="M18,22 C10,14 8,8 12,6" stroke="#1A1A1A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M42,22 C50,14 52,8 48,6" stroke="#1A1A1A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="5" r="2" fill="#1A1A1A"/>
+      <circle cx="48" cy="5" r="2" fill="#1A1A1A"/>
+      <ellipse cx="18" cy="28" rx="10" ry="5" fill="#fff" opacity=".35" transform="rotate(-30,18,28)"/>
+      <ellipse cx="42" cy="28" rx="10" ry="5" fill="#fff" opacity=".35" transform="rotate(30,42,28)"/>
+      <path d="M30,46 L28,52 L32,52 Z" fill="#1A1A1A"/>
+    </svg>
+    <span>Bee</span>
+  </div>
+
+  <!-- 15. Ladybug -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Ladybug">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 60" width="50" height="64">
+      <ellipse cx="27" cy="35" rx="18" ry="20" fill="#D94040"/>
+      <line x1="27" y1="15" x2="27" y2="55" stroke="#1A1A1A" stroke-width="2"/>
+      <circle cx="18" cy="28" r="3.5" fill="#1A1A1A"/>
+      <circle cx="36" cy="28" r="3.5" fill="#1A1A1A"/>
+      <circle cx="20" cy="40" r="3" fill="#1A1A1A"/>
+      <circle cx="34" cy="40" r="3" fill="#1A1A1A"/>
+      <circle cx="22" cy="50" r="2.5" fill="#1A1A1A"/>
+      <circle cx="32" cy="50" r="2.5" fill="#1A1A1A"/>
+      <circle cx="27" cy="16" r="8" fill="#1A1A1A"/>
+      <path d="M22,10 C18,4 16,0 14,0" stroke="#1A1A1A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M32,10 C36,4 38,0 40,0" stroke="#1A1A1A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="14" cy="0" r="2" fill="#1A1A1A"/>
+      <circle cx="40" cy="0" r="2" fill="#1A1A1A"/>
+    </svg>
+    <span>Ladybug</span>
+  </div>
+
+  <!-- 16. Tomato -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Tomato">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 65" width="50" height="64">
+      <circle cx="30" cy="36" r="22" fill="#D94040"/>
+      <path d="M30,14 C20,14 12,22 12,36" fill="#c03030" opacity=".2"/>
+      <path d="M22,16 C18,12 20,6 24,8 C26,9 28,12 28,16" fill="#207D43"/>
+      <path d="M28,16 C28,10 30,6 34,8 C36,9 36,12 34,16" fill="#2d9554"/>
+      <path d="M34,16 C36,12 40,10 42,12 C42,14 40,16 38,16" fill="#207D43"/>
+      <path d="M30,16 L30,8" stroke="#1a6a38" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="20" cy="30" rx="4" ry="7" fill="#fff" opacity=".12" transform="rotate(-10,20,30)"/>
+    </svg>
+    <span>Tomato</span>
+  </div>
+
+  <!-- 17. Carrot -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Carrot">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 70" width="50" height="64">
+      <path d="M22,18 C22,18 8,40 10,58 C12,66 18,68 22,68 C26,68 32,66 34,58 C36,40 22,18 22,18 Z" fill="#E8A838"/>
+      <path d="M22,18 C22,18 16,40 18,58" stroke="#C4883C" stroke-width="1" fill="none" opacity=".4"/>
+      <path d="M22,18 C22,18 28,40 26,58" stroke="#C4883C" stroke-width="1" fill="none" opacity=".4"/>
+      <line x1="14" y1="38" x2="30" y2="36" stroke="#C4883C" stroke-width=".8" opacity=".3"/>
+      <line x1="15" y1="48" x2="29" y2="46" stroke="#C4883C" stroke-width=".8" opacity=".3"/>
+      <path d="M22,18 C18,10 12,4 8,2" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M22,18 C22,8 22,4 22,0" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M22,18 C26,10 32,4 36,2" stroke="#2d9554" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span>Carrot</span>
+  </div>
+
+  <!-- 18. Butterfly -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Butterfly">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 55" width="50" height="64">
+      <path d="M30,12 C16,-4 0,2 2,14 C4,24 18,28 30,28" fill="#2d9554" opacity=".8"/>
+      <path d="M30,12 C44,-4 60,2 58,14 C56,24 42,28 30,28" fill="#207D43" opacity=".8"/>
+      <path d="M30,28 C18,28 4,36 2,46 C0,52 10,54 22,44 C28,38 30,32 30,28" fill="#2d9554" opacity=".6"/>
+      <path d="M30,28 C42,28 56,36 58,46 C60,52 50,54 38,44 C32,38 30,32 30,28" fill="#207D43" opacity=".6"/>
+      <path d="M30,10 L30,50" stroke="#1a6a38" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M26,6 C24,0 22,0 22,2" stroke="#1a6a38" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M34,6 C36,0 38,0 38,2" stroke="#1a6a38" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="12" cy="14" r="3" fill="#fff" opacity=".25"/>
+      <circle cx="48" cy="14" r="3" fill="#fff" opacity=".25"/>
+    </svg>
+    <span>Butterfly</span>
+  </div>
+
+  <!-- 19. Pumpkin -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Pumpkin">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="50" height="64">
+      <ellipse cx="20" cy="36" rx="14" ry="18" fill="#E8A838"/>
+      <ellipse cx="40" cy="36" rx="14" ry="18" fill="#E8A838"/>
+      <ellipse cx="30" cy="36" rx="12" ry="20" fill="#F5A623"/>
+      <path d="M30,16 C30,10 32,6 34,4" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M32,8 C36,4 42,4 44,8" fill="#207D43"/>
+      <path d="M28,20 C22,20 16,24 14,30" stroke="#E8A838" stroke-width="1" fill="none" opacity=".3"/>
+    </svg>
+    <span>Pumpkin</span>
+  </div>
+
+  <!-- 20. Herb bundle -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Herb bundle">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 70" width="50" height="64">
+      <path d="M18,68 L18,30" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M27,68 L27,22" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M36,68 L36,28" stroke="#2d9554" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M18,30 C10,20 4,16 2,12 C6,14 14,22 18,30 Z" fill="#207D43"/>
+      <path d="M18,38 C12,30 6,28 2,26 C6,28 12,32 18,38 Z" fill="#2d9554"/>
+      <path d="M27,22 C27,12 24,4 22,0 C26,4 28,10 27,22 Z" fill="#207D43"/>
+      <path d="M27,22 C27,12 30,4 32,0 C28,4 26,10 27,22 Z" fill="#2d9554"/>
+      <path d="M36,28 C42,18 48,14 52,12 C48,16 42,22 36,28 Z" fill="#2d9554"/>
+      <path d="M36,36 C44,28 50,26 54,26 C50,28 44,32 36,36 Z" fill="#207D43"/>
+      <rect x="14" y="56" width="26" height="6" rx="2" fill="#8B5E3C"/>
+      <path d="M12,56 C12,56 18,54 27,54 C36,54 42,56 42,56" stroke="#A0703A" stroke-width="2" fill="none"/>
+    </svg>
+    <span>Herb bundle</span>
+  </div>
+
+  <!-- 21. Acorn -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Acorn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 65" width="50" height="64">
+      <path d="M25,24 C14,24 6,32 6,42 C6,56 16,64 25,64 C34,64 44,56 44,42 C44,32 36,24 25,24 Z" fill="#8B5E3C"/>
+      <path d="M25,30 C25,30 20,40 20,48 C20,54 25,60 25,60" stroke="#A0703A" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M8,26 C8,18 16,14 25,14 C34,14 42,18 42,26 C42,28 40,30 36,30 L14,30 C10,30 8,28 8,26 Z" fill="#A0703A" stroke="#8B5E3C" stroke-width="1"/>
+      <path d="M25,14 L25,4" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M25,8 C22,4 18,2 14,2" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span>Acorn</span>
+  </div>
+
+  <!-- 22. Mushroom -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Mushroom">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 65" width="50" height="64">
+      <path d="M6,34 C6,14 16,4 27,4 C38,4 48,14 48,34 Z" fill="#D94040"/>
+      <circle cx="18" cy="18" r="4" fill="#fff" opacity=".6"/>
+      <circle cx="34" cy="14" r="3" fill="#fff" opacity=".6"/>
+      <circle cx="27" cy="26" r="3.5" fill="#fff" opacity=".6"/>
+      <circle cx="40" cy="24" r="2.5" fill="#fff" opacity=".5"/>
+      <rect x="20" y="34" width="14" height="26" rx="3" fill="#FFF8F0" stroke="#e0d6c8" stroke-width="1"/>
+      <ellipse cx="27" cy="62" rx="18" ry="4" fill="#207D43" opacity=".3"/>
+    </svg>
+    <span>Mushroom</span>
+  </div>
+
+  <!-- 23. Cherry pair -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Cherry">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 65" width="50" height="64">
+      <path d="M28,8 C28,8 18,20 16,38" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M28,8 C28,8 36,22 38,36" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="16" cy="44" r="12" fill="#D94040"/>
+      <circle cx="16" cy="44" r="8" fill="#c03030" opacity=".3"/>
+      <ellipse cx="12" cy="39" rx="3" ry="4" fill="#fff" opacity=".15" transform="rotate(-15,12,39)"/>
+      <circle cx="38" cy="42" r="12" fill="#D94040"/>
+      <circle cx="38" cy="42" r="8" fill="#c03030" opacity=".3"/>
+      <ellipse cx="34" cy="37" rx="3" ry="4" fill="#fff" opacity=".15" transform="rotate(-15,34,37)"/>
+      <path d="M28,8 C30,4 34,2 38,4" fill="#207D43"/>
+      <path d="M28,8 C26,4 22,2 18,4" fill="#2d9554"/>
+    </svg>
+    <span>Cherry</span>
+  </div>
+
+  <!-- 24. Strawberry -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Strawberry">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <path d="M25,16 C12,18 4,32 6,48 C8,60 16,66 25,66 C34,66 42,60 44,48 C46,32 38,18 25,16 Z" fill="#D94040"/>
+      <circle cx="18" cy="32" r="1.5" fill="#E8A838"/>
+      <circle cx="30" cy="30" r="1.5" fill="#E8A838"/>
+      <circle cx="14" cy="42" r="1.5" fill="#E8A838"/>
+      <circle cx="25" cy="40" r="1.5" fill="#E8A838"/>
+      <circle cx="36" cy="40" r="1.5" fill="#E8A838"/>
+      <circle cx="20" cy="52" r="1.5" fill="#E8A838"/>
+      <circle cx="30" cy="50" r="1.5" fill="#E8A838"/>
+      <circle cx="25" cy="60" r="1.5" fill="#E8A838"/>
+      <path d="M16,18 C18,12 22,10 25,10 C28,10 32,12 34,18" fill="#207D43"/>
+      <path d="M20,16 C20,10 18,4 16,2" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M30,16 C30,10 32,4 34,2" stroke="#2d9554" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M25,14 L25,4" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span>Strawberry</span>
+  </div>
+
+  <!-- 25. Corn / maize -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Corn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 70" width="50" height="64">
+      <path d="M16,20 C14,20 12,24 12,30 L12,56 C12,60 16,62 22,62 C28,62 32,60 32,56 L32,30 C32,24 30,20 28,20 Z" fill="#E8A838"/>
+      <line x1="22" y1="22" x2="22" y2="60" stroke="#C4883C" stroke-width="1" opacity=".4"/>
+      <path d="M14,28 L22,32 L30,28" stroke="#F5A623" stroke-width="1.5" fill="none" opacity=".5"/>
+      <path d="M13,36 L22,40 L31,36" stroke="#F5A623" stroke-width="1.5" fill="none" opacity=".5"/>
+      <path d="M13,44 L22,48 L31,44" stroke="#F5A623" stroke-width="1.5" fill="none" opacity=".5"/>
+      <path d="M14,52 L22,56 L30,52" stroke="#F5A623" stroke-width="1.5" fill="none" opacity=".5"/>
+      <path d="M12,24 C6,18 4,10 6,4" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M32,24 C38,18 42,12 40,4" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M22,20 C22,14 20,6 22,0" stroke="#2d9554" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M10,26 C4,24 2,28 4,32 C6,34 10,32 12,30" fill="#207D43" opacity=".7"/>
+      <path d="M34,26 C40,24 42,28 40,32 C38,34 34,32 32,30" fill="#2d9554" opacity=".7"/>
+    </svg>
+    <span>Corn</span>
+  </div>
+
+  <!-- 26. Hot pepper -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Pepper">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 70" width="50" height="64">
+      <path d="M22,14 C12,16 6,26 8,40 C10,52 16,60 22,66 C24,62 26,54 26,44 C26,30 22,14 22,14 Z" fill="#D94040"/>
+      <path d="M22,14 C32,16 38,26 36,40 C34,52 28,60 22,66" fill="#E05530"/>
+      <path d="M22,14 C22,14 20,26 20,40 C20,50 22,58 22,66" stroke="#c03030" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M22,14 C20,8 18,4 20,0" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M20,6 C16,2 12,2 10,4" fill="#207D43"/>
+      <path d="M22,6 C26,2 30,2 32,4" fill="#2d9554"/>
+    </svg>
+    <span>Pepper</span>
+  </div>
+
+  <!-- 27. Radish -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Radish">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <path d="M25,22 C14,22 8,32 8,42 C8,50 12,56 18,60 L25,68 L32,60 C38,56 42,50 42,42 C42,32 36,22 25,22 Z" fill="#D94040"/>
+      <path d="M25,22 C25,22 22,32 22,42 C22,50 25,58 25,68" stroke="#c03030" stroke-width="1" fill="none" opacity=".2"/>
+      <ellipse cx="18" cy="34" rx="4" ry="6" fill="#fff" opacity=".12" transform="rotate(-10,18,34)"/>
+      <path d="M20,22 C18,14 14,8 10,4" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M25,20 C25,12 25,6 25,0" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M30,22 C32,14 36,8 40,4" stroke="#2d9554" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M10,4 C8,2 6,4 8,6" fill="#207D43"/>
+      <path d="M40,4 C42,2 44,4 42,6" fill="#2d9554"/>
+    </svg>
+    <span>Radish</span>
+  </div>
+
+  <!-- 28. Garden fence/gate -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Garden fence">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="50" height="64">
+      <g fill="#8B5E3C" stroke="#A0703A" stroke-width="1">
+        <path d="M6,14 L10,8 L14,14 L14,55 L6,55 Z"/>
+        <path d="M20,14 L24,8 L28,14 L28,55 L20,55 Z"/>
+        <path d="M34,14 L38,8 L42,14 L42,55 L34,55 Z"/>
+        <path d="M48,14 L52,8 L56,14 L56,55 L48,55 Z"/>
+      </g>
+      <rect x="2" y="24" width="58" height="5" rx="2" fill="#A0703A"/>
+      <rect x="2" y="42" width="58" height="5" rx="2" fill="#A0703A"/>
+      <g transform="translate(30,0)">
+        <path d="M0,24 L0,8" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M0,14 C-6,8 -12,6 -14,4 C-10,8 -6,10 0,14 Z" fill="#207D43"/>
+        <path d="M0,10 C6,4 12,2 14,0 C10,4 6,6 0,10 Z" fill="#2d9554"/>
+      </g>
+    </svg>
+    <span>Garden fence</span>
+  </div>
+
+  <!-- 29. Bird (robin) -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Bird">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 55" width="50" height="64">
+      <ellipse cx="32" cy="30" rx="18" ry="14" fill="#8B5E3C"/>
+      <circle cx="18" cy="20" r="10" fill="#A0703A"/>
+      <circle cx="14" cy="18" r="2" fill="#1A1A1A"/>
+      <circle cx="14" cy="18" r=".8" fill="#fff"/>
+      <path d="M4,20 L8,18 L8,22 Z" fill="#E8A838"/>
+      <path d="M28,38 L24,50 L28,50" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M36,38 L32,50 L36,50" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M48,24 C54,20 58,22 56,18 C54,14 50,16 48,20" fill="#A0703A"/>
+      <ellipse cx="28" cy="28" rx="8" ry="6" fill="#D94040" opacity=".6"/>
+    </svg>
+    <span>Bird</span>
+  </div>
+
+  <!-- 30. Snail -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Snail">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 55" width="50" height="64">
+      <path d="M8,44 C8,44 12,42 20,42 L40,42 C44,42 46,40 46,38" stroke="#A0703A" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <circle cx="35" cy="28" r="16" fill="#8B5E3C" stroke="#A0703A" stroke-width="1.5"/>
+      <circle cx="35" cy="28" r="10" fill="none" stroke="#A0703A" stroke-width="1.5"/>
+      <circle cx="35" cy="28" r="5" fill="none" stroke="#A0703A" stroke-width="1"/>
+      <path d="M8,42 C6,36 2,32 2,28" stroke="#A0703A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M12,42 C12,36 14,32 16,28" stroke="#A0703A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="2" cy="26" r="2.5" fill="#A0703A"/>
+      <circle cx="16" cy="26" r="2.5" fill="#A0703A"/>
+    </svg>
+    <span>Snail</span>
+  </div>
+
+  <!-- 31. Daisy -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Daisy">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 70" width="50" height="64">
+      <path d="M27,68 L27,36" stroke="#207D43" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M27,50 C20,44 12,42 8,42" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="7" cy="41" rx="5" ry="3" fill="#2d9554" transform="rotate(-25,7,41)"/>
+      <g transform="translate(27,20)">
+        <ellipse cx="0" cy="-12" rx="4.5" ry="9" fill="#fff" stroke="#e0e0e0" stroke-width=".5"/>
+        <ellipse cx="0" cy="-12" rx="4.5" ry="9" fill="#fff" stroke="#e0e0e0" stroke-width=".5" transform="rotate(60)"/>
+        <ellipse cx="0" cy="-12" rx="4.5" ry="9" fill="#fff" stroke="#e0e0e0" stroke-width=".5" transform="rotate(120)"/>
+        <ellipse cx="0" cy="-12" rx="4.5" ry="9" fill="#fff" stroke="#e0e0e0" stroke-width=".5" transform="rotate(180)"/>
+        <ellipse cx="0" cy="-12" rx="4.5" ry="9" fill="#fff" stroke="#e0e0e0" stroke-width=".5" transform="rotate(240)"/>
+        <ellipse cx="0" cy="-12" rx="4.5" ry="9" fill="#fff" stroke="#e0e0e0" stroke-width=".5" transform="rotate(300)"/>
+        <circle cx="0" cy="0" r="6" fill="#E8A838"/>
+      </g>
+    </svg>
+    <span>Daisy</span>
+  </div>
+
+  <!-- 32. Pine / Christmas tree -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Pine tree">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <polygon points="25,2 40,26 34,26 46,46 38,46 50,64 0,64 12,46 4,46 16,26 10,26" fill="#207D43"/>
+      <polygon points="25,2 40,26 34,26 46,46 38,46 50,64 25,64 25,2" fill="#1a6a38" opacity=".3"/>
+      <rect x="21" y="60" width="8" height="8" fill="#8B5E3C"/>
+    </svg>
+    <span>Pine tree</span>
+  </div>
+
+  <!-- 33. Grapes -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Grapes">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <path d="M25,10 C22,4 18,2 14,4" fill="#207D43"/>
+      <path d="M25,10 C28,4 32,2 36,4" fill="#2d9554"/>
+      <path d="M25,12 L25,4" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="18" cy="22" r="7" fill="#6B3FA0" opacity=".9"/>
+      <circle cx="32" cy="22" r="7" fill="#6B3FA0" opacity=".9"/>
+      <circle cx="25" cy="20" r="7" fill="#7B4FB8"/>
+      <circle cx="14" cy="34" r="7" fill="#6B3FA0" opacity=".9"/>
+      <circle cx="25" cy="32" r="7" fill="#7B4FB8"/>
+      <circle cx="36" cy="34" r="7" fill="#6B3FA0" opacity=".9"/>
+      <circle cx="19" cy="44" r="7" fill="#7B4FB8"/>
+      <circle cx="31" cy="44" r="7" fill="#6B3FA0" opacity=".9"/>
+      <circle cx="25" cy="52" r="7" fill="#7B4FB8"/>
+      <circle cx="19" cy="24" r="2" fill="#fff" opacity=".15"/>
+      <circle cx="32" cy="24" r="2" fill="#fff" opacity=".15"/>
+      <circle cx="25" cy="34" r="2" fill="#fff" opacity=".15"/>
+    </svg>
+    <span>Grapes</span>
+  </div>
+
+  <!-- 34. Watermelon slice -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Watermelon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 50" width="50" height="64">
+      <path d="M4,44 C4,20 14,4 30,4 C46,4 56,20 56,44 Z" fill="#207D43"/>
+      <path d="M8,44 C8,22 16,8 30,8 C44,8 52,22 52,44 Z" fill="#D94040"/>
+      <path d="M6,44 C6,21 15,6 30,6 C45,6 54,21 54,44 Z" fill="none" stroke="#2d9554" stroke-width="3"/>
+      <ellipse cx="20" cy="28" rx="2" ry="3" fill="#1A1A1A" transform="rotate(-10,20,28)"/>
+      <ellipse cx="30" cy="24" rx="2" ry="3" fill="#1A1A1A"/>
+      <ellipse cx="40" cy="28" rx="2" ry="3" fill="#1A1A1A" transform="rotate(10,40,28)"/>
+      <ellipse cx="24" cy="36" rx="2" ry="2.5" fill="#1A1A1A" transform="rotate(-5,24,36)"/>
+      <ellipse cx="36" cy="36" rx="2" ry="2.5" fill="#1A1A1A" transform="rotate(5,36,36)"/>
+    </svg>
+    <span>Watermelon</span>
+  </div>
+
+  <!-- 35. Kalyna (viburnum) — Ukrainian symbol -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Kalyna">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 65" width="50" height="64">
+      <path d="M27,62 L27,30" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M27,45 C20,40 10,38 6,38" stroke="#8B5E3C" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M27,50 C34,45 44,43 48,43" stroke="#8B5E3C" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <path d="M4,36 C2,34 4,30 8,32 C10,33 8,37 4,36 Z" fill="#207D43"/>
+      <path d="M46,41 C44,39 46,35 50,37 C52,38 50,42 46,41 Z" fill="#2d9554"/>
+      <circle cx="20" cy="18" r="4.5" fill="#D94040"/><circle cx="28" cy="14" r="4.5" fill="#D94040"/>
+      <circle cx="36" cy="18" r="4.5" fill="#D94040"/><circle cx="16" cy="26" r="4.5" fill="#c03030"/>
+      <circle cx="24" cy="24" r="4.5" fill="#D94040"/><circle cx="32" cy="24" r="4.5" fill="#D94040"/>
+      <circle cx="40" cy="26" r="4.5" fill="#c03030"/><circle cx="28" cy="30" r="4" fill="#c03030"/>
+      <circle cx="20" cy="20" r="1.5" fill="#fff" opacity=".2"/>
+      <circle cx="28" cy="16" r="1.5" fill="#fff" opacity=".2"/>
+      <circle cx="36" cy="20" r="1.5" fill="#fff" opacity=".2"/>
+    </svg>
+    <span>Kalyna</span>
+  </div>
+
+  <!-- 36. Germinating seed cross-section -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Germinating seed">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 65" width="50" height="64">
+      <ellipse cx="27" cy="48" rx="22" ry="8" fill="#8B5E3C" opacity=".4"/>
+      <ellipse cx="27" cy="44" rx="16" ry="12" fill="#A0703A"/>
+      <ellipse cx="27" cy="44" rx="12" ry="9" fill="#C4883C"/>
+      <path d="M27,36 L27,14" stroke="#207D43" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <path d="M27,24 C20,16 12,12 6,10 C12,16 20,20 27,24 Z" fill="#207D43"/>
+      <path d="M27,16 C34,8 42,6 48,4 C42,10 34,12 27,16 Z" fill="#2d9554"/>
+      <path d="M23,44 C20,40 18,38 16,40 C14,42 18,46 22,46" fill="#FFF8F0" opacity=".4"/>
+      <path d="M31,42 L27,36" stroke="#fff" stroke-width="1.5" fill="none" opacity=".3" stroke-linecap="round"/>
+    </svg>
+    <span>Seed sprout</span>
+  </div>
+
+  <!-- 37. Greenhouse silhouette -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Greenhouse">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="50" height="64">
+      <path d="M6,58 L6,30 C6,14 18,4 30,4 C42,4 54,14 54,30 L54,58 Z" fill="none" stroke="#207D43" stroke-width="2.5"/>
+      <path d="M6,30 C6,14 18,4 30,4 C42,4 54,14 54,30" fill="#207D43" opacity=".15"/>
+      <line x1="30" y1="4" x2="30" y2="58" stroke="#207D43" stroke-width="1.5" opacity=".5"/>
+      <line x1="6" y1="30" x2="54" y2="30" stroke="#207D43" stroke-width="1.5" opacity=".5"/>
+      <line x1="6" y1="44" x2="54" y2="44" stroke="#207D43" stroke-width="1.5" opacity=".5"/>
+      <path d="M14,58 C14,58 14,50 18,46 C20,44 22,46 22,50 L22,58" fill="#2d9554"/>
+      <path d="M36,58 C36,58 36,48 40,44 C42,42 44,44 44,48 L44,58" fill="#207D43"/>
+      <rect x="4" y="56" width="52" height="4" rx="2" fill="#8B5E3C"/>
+    </svg>
+    <span>Greenhouse</span>
+  </div>
+
+  <!-- 38. Beetroot -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Beetroot">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <path d="M25,24 C12,24 4,36 6,50 C8,60 16,66 25,66 C34,66 42,60 44,50 C46,36 38,24 25,24 Z" fill="#8B2252"/>
+      <path d="M25,24 C25,24 20,36 20,48 C20,56 25,62 25,66" stroke="#6B1A40" stroke-width="1" fill="none" opacity=".3"/>
+      <ellipse cx="18" cy="38" rx="4" ry="6" fill="#fff" opacity=".08" transform="rotate(-10,18,38)"/>
+      <path d="M18,24 C16,16 12,8 8,4" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M25,22 L25,2" stroke="#207D43" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M32,24 C34,16 38,8 42,4" stroke="#2d9554" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M8,4 C6,8 8,12 12,10" fill="#207D43"/>
+      <path d="M42,4 C44,8 42,12 38,10" fill="#2d9554"/>
+      <path d="M25,2 C22,6 24,10 28,8" fill="#207D43"/>
+    </svg>
+    <span>Beetroot</span>
+  </div>
+
+  <!-- 39. Garlic bulb -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Garlic">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 65" width="50" height="64">
+      <path d="M25,20 C12,22 6,34 8,48 C10,58 16,62 25,62 C34,62 40,58 42,48 C44,34 38,22 25,20 Z" fill="#FFF8F0" stroke="#e0d6c8" stroke-width="1.5"/>
+      <path d="M25,22 L25,62" stroke="#e0d6c8" stroke-width="1" opacity=".4"/>
+      <path d="M16,28 C14,38 14,48 18,56" stroke="#e0d6c8" stroke-width="1" opacity=".3"/>
+      <path d="M34,28 C36,38 36,48 32,56" stroke="#e0d6c8" stroke-width="1" opacity=".3"/>
+      <path d="M25,20 C22,14 20,8 22,4 C24,2 26,2 28,4 C30,8 28,14 25,20 Z" fill="#A0703A" stroke="#8B5E3C" stroke-width="1"/>
+      <path d="M25,4 L25,0" stroke="#8B5E3C" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="20" cy="36" rx="3" ry="8" fill="#fff" opacity=".15" transform="rotate(-5,20,36)"/>
+    </svg>
+    <span>Garlic</span>
+  </div>
+
+  <!-- 40. Birch leaf -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Birch leaf">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 65" width="50" height="64">
+      <path d="M25,4 C8,16 4,34 12,48 C18,58 25,62 25,62 C25,62 32,58 38,48 C46,34 42,16 25,4 Z" fill="#207D43"/>
+      <path d="M25,4 C42,16 46,34 38,48 C32,58 25,62 25,62" fill="#2d9554" opacity=".4"/>
+      <path d="M25,8 L25,58" stroke="#1a6a38" stroke-width="1.5" fill="none" opacity=".5"/>
+      <path d="M25,20 L14,14" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M25,20 L36,14" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M25,32 L12,26" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M25,32 L38,26" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M25,44 L16,40" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M25,44 L34,40" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M20,56 C16,58 14,60 12,62" stroke="#8B5E3C" stroke-width="1" fill="none" opacity=".4"/>
+      <path d="M30,56 C34,58 36,60 38,62" stroke="#8B5E3C" stroke-width="1" fill="none" opacity=".4"/>
+    </svg>
+    <span>Birch leaf</span>
+  </div>
+
+  <!-- 41. Preserve jar -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Preserve jar">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <rect x="10" y="18" width="30" height="44" rx="4" fill="#FFF8F0" stroke="#8B5E3C" stroke-width="1.5"/>
+      <rect x="14" y="8" width="22" height="12" rx="2" fill="#D94040" stroke="#c03030" stroke-width="1"/>
+      <path d="M18,8 C18,4 20,2 25,2 C30,2 32,4 32,8" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="22" cy="36" r="5" fill="#D94040" opacity=".5"/>
+      <circle cx="30" cy="40" r="4" fill="#E8A838" opacity=".5"/>
+      <circle cx="24" cy="46" r="3.5" fill="#D94040" opacity=".4"/>
+      <circle cx="32" cy="50" r="3" fill="#E8A838" opacity=".4"/>
+      <text x="25" y="14" text-anchor="middle" fill="#fff" font-family="Montserrat,sans-serif" font-weight="700" font-size="5">JAM</text>
+      <path d="M16,16 C16,16 22,18 25,18 C28,18 34,16 34,16" stroke="#c03030" stroke-width="1.5" fill="none"/>
+    </svg>
+    <span>Preserve jar</span>
+  </div>
+
+  <!-- 42. Garden glove -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Garden glove">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <path d="M14,28 L14,56 C14,60 18,64 24,64 L32,64 C36,64 40,60 40,56 L40,28" fill="#207D43" stroke="#1a6a38" stroke-width="1.5"/>
+      <path d="M14,28 L14,16 C14,12 16,10 18,10 L18,28" fill="#207D43" stroke="#1a6a38" stroke-width="1"/>
+      <path d="M22,28 L22,8 C22,5 24,4 26,4 L26,28" fill="#207D43" stroke="#1a6a38" stroke-width="1"/>
+      <path d="M30,28 L30,6 C30,3 32,2 34,2 L34,28" fill="#2d9554" stroke="#1a6a38" stroke-width="1"/>
+      <path d="M38,28 L38,10 C38,7 40,6 42,8 L42,20 C42,24 40,28 40,28" fill="#2d9554" stroke="#1a6a38" stroke-width="1"/>
+      <rect x="12" y="26" width="30" height="6" rx="3" fill="#1a6a38"/>
+      <circle cx="20" cy="42" r="2" fill="#E8A838" opacity=".5"/>
+      <circle cx="28" cy="38" r="1.5" fill="#E8A838" opacity=".4"/>
+      <circle cx="32" cy="48" r="2" fill="#E8A838" opacity=".5"/>
+    </svg>
+    <span>Glove</span>
+  </div>
+
+  <!-- 43. Wheelbarrow -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Wheelbarrow">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 65 55" width="50" height="64">
+      <path d="M16,22 L20,40 C21,44 24,46 28,46 L46,46 C50,46 52,44 52,40 L52,22 Z" fill="#207D43"/>
+      <rect x="14" y="18" width="40" height="6" rx="3" fill="#1a6a38"/>
+      <circle cx="52" cy="48" r="7" fill="none" stroke="#8B5E3C" stroke-width="3"/>
+      <circle cx="52" cy="48" r="2" fill="#8B5E3C"/>
+      <path d="M14,22 L4,14" stroke="#8B5E3C" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M16,28 L6,20" stroke="#8B5E3C" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <circle cx="28" cy="14" r="5" fill="#E8A838"/>
+      <circle cx="38" cy="12" r="4" fill="#D94040"/>
+      <path d="M35,8 L35,4" stroke="#207D43" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <circle cx="44" cy="14" r="3.5" fill="#2d9554"/>
+    </svg>
+    <span>Wheelbarrow</span>
+  </div>
+
+  <!-- 44. Rain cloud with sun -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Rain & sun">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 55" width="50" height="64">
+      <circle cx="46" cy="16" r="8" fill="#E8A838"/>
+      <line x1="46" y1="4" x2="46" y2="0" stroke="#E8A838" stroke-width="2" stroke-linecap="round"/>
+      <line x1="56" y1="10" x2="60" y2="8" stroke="#E8A838" stroke-width="2" stroke-linecap="round"/>
+      <line x1="58" y1="20" x2="60" y2="24" stroke="#E8A838" stroke-width="2" stroke-linecap="round"/>
+      <line x1="36" y1="10" x2="34" y2="6" stroke="#E8A838" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="22" cy="22" r="10" fill="#b0c4d8"/>
+      <circle cx="34" cy="22" r="8" fill="#c0d0e0"/>
+      <circle cx="14" cy="22" r="7" fill="#c0d0e0"/>
+      <rect x="8" y="22" width="32" height="6" rx="3" fill="#b0c4d8"/>
+      <line x1="14" y1="32" x2="12" y2="40" stroke="#207D43" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="22" y1="32" x2="20" y2="40" stroke="#207D43" stroke-width="1.5" stroke-linecap="round"/>
+      <line x1="30" y1="32" x2="28" y2="40" stroke="#207D43" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M10,46 C10,46 14,42 18,44 C22,46 20,50 16,50 C12,50 10,46 10,46 Z" fill="#207D43" opacity=".5"/>
+    </svg>
+    <span>Rain & sun</span>
+  </div>
+
+  <!-- 45. Eggplant / aubergine -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Eggplant">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 68" width="50" height="64">
+      <path d="M22,16 C10,20 4,34 6,48 C8,58 14,64 22,66 C30,64 36,54 36,44 C36,30 30,18 22,16 Z" fill="#6B3FA0"/>
+      <path d="M22,16 C30,18 36,30 36,44 C36,54 30,64 22,66" fill="#5A2D90" opacity=".4"/>
+      <ellipse cx="14" cy="34" rx="3" ry="8" fill="#fff" opacity=".1" transform="rotate(-8,14,34)"/>
+      <path d="M22,16 C20,10 16,6 14,4 C18,4 22,8 22,16 Z" fill="#207D43"/>
+      <path d="M22,16 C24,10 28,6 32,4 C28,6 24,10 22,16 Z" fill="#2d9554"/>
+      <path d="M22,16 C22,10 22,4 20,0" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M18,4 C14,2 12,4 14,8" fill="#207D43" opacity=".7"/>
+      <path d="M28,6 C32,2 34,4 32,8" fill="#2d9554" opacity=".7"/>
+    </svg>
+    <span>Eggplant</span>
+  </div>
+
+  <!-- 46. Onion -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Onion">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 65" width="50" height="64">
+      <path d="M25,18 C10,24 4,38 8,50 C12,58 18,62 25,62 C32,62 38,58 42,50 C46,38 40,24 25,18 Z" fill="#C4883C"/>
+      <path d="M25,18 C40,24 46,38 42,50 C38,58 32,62 25,62" fill="#A0703A" opacity=".4"/>
+      <path d="M25,22 L25,60" stroke="#8B5E3C" stroke-width="1" fill="none" opacity=".3"/>
+      <path d="M18,26 C14,34 14,46 18,56" stroke="#8B5E3C" stroke-width="1" fill="none" opacity=".2"/>
+      <path d="M32,26 C36,34 36,46 32,56" stroke="#8B5E3C" stroke-width="1" fill="none" opacity=".2"/>
+      <ellipse cx="19" cy="38" rx="3" ry="6" fill="#fff" opacity=".1"/>
+      <path d="M25,18 L25,2" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M25,6 C22,2 18,0 16,2" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M25,4 C28,0 32,0 34,2" stroke="#2d9554" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <span>Onion</span>
+  </div>
+
+  <!-- 47. Pear -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Pear">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 68" width="50" height="64">
+      <path d="M25,14 C18,14 10,22 8,34 C6,46 10,56 16,62 C20,66 30,66 34,62 C40,56 44,46 42,34 C40,22 32,14 25,14 Z" fill="#8CC63F"/>
+      <path d="M25,14 C32,14 40,22 42,34 C44,46 40,56 34,62 C30,66 25,66 25,66" fill="#7AB530" opacity=".3"/>
+      <ellipse cx="18" cy="36" rx="4" ry="8" fill="#fff" opacity=".12" transform="rotate(-8,18,36)"/>
+      <path d="M25,14 C23,8 22,4 24,2" stroke="#8B5E3C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M24,6 C28,2 34,2 36,6" fill="#207D43"/>
+      <circle cx="24" cy="56" r="3" fill="#A0703A" opacity=".15"/>
+    </svg>
+    <span>Pear</span>
+  </div>
+
+  <!-- 48. Lemon -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Lemon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 50" width="50" height="64">
+      <ellipse cx="27" cy="28" rx="22" ry="16" fill="#E8D44D" transform="rotate(-15,27,28)"/>
+      <ellipse cx="27" cy="28" rx="18" ry="13" fill="#F0E060" transform="rotate(-15,27,28)"/>
+      <path d="M8,24 C4,22 2,18 6,16" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M6,16 C8,14 12,14 14,18" fill="#207D43"/>
+      <ellipse cx="20" cy="24" rx="3" ry="5" fill="#fff" opacity=".15" transform="rotate(-15,20,24)"/>
+      <path d="M46,30 C48,32 48,28 46,26" stroke="#E8D44D" stroke-width="1.5" fill="none" opacity=".3"/>
+    </svg>
+    <span>Lemon</span>
+  </div>
+
+  <!-- 49. Garden hat -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Garden hat">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 50" width="50" height="64">
+      <ellipse cx="30" cy="38" rx="28" ry="8" fill="#C4883C"/>
+      <ellipse cx="30" cy="36" rx="28" ry="6" fill="#E8D4A0" stroke="#C4883C" stroke-width="1.5"/>
+      <path d="M14,36 C14,18 20,8 30,8 C40,8 46,18 46,36" fill="#E8D4A0" stroke="#C4883C" stroke-width="1.5"/>
+      <rect x="14" y="32" width="32" height="6" rx="2" fill="#207D43"/>
+      <path d="M38,34 L42,32 L44,36 L40,36 Z" fill="#D94040"/>
+      <circle cx="26" cy="35" r="1.5" fill="#E8A838"/>
+      <circle cx="32" cy="34" r="1" fill="#2d9554"/>
+    </svg>
+    <span>Garden hat</span>
+  </div>
+
+  <!-- 50. Beehive -->
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Beehive">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 55 65" width="50" height="64">
+      <path d="M14,58 L14,28 C14,14 20,6 27,6 C34,6 40,14 40,28 L40,58 Z" fill="#E8A838"/>
+      <rect x="10" y="56" width="34" height="6" rx="2" fill="#8B5E3C"/>
+      <rect x="12" y="16" width="30" height="6" rx="2" fill="#F5A623" opacity=".5"/>
+      <rect x="12" y="26" width="30" height="6" rx="2" fill="#F5A623" opacity=".5"/>
+      <rect x="12" y="36" width="30" height="6" rx="2" fill="#F5A623" opacity=".5"/>
+      <rect x="12" y="46" width="30" height="6" rx="2" fill="#F5A623" opacity=".5"/>
+      <rect x="22" y="48" width="10" height="10" rx="4" fill="#8B5E3C"/>
+      <ellipse cx="44" cy="14" rx="5" ry="4" fill="#E8A838" stroke="#1A1A1A" stroke-width="1"/>
+      <rect x="42" y="12" width="4" height="1.5" fill="#1A1A1A" rx=".5"/>
+      <rect x="42" y="15" width="4" height="1.5" fill="#1A1A1A" rx=".5"/>
+      <ellipse cx="40" cy="14" rx="3" ry="2" fill="#fff" opacity=".2" transform="rotate(-20,40,14)"/>
+      <ellipse cx="48" cy="14" rx="3" ry="2" fill="#fff" opacity=".2" transform="rotate(20,48,14)"/>
+    </svg>
+    <span>Beehive</span>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 2. Preview & Download <small>Logo with selected icon</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="grid">
+
+  <!-- ─── A. Full horizontal ─── -->
+  <div class="card">
+    <div class="card__content" id="logo-a">
+      <div class="logo-wrap">
+        <div class="logo-line" style="font-size:64px">
+          <span class="logo-fun">FUN</span>
+          <span class="logo-icon" style="display:inline-flex;align-items:center"></span>
+          <span class="logo-dacha">DACHA</span>
+        </div>
+        <div class="logo-slogan" style="font-size:20px">Насіння. Добрива. Захист.</div>
+      </div>
+    </div>
+    <h3>A. Full Logo — Horizontal</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-a','fun-dacha-logo')">Download PNG</button>
+  </div>
+
+  <!-- ─── B. Compact horizontal ─── -->
+  <div class="card">
+    <div class="card__content" id="logo-b">
+      <div class="logo-wrap">
+        <div class="logo-line logo-line--sm" style="font-size:32px">
+          <span class="logo-fun">FUN</span>
+          <span class="logo-icon" style="display:inline-flex;align-items:center"></span>
+          <span class="logo-dacha">DACHA</span>
+        </div>
+        <div class="logo-slogan" style="font-size:11px">Насіння. Добрива. Захист.</div>
+      </div>
+    </div>
+    <h3>B. Compact</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-b','fun-dacha-logo-compact')">Download PNG</button>
+  </div>
+
+  <!-- ─── C. Dark background ─── -->
+  <div class="card">
+    <div class="card__content card__content--dark" id="logo-c">
+      <div class="logo-wrap">
+        <div class="logo-line" style="font-size:64px">
+          <span class="logo-fun logo-fun--light">FUN</span>
+          <span class="logo-icon" style="display:inline-flex;align-items:center"></span>
+          <span class="logo-dacha logo-dacha--white">DACHA</span>
+        </div>
+        <div class="logo-slogan logo-slogan--muted" style="font-size:20px">Насіння. Добрива. Захист.</div>
+      </div>
+    </div>
+    <h3>C. On Dark</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-c','fun-dacha-logo-dark')">Download PNG</button>
+  </div>
+
+  <!-- ─── D. Circular brand seal ─── -->
+  <div class="card">
+    <div class="card__content" id="logo-d">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="200">
+      <circle cx="120" cy="120" r="116" fill="#207D43"/>
+      <circle cx="120" cy="120" r="110" stroke="#1a6a38" stroke-width="2" fill="none"/>
+      <circle cx="120" cy="120" r="102" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="4 3" opacity=".5"/>
+      <g transform="translate(120, 72)" class="seal-icon">
+        <path d="M0,22 L0,0" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M0,12 C-10,5 -20,1 -26,-3 C-18,5 -10,9 0,12 Z" fill="#fff" opacity=".9"/>
+        <path d="M0,5 C10,-2 20,-6 26,-10 C18,-2 10,2 0,5 Z" fill="#FFF8F0" opacity=".8"/>
+        <path d="M0,0 C-8,-7 -16,-11 -22,-15 C-14,-9 -8,-5 0,0 Z" fill="#FFF8F0" opacity=".8"/>
+        <path d="M0,-4 C8,-11 14,-15 20,-19 C14,-13 8,-9 0,-4 Z" fill="#fff" opacity=".7"/>
+        <ellipse cx="0" cy="26" rx="16" ry="4" fill="#1a6a38" opacity=".5"/>
+      </g>
+      <text x="120" y="130" text-anchor="middle" fill="#fff" font-family="Montserrat, sans-serif" font-weight="900" font-size="18" letter-spacing="2">FUN DACHA</text>
+      <line x1="40" y1="142" x2="200" y2="142" stroke="#fff" stroke-width="1" opacity=".3"/>
+      <text x="120" y="162" text-anchor="middle" fill="#FFF8F0" font-family="Open Sans, sans-serif" font-weight="600" font-size="9" letter-spacing="1.5" opacity=".85">НАСІННЯ &#x2022; ДОБРИВА &#x2022; ЗАХИСТ</text>
+      <text x="120" y="180" text-anchor="middle" fill="#FFF8F0" font-family="Montserrat, sans-serif" font-weight="700" font-size="10" letter-spacing=".3" opacity=".7">fun-dacha.com.ua</text>
+    </svg>
+    </div>
+    <h3>D. Brand Seal</h3>
+    <button class="btn-dl" onclick="downloadSvg('logo-d','fun-dacha-seal')">Download SVG</button>
+  </div>
+
+  <!-- ─── E. Seal on dark ─── -->
+  <div class="card">
+    <div class="card__content card__content--dark" id="logo-e">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="200">
+      <circle cx="120" cy="120" r="116" fill="#207D43"/>
+      <circle cx="120" cy="120" r="110" stroke="#2d9554" stroke-width="2" fill="none"/>
+      <circle cx="120" cy="120" r="102" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="4 3" opacity=".5"/>
+      <g transform="translate(120, 72)" class="seal-icon">
+        <path d="M0,22 L0,0" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M0,12 C-10,5 -20,1 -26,-3 C-18,5 -10,9 0,12 Z" fill="#fff" opacity=".9"/>
+        <path d="M0,5 C10,-2 20,-6 26,-10 C18,-2 10,2 0,5 Z" fill="#FFF8F0" opacity=".8"/>
+        <path d="M0,0 C-8,-7 -16,-11 -22,-15 C-14,-9 -8,-5 0,0 Z" fill="#FFF8F0" opacity=".8"/>
+        <path d="M0,-4 C8,-11 14,-15 20,-19 C14,-13 8,-9 0,-4 Z" fill="#fff" opacity=".7"/>
+        <ellipse cx="0" cy="26" rx="16" ry="4" fill="#1a6a38" opacity=".5"/>
+      </g>
+      <text x="120" y="130" text-anchor="middle" fill="#fff" font-family="Montserrat, sans-serif" font-weight="900" font-size="18" letter-spacing="2">FUN DACHA</text>
+      <line x1="40" y1="142" x2="200" y2="142" stroke="#fff" stroke-width="1" opacity=".3"/>
+      <text x="120" y="162" text-anchor="middle" fill="#FFF8F0" font-family="Open Sans, sans-serif" font-weight="600" font-size="9" letter-spacing="1.5" opacity=".85">НАСІННЯ &#x2022; ДОБРИВА &#x2022; ЗАХИСТ</text>
+      <text x="120" y="180" text-anchor="middle" fill="#FFF8F0" font-family="Montserrat, sans-serif" font-weight="700" font-size="10" letter-spacing=".3" opacity=".7">fun-dacha.com.ua</text>
+    </svg>
+    </div>
+    <h3>E. Seal on Dark</h3>
+    <button class="btn-dl" onclick="downloadSvg('logo-e','fun-dacha-seal-dark')">Download SVG</button>
+  </div>
+
+  <!-- ─── F. Stacked vertical ─── -->
+  <div class="card">
+    <div class="card__content" id="logo-f" style="padding:2rem 3rem">
+      <div class="logo-wrap">
+        <span class="logo-icon" style="display:inline-flex;align-items:center;margin-bottom:4px"></span>
+        <div class="logo-fun" style="font-size:46px;letter-spacing:4px;line-height:1.1">FUN</div>
+        <div class="logo-dacha" style="font-size:46px;letter-spacing:4px;line-height:1.1">DACHA</div>
+        <div class="logo-slogan" style="font-size:12px;margin-top:8px;color:#7A7A7A">Насіння. Добрива. Захист.</div>
+      </div>
+    </div>
+    <h3>F. Stacked</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-f','fun-dacha-logo-stacked')">Download PNG</button>
+  </div>
+
+  <!-- ─── G. Stacked dark ─── -->
+  <div class="card">
+    <div class="card__content card__content--dark" id="logo-g" style="padding:2rem 3rem">
+      <div class="logo-wrap">
+        <span class="logo-icon" style="display:inline-flex;align-items:center;margin-bottom:4px"></span>
+        <div class="logo-fun logo-fun--light" style="font-size:46px;letter-spacing:4px;line-height:1.1">FUN</div>
+        <div class="logo-dacha logo-dacha--white" style="font-size:46px;letter-spacing:4px;line-height:1.1">DACHA</div>
+        <div class="logo-slogan logo-slogan--muted" style="font-size:12px;margin-top:8px">Насіння. Добрива. Захист.</div>
+      </div>
+    </div>
+    <h3>G. Stacked Dark</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-g','fun-dacha-logo-stacked-dark')">Download PNG</button>
+  </div>
+
+  <!-- ─── H. Cream ─── -->
+  <div class="card">
+    <div class="card__content card__content--cream" id="logo-h">
+      <div class="logo-wrap">
+        <div class="logo-line" style="font-size:64px">
+          <span class="logo-fun">FUN</span>
+          <span class="logo-icon" style="display:inline-flex;align-items:center"></span>
+          <span class="logo-dacha">DACHA</span>
+        </div>
+        <div class="logo-slogan logo-slogan--brown" style="font-size:20px">Насіння. Добрива. Захист.</div>
+      </div>
+    </div>
+    <h3>H. On Cream</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-h','fun-dacha-logo-cream')">Download PNG</button>
+  </div>
+
+  <!-- ─── I. Monogram ─── -->
+  <div class="card">
+    <div class="card__content" id="logo-i" style="padding:1.5rem">
+      <div style="display:flex;gap:1.5rem;align-items:center">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80">
+          <circle cx="40" cy="40" r="38" fill="#207D43" stroke="#1a6a38" stroke-width="2"/>
+          <circle cx="40" cy="40" r="33" fill="none" stroke="#fff" stroke-width="1" stroke-dasharray="3 2" opacity=".5"/>
+          <g transform="translate(40, 30)">
+            <path d="M0,14 L0,2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M0,8 C-5,4 -10,2 -12,0 C-8,4 -4,6 0,8 Z" fill="#fff" opacity=".85"/>
+            <path d="M0,4 C5,0 10,-2 12,-4 C8,0 4,2 0,4 Z" fill="#fff" opacity=".75"/>
+          </g>
+          <text x="40" y="58" text-anchor="middle" fill="#FFF8F0" font-family="Montserrat, sans-serif" font-weight="800" font-size="7" letter-spacing="1.5" opacity=".9">DACHA</text>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="48">
+          <circle cx="40" cy="40" r="38" fill="#207D43" stroke="#1a6a38" stroke-width="3"/>
+          <g transform="translate(40, 34)">
+            <path d="M0,12 L0,0" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <path d="M0,6 C-6,2 -11,0 -13,-2 C-9,2 -4,4 0,6 Z" fill="#fff" opacity=".85"/>
+            <path d="M0,2 C6,-2 11,-4 13,-6 C9,-2 4,0 0,2 Z" fill="#fff" opacity=".75"/>
+          </g>
+        </svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="32">
+          <circle cx="40" cy="40" r="38" fill="#207D43"/>
+          <g transform="translate(40, 34)">
+            <path d="M0,12 L0,0" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M0,6 C-7,1 -12,-1 -14,-3 C-10,1 -5,3 0,6 Z" fill="#fff"/>
+            <path d="M0,2 C7,-3 12,-5 14,-7 C10,-3 5,-1 0,2 Z" fill="#fff" opacity=".8"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <h3>I. Monogram (80/48/32)</h3>
+    <button class="btn-dl" onclick="downloadCard('logo-i','fun-dacha-monogram')">Download PNG</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 3. Bundle Labels <small>«Готові Набори» — 5 curated sets</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="grid">
+
+  <!-- Bundle 1: Набір новачка -->
+  <div class="card">
+    <div class="card__content" id="bundle-1">
+      <div class="sticker-content sticker-content--bundle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="40" height="40">
+          <path d="M25,40 L25,14" stroke="#207D43" stroke-width="4" fill="none" stroke-linecap="round"/>
+          <path d="M25,26 C16,18 6,14 0,10 C8,18 16,22 25,26 Z" fill="#207D43"/>
+          <path d="M25,16 C34,8 44,4 50,0 C42,8 34,12 25,16 Z" fill="#2d9554"/>
+          <ellipse cx="25" cy="42" rx="14" ry="4" fill="#8B5E3C" opacity=".4"/>
+        </svg>
+        <div class="bundle-name">Набір новачка</div>
+        <div class="bundle-desc">10 малих пакетів невибагливих культур зі 100% висадкою у відкритий ґрунт</div>
+        <div class="bundle-count">10 продуктів</div>
+        <div class="bundle-brand">FUN DACHA</div>
+      </div>
+    </div>
+    <h3>Набір новачка</h3>
+    <button class="btn-dl" onclick="downloadCard('bundle-1','bundle-nabir-novachka')">Download PNG</button>
+  </div>
+
+  <!-- Bundle 2: Пряносмакові -->
+  <div class="card">
+    <div class="card__content" id="bundle-2">
+      <div class="sticker-content sticker-content--bundle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="40" height="40">
+          <path d="M25,42 L25,18" stroke="#207D43" stroke-width="3" fill="none" stroke-linecap="round"/>
+          <path d="M25,30 C17,24 7,22 3,20" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M2,19 C0,17 2,13 6,15 C8,16 6,20 2,19 Z" fill="#207D43"/>
+          <path d="M25,22 C33,16 43,14 47,12" stroke="#2d9554" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M48,11 C50,9 48,5 44,7 C42,8 44,12 48,11 Z" fill="#2d9554"/>
+          <path d="M25,18 C23,10 19,4 17,0" stroke="#207D43" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M16,0 C14,2 16,6 20,4 Z" fill="#2d9554"/>
+        </svg>
+        <div class="bundle-name">Пряносмакові +<br>Мікроелементи</div>
+        <div class="bundle-desc">Ароматні трави та стимулятор росту для замочування насіння і поливу</div>
+        <div class="bundle-count">8 продуктів</div>
+        <div class="bundle-brand">FUN DACHA</div>
+      </div>
+    </div>
+    <h3>Пряносмакові</h3>
+    <button class="btn-dl" onclick="downloadCard('bundle-2','bundle-pryanosmakovi')">Download PNG</button>
+  </div>
+
+  <!-- Bundle 3: Захист врожаю -->
+  <div class="card">
+    <div class="card__content" id="bundle-3">
+      <div class="sticker-content sticker-content--bundle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="40" height="40">
+          <path d="M25,4 C25,4 6,10 6,22 C6,36 16,46 25,48 C34,46 44,36 44,22 C44,10 25,4 25,4 Z" fill="none" stroke="#207D43" stroke-width="3"/>
+          <path d="M25,8 C25,8 10,14 10,24 C10,34 18,42 25,44 C32,42 40,34 40,24 C40,14 25,8 25,8 Z" fill="#207D43" opacity=".15"/>
+          <path d="M18,24 L23,30 L34,18" stroke="#207D43" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="bundle-name">Захист вашого<br>врожаю</div>
+        <div class="bundle-desc">Інсектициди, фунгіцид, прилипач та захисні рукавички</div>
+        <div class="bundle-count">5 продуктів</div>
+        <div class="bundle-brand">FUN DACHA</div>
+      </div>
+    </div>
+    <h3>Захист врожаю</h3>
+    <button class="btn-dl" onclick="downloadCard('bundle-3','bundle-zakhyst')">Download PNG</button>
+  </div>
+
+  <!-- Bundle 4: Томати -->
+  <div class="card">
+    <div class="card__content" id="bundle-4">
+      <div class="sticker-content sticker-content--bundle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="40" height="40">
+          <circle cx="25" cy="28" r="18" fill="#D94040"/>
+          <path d="M25,10 C18,10 12,16 12,28" fill="#c03030" opacity=".15"/>
+          <path d="M18,12 C15,8 17,4 20,5 C22,6 23,9 22,12" fill="#207D43"/>
+          <path d="M22,12 C22,6 24,3 27,4 C29,5 29,8 28,12" fill="#2d9554"/>
+          <path d="M28,12 C30,8 33,7 35,8 C35,10 33,12 31,12" fill="#207D43"/>
+          <path d="M25,12 L25,6" stroke="#1a6a38" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="bundle-name">Томати</div>
+        <div class="bundle-desc">Перевірені сорти — від класичних до екзотичних, різні за формою та смаком</div>
+        <div class="bundle-count">5 продуктів</div>
+        <div class="bundle-brand">FUN DACHA</div>
+      </div>
+    </div>
+    <h3>Томати</h3>
+    <button class="btn-dl" onclick="downloadCard('bundle-4','bundle-tomaty')">Download PNG</button>
+  </div>
+
+  <!-- Bundle 5: Капусти -->
+  <div class="card">
+    <div class="card__content" id="bundle-5">
+      <div class="sticker-content sticker-content--bundle">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="40" height="40">
+          <ellipse cx="25" cy="28" rx="18" ry="16" fill="#207D43"/>
+          <ellipse cx="25" cy="26" rx="12" ry="10" fill="#2d9554"/>
+          <ellipse cx="25" cy="24" rx="7" ry="6" fill="#3aad64"/>
+          <path d="M25,18 C23,16 25,14 27,16 C29,18 27,20 25,18 Z" fill="#207D43"/>
+          <path d="M14,22 C10,26 10,32 14,36" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+          <path d="M36,22 C40,26 40,32 36,36" stroke="#1a6a38" stroke-width="1" fill="none" opacity=".3"/>
+        </svg>
+        <div class="bundle-name">Капусти</div>
+        <div class="bundle-desc">Рання, середня та пізня капуста + засіб захисту від тлі та білокрилки</div>
+        <div class="bundle-count">6 продуктів</div>
+        <div class="bundle-brand">FUN DACHA</div>
+      </div>
+    </div>
+    <h3>Капусти</h3>
+    <button class="btn-dl" onclick="downloadCard('bundle-5','bundle-kapusty')">Download PNG</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 4. Promo Badges <small>Discounts, shipping, bestsellers</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="grid">
+
+  <!-- Sale badge -->
+  <div class="card">
+    <div class="card__content" id="promo-sale">
+      <div class="promo-badge promo-badge--sale">
+        <div class="promo-text-lg">−20%</div>
+        <div class="promo-text-md">ЗНИЖКА</div>
+        <div class="promo-text-sm">на перше<br>замовлення</div>
+      </div>
+    </div>
+    <h3>Sale Badge</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-sale','promo-sale-20')">Download PNG</button>
+  </div>
+
+  <!-- New arrival -->
+  <div class="card">
+    <div class="card__content" id="promo-new">
+      <div class="promo-badge promo-badge--new">
+        <div class="promo-text-sm" style="letter-spacing:1.5px;opacity:.8">✦ НОВИНКА ✦</div>
+        <div class="promo-text-md" style="font-size:15px;margin-top:4px">НОВЕ<br>НАДХОДЖЕННЯ</div>
+        <div class="promo-text-sm">Сезон 2025</div>
+      </div>
+    </div>
+    <h3>New Arrival</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-new','promo-new-arrival')">Download PNG</button>
+  </div>
+
+  <!-- Free shipping -->
+  <div class="card">
+    <div class="card__content" id="promo-ship">
+      <div class="promo-badge promo-badge--ship">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 30" width="36" height="27">
+          <rect x="0" y="6" width="24" height="18" rx="2" fill="#fff" opacity=".9"/>
+          <path d="M24,12 L32,12 L38,18 L38,24 L24,24 Z" fill="#fff" opacity=".7"/>
+          <circle cx="8" cy="26" r="4" fill="#fff"/><circle cx="8" cy="26" r="2" fill="#0F3B47"/>
+          <circle cx="32" cy="26" r="4" fill="#fff"/><circle cx="32" cy="26" r="2" fill="#0F3B47"/>
+        </svg>
+        <div class="promo-text-md" style="margin-top:6px">БЕЗКОШТОВНА</div>
+        <div class="promo-text-md">ДОСТАВКА</div>
+        <div class="promo-text-sm">від 2000 ₴</div>
+      </div>
+    </div>
+    <h3>Free Shipping</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-ship','promo-free-shipping')">Download PNG</button>
+  </div>
+
+  <!-- Bestseller -->
+  <div class="card">
+    <div class="card__content" id="promo-best">
+      <div class="promo-badge promo-badge--best">
+        <div class="promo-text-sm" style="color:#1A1A1A;font-size:20px">★</div>
+        <div class="promo-text-lg" style="font-size:18px">ХІТ<br>ПРОДАЖІВ</div>
+        <div class="promo-text-sm" style="color:#1A1A1A">БЕСТСЕЛЕР</div>
+      </div>
+    </div>
+    <h3>Bestseller</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-best','promo-bestseller')">Download PNG</button>
+  </div>
+
+  <!-- Eco / organic -->
+  <div class="card">
+    <div class="card__content" id="promo-eco">
+      <div class="promo-badge promo-badge--eco">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="28" height="28">
+          <path d="M15,28 C15,28 15,14 15,8 C15,0 26,-2 28,2 C24,4 18,10 16,18" fill="#fff" opacity=".9"/>
+          <path d="M15,28 C15,28 15,14 15,8 C15,0 4,-2 2,2 C6,4 12,10 14,18" fill="#fff" opacity=".7"/>
+        </svg>
+        <div class="promo-text-md" style="margin-top:4px">100%</div>
+        <div class="promo-text-md">НАТУРАЛЬНЕ</div>
+        <div class="promo-text-sm">Еко продукція</div>
+      </div>
+    </div>
+    <h3>Eco / Natural</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-eco','promo-eco-natural')">Download PNG</button>
+  </div>
+
+  <!-- Gift / набір -->
+  <div class="card">
+    <div class="card__content" id="promo-gift">
+      <div class="promo-badge promo-badge--gift">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 34" width="30" height="30">
+          <rect x="2" y="14" width="30" height="18" rx="3" fill="#fff" opacity=".25"/>
+          <rect x="0" y="12" width="34" height="7" rx="2" fill="#fff" opacity=".35"/>
+          <rect x="14" y="12" width="6" height="20" fill="#fff" opacity=".2"/>
+          <path d="M17,12 C17,12 10,8 8,4 C6,0 10,-2 14,2 C16,4 17,8 17,12 Z" fill="#fff" opacity=".5"/>
+          <path d="M17,12 C17,12 24,8 26,4 C28,0 24,-2 20,2 C18,4 17,8 17,12 Z" fill="#fff" opacity=".4"/>
+        </svg>
+        <div class="promo-text-md" style="margin-top:4px;font-size:12px">ІДЕЯ ДЛЯ</div>
+        <div class="promo-text-lg" style="font-size:18px">ПОДАРУНКА</div>
+      </div>
+    </div>
+    <h3>Gift Idea</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-gift','promo-gift-idea')">Download PNG</button>
+  </div>
+
+  <!-- CTA rectangle -->
+  <div class="card">
+    <div class="card__content" id="promo-cta">
+      <div class="promo-rect promo-rect--cta">
+        <div style="font-weight:800;font-size:11px;letter-spacing:2px;opacity:.7">FUN DACHA</div>
+        <div style="font-weight:900;font-size:22px;margin-top:4px">ЗАМОВЛЯЙ ЗАРАЗ</div>
+        <div style="font-weight:600;font-size:11px;margin-top:6px;opacity:.85">Насіння · Добрива · Захист</div>
+        <div style="font-weight:700;font-size:10px;margin-top:8px;background:rgba(255,255,255,.2);padding:4px 16px;border-radius:20px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>CTA Banner</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-cta','promo-cta-banner')">Download PNG</button>
+  </div>
+
+  <!-- Season rectangle -->
+  <div class="card">
+    <div class="card__content" id="promo-season">
+      <div class="promo-rect promo-rect--season">
+        <div style="font-weight:800;font-size:10px;letter-spacing:2px;opacity:.7">ВЕСНА 2025</div>
+        <div style="font-weight:900;font-size:20px;margin-top:4px">СЕЗОН ВІДКРИТО!</div>
+        <div style="font-weight:600;font-size:11px;margin-top:6px;opacity:.85">Свіже насіння вже у продажу</div>
+        <div style="font-weight:700;font-size:10px;margin-top:8px;background:rgba(255,255,255,.15);padding:4px 16px;border-radius:20px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>Season Open</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-season','promo-season-open')">Download PNG</button>
+  </div>
+
+  <!-- URL strip -->
+  <div class="card">
+    <div class="card__content" id="promo-url">
+      <div class="promo-rect promo-rect--url">
+        <div style="font-weight:900;font-size:10px;letter-spacing:2px;color:#8B5E3C">ІНТЕРНЕТ-МАГАЗИН</div>
+        <div style="font-weight:900;font-size:24px;margin-top:4px;color:#207D43">fun-dacha.com.ua</div>
+        <div style="font-weight:600;font-size:11px;margin-top:4px;color:#4A4A4A">Насіння · Добрива · Захист рослин</div>
+      </div>
+    </div>
+    <h3>URL Strip</h3>
+    <button class="btn-dl" onclick="downloadCard('promo-url','promo-url-strip')">Download PNG</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 5. QR Code Stickers <small>Scan → fun-dacha.com.ua</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="grid">
+
+  <!-- QR white -->
+  <div class="card">
+    <div class="card__content" id="qr-white">
+      <div class="qr-sticker">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;color:#207D43;margin-bottom:4px">FUN DACHA</div>
+        <div class="qr-wrap" id="qrTarget1"></div>
+        <div class="qr-label" style="color:#207D43">Скануй та замовляй!</div>
+        <div class="qr-url">fun-dacha.com.ua</div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:9px;color:#7A7A7A;margin-top:6px">Насіння · Добрива · Захист</div>
+      </div>
+    </div>
+    <h3>QR — White</h3>
+    <button class="btn-dl" onclick="downloadCard('qr-white','qr-sticker-white')">Download PNG</button>
+  </div>
+
+  <!-- QR dark -->
+  <div class="card">
+    <div class="card__content card__content--dark" id="qr-dark">
+      <div class="qr-sticker qr-sticker--dark">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:18px;color:#2d9554;margin-bottom:4px">FUN DACHA</div>
+        <div class="qr-wrap" id="qrTarget2"></div>
+        <div class="qr-label" style="color:#2d9554">Скануй та замовляй!</div>
+        <div class="qr-url" style="color:#999">fun-dacha.com.ua</div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:9px;color:#666;margin-top:6px">Насіння · Добрива · Захист</div>
+      </div>
+    </div>
+    <h3>QR — Dark</h3>
+    <button class="btn-dl" onclick="downloadCard('qr-dark','qr-sticker-dark')">Download PNG</button>
+  </div>
+
+  <!-- QR compact green -->
+  <div class="card">
+    <div class="card__content" id="qr-green">
+      <div style="background:#207D43;border-radius:14px;padding:1.2rem 1.5rem;display:flex;flex-direction:column;align-items:center">
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:14px;color:#fff;letter-spacing:1px">FUN DACHA</div>
+        <div class="qr-wrap" id="qrTarget3" style="margin-top:8px"></div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:#fff;margin-top:8px">fun-dacha.com.ua</div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:rgba(255,255,255,.7);margin-top:2px">Скануй та замовляй</div>
+      </div>
+    </div>
+    <h3>QR — Green</h3>
+    <button class="btn-dl" onclick="downloadCard('qr-green','qr-sticker-green')">Download PNG</button>
+  </div>
+
+  <!-- QR round seal style -->
+  <div class="card">
+    <div class="card__content" id="qr-seal">
+      <div style="width:200px;height:200px;border-radius:50%;background:#207D43;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative">
+        <div style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:50%;border:3px solid #1a6a38;box-sizing:border-box"></div>
+        <div style="position:absolute;top:6px;left:6px;right:6px;bottom:6px;border-radius:50%;border:1.5px dashed rgba(255,255,255,.3);box-sizing:border-box"></div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1.5px">FUN DACHA</div>
+        <div class="qr-wrap" id="qrTarget4" style="margin-top:4px;padding:6px;border-radius:6px"></div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:rgba(255,255,255,.8);margin-top:4px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>QR — Seal</h3>
+    <button class="btn-dl" onclick="downloadCard('qr-seal','qr-seal-round')">Download PNG</button>
+  </div>
+
+  <!-- QR with logo horizontal -->
+  <div class="card">
+    <div class="card__content" id="qr-horiz">
+      <div style="display:flex;align-items:center;gap:1.2rem;background:#FFF8F0;border:2.5px solid #207D43;border-radius:14px;padding:1rem 1.5rem">
+        <div class="qr-wrap" id="qrTarget5" style="padding:6px;flex-shrink:0"></div>
+        <div style="display:flex;flex-direction:column">
+          <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:20px;color:#207D43;line-height:1">FUN</div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:20px;color:#1A1A1A;line-height:1">DACHA</div>
+          <div style="font-family:'Open Sans',sans-serif;font-weight:600;font-size:9px;color:#8B5E3C;margin-top:4px">Насіння · Добрива · Захист</div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:#207D43;margin-top:4px">fun-dacha.com.ua</div>
+        </div>
+      </div>
+    </div>
+    <h3>QR — Horizontal</h3>
+    <button class="btn-dl" onclick="downloadCard('qr-horiz','qr-horizontal')">Download PNG</button>
+  </div>
+
+</div>
+
+<hr style="margin-top:3rem; border: 1px solid #bbb;">
+<p style="color:#888;font-size:12px;text-align:center;margin-top:1rem">Fun Dacha — Marketing Assets v6 | Logo · Bundles · Promos · QR Stickers</p>
+
+<script>
+const iconSizes = { large: { w: 56, h: 72 }, small: { w: 28, h: 36 }, stacked: { w: 48, h: 62 } };
+
+function pickIcon(el) {
+  document.querySelectorAll('.icon-option').forEach(function(o) { o.classList.remove('active'); });
+  el.classList.add('active');
+  const svg = el.querySelector('svg');
+  document.querySelectorAll('.logo-icon').forEach(function(slot) {
+    const clone = svg.cloneNode(true);
+    const parent = slot.closest('.logo-line');
+    const isStacked = !parent;
+    const isSmall = parent && parent.classList.contains('logo-line--sm');
+    if (isStacked) {
+      clone.setAttribute('width', iconSizes.stacked.w);
+      clone.setAttribute('height', iconSizes.stacked.h);
+    } else if (isSmall) {
+      clone.setAttribute('width', iconSizes.small.w);
+      clone.setAttribute('height', iconSizes.small.h);
+    } else {
+      clone.setAttribute('width', iconSizes.large.w);
+      clone.setAttribute('height', iconSizes.large.h);
+    }
+    slot.innerHTML = '';
+    slot.appendChild(clone);
+  });
+}
+
+function downloadCard(id, filename) {
+  const el = document.getElementById(id);
+  html2canvas(el, { scale: 3, backgroundColor: null, useCORS: true }).then(function(canvas) {
+    const link = document.createElement('a');
+    link.download = filename + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+function downloadSvg(id, filename) {
+  const el = document.getElementById(id);
+  const svg = el.querySelector('svg');
+  const clone = svg.cloneNode(true);
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  const data = new XMLSerializer().serializeToString(clone);
+  const blob = new Blob([data], { type: 'image/svg+xml' });
+  const link = document.createElement('a');
+  link.download = filename + '.svg';
+  link.href = URL.createObjectURL(blob);
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+// Init: apply first icon + generate QR codes
+document.addEventListener('DOMContentLoaded', function() {
+  const first = document.querySelector('.icon-option.active');
+  if (first) pickIcon(first);
+
+  const qrTargets = [
+    { id: 'qrTarget1', size: 120, dark: '#207D43' },
+    { id: 'qrTarget2', size: 120, dark: '#207D43' },
+    { id: 'qrTarget3', size: 100, dark: '#207D43' },
+    { id: 'qrTarget4', size: 80, dark: '#1a6a38' },
+    { id: 'qrTarget5', size: 100, dark: '#207D43' }
+  ];
+  qrTargets.forEach(function(t) {
+    const el = document.getElementById(t.id);
+    if (!el) return;
+    const qr = qrcode(0, 'M');
+    qr.addData('https://fun-dacha.com.ua');
+    qr.make();
+    const count = qr.getModuleCount();
+    const cellSize = t.size / count;
+    let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + t.size + '" height="' + t.size + '" viewBox="0 0 ' + t.size + ' ' + t.size + '">';
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (qr.isDark(r, c)) {
+          svg += '<rect x="' + (c * cellSize).toFixed(2) + '" y="' + (r * cellSize).toFixed(2) + '" width="' + (cellSize + 0.5).toFixed(2) + '" height="' + (cellSize + 0.5).toFixed(2) + '" fill="' + t.dark + '"/>';
+        }
+      }
+    }
+    svg += '</svg>';
+    el.innerHTML = svg;
+  });
+});
+</script>
+
+</body>
+</html>
