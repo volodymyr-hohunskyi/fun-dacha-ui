@@ -145,7 +145,7 @@
 <div class="icon-grid" id="iconGrid">
 
   <!-- 1. Seedling in pot -->
-  <div class="icon-option active" onclick="pickIcon(this)" data-name="Seedling in pot">
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Seedling in pot">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 90" width="50" height="64">
       <path d="M12,52 L18,72 C19,75 22,77 25,77 L45,77 C48,77 51,75 52,72 L58,52 Z" fill="#A0703A" stroke="#8B5E3C" stroke-width="1.5"/>
       <rect x="8" y="46" width="54" height="8" rx="4" fill="#8B5E3C"/>
@@ -388,7 +388,7 @@
   </div>
 
   <!-- 16. Tomato -->
-  <div class="icon-option" onclick="pickIcon(this)" data-name="Tomato">
+  <div class="icon-option active" onclick="pickIcon(this)" data-name="Tomato">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 65" width="50" height="64">
       <circle cx="30" cy="36" r="22" fill="#D94040"/>
       <path d="M30,14 C20,14 12,22 12,36" fill="#c03030" opacity=".2"/>
@@ -1474,8 +1474,334 @@
 
 </div>
 
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 6. Packaging &amp; Labels <small>Brand stickers, sleeves, inserts for any product</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div class="grid">
+
+  <!-- 1. Round brand seal sticker -->
+  <div class="card">
+    <div class="card__content" id="pack-seal">
+      <div style="width:180px;height:180px;border-radius:50%;background:#207D43;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative">
+        <div style="position:absolute;top:4px;left:4px;right:4px;bottom:4px;border-radius:50%;border:2px solid rgba(255,255,255,.2);box-sizing:border-box"></div>
+        <div style="position:absolute;top:10px;left:10px;right:10px;bottom:10px;border-radius:50%;border:1px dashed rgba(255,255,255,.25);box-sizing:border-box"></div>
+        <span class="logo-icon" data-icon-w="28" data-icon-h="36" style="display:inline-flex;align-items:center;margin-bottom:4px"></span>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:13px;color:#fff;letter-spacing:1.5px">FUN DACHA</div>
+        <div style="width:50px;height:1px;background:rgba(255,255,255,.3);margin:5px 0"></div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:7px;color:rgba(255,255,255,.7);letter-spacing:1px">НАСІННЯ · ДОБРИВА · ЗАХИСТ</div>
+      </div>
+    </div>
+    <h3>Brand Seal Sticker</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-seal','pack-brand-seal')">Download PNG</button>
+  </div>
+
+  <!-- 2. Rectangular brand label -->
+  <div class="card">
+    <div class="card__content" id="pack-rect-label">
+      <div style="width:220px;padding:14px 18px;background:#FFF8F0;border:2.5px solid #207D43;border-radius:8px;display:flex;flex-direction:column;align-items:center;position:relative">
+        <div style="position:absolute;top:5px;left:5px;right:5px;bottom:5px;border:1px dashed rgba(32,125,67,.2);border-radius:5px"></div>
+        <div class="logo-line" style="font-size:16px;gap:4px">
+          <span class="logo-fun">FUN</span>
+          <span class="logo-icon" data-icon-w="14" data-icon-h="18" style="display:inline-flex;align-items:center"></span>
+          <span class="logo-dacha">DACHA</span>
+        </div>
+        <div style="width:40px;height:1px;background:#207D43;margin:8px 0;opacity:.3"></div>
+        <div style="font-family:'Open Sans',sans-serif;font-weight:600;font-size:9px;color:#8B5E3C;text-align:center;letter-spacing:.5px">Насіння · Добрива · Захист</div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:7px;color:#999;margin-top:6px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>Rectangular Label</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-rect-label','pack-rect-label')">Download PNG</button>
+  </div>
+
+  <!-- 3. Packaging band / sleeve -->
+  <div class="card">
+    <div class="card__content" id="pack-band" style="padding:1rem">
+      <div style="width:320px;height:80px;background:#207D43;border-radius:4px;display:flex;align-items:center;padding:0 20px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8B5E3C,#E8A838,#8B5E3C)"></div>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8B5E3C,#E8A838,#8B5E3C)"></div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div class="logo-line" style="font-size:20px;gap:5px">
+            <span class="logo-fun logo-fun--light">FUN</span>
+            <span class="logo-icon" data-icon-w="16" data-icon-h="20" style="display:inline-flex;align-items:center"></span>
+            <span class="logo-dacha logo-dacha--white">DACHA</span>
+          </div>
+          <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:rgba(255,255,255,.65);margin-top:4px;letter-spacing:.5px">Насіння · Добрива · Захист рослин</div>
+        </div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:rgba(255,255,255,.5);writing-mode:vertical-rl;text-orientation:mixed;letter-spacing:1px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>Packaging Band / Sleeve</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-band','pack-band-sleeve')">Download PNG</button>
+  </div>
+
+  <!-- 4. Thank you insert card -->
+  <div class="card">
+    <div class="card__content" id="pack-thanks">
+      <div style="width:240px;min-height:160px;background:#FFF8F0;border-radius:10px;border:2px solid #e0d6c8;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:60px;height:60px;border-radius:50%;background:#207D43;opacity:.06"></div>
+        <div style="position:absolute;bottom:-15px;left:-15px;width:50px;height:50px;border-radius:50%;background:#207D43;opacity:.06"></div>
+        <span class="logo-icon" data-icon-w="24" data-icon-h="30" style="display:inline-flex;align-items:center;margin-bottom:6px;opacity:.5"></span>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:16px;color:#207D43;text-align:center">ДЯКУЄМО ЗА<br>ЗАМОВЛЕННЯ!</div>
+        <div style="width:40px;height:1.5px;background:#8B5E3C;margin:10px 0;opacity:.3"></div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:10px;color:#4A4A4A;text-align:center;line-height:1.5">Бажаємо гарного врожаю!<br>Ваш магазин <strong style="color:#207D43">Fun Dacha</strong></div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:#999;margin-top:8px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>Thank You Insert</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-thanks','pack-thank-you')">Download PNG</button>
+  </div>
+
+  <!-- 5. Brand tape strip (repeating pattern) -->
+  <div class="card">
+    <div class="card__content" id="pack-tape" style="padding:1rem">
+      <div style="width:340px;height:44px;background:#207D43;display:flex;align-items:center;justify-content:center;gap:20px;overflow:hidden;border-radius:2px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1px">FUN</span>
+          <span class="logo-icon" data-icon-w="10" data-icon-h="13" style="display:inline-flex;align-items:center"></span>
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1px">DACHA</span>
+        </div>
+        <span style="font-family:'Open Sans',sans-serif;font-size:7px;color:rgba(255,255,255,.4)">●</span>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1px">FUN</span>
+          <span class="logo-icon" data-icon-w="10" data-icon-h="13" style="display:inline-flex;align-items:center"></span>
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1px">DACHA</span>
+        </div>
+        <span style="font-family:'Open Sans',sans-serif;font-size:7px;color:rgba(255,255,255,.4)">●</span>
+        <div style="display:flex;align-items:center;gap:4px">
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1px">FUN</span>
+          <span class="logo-icon" data-icon-w="10" data-icon-h="13" style="display:inline-flex;align-items:center"></span>
+          <span style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:11px;color:#fff;letter-spacing:1px">DACHA</span>
+        </div>
+      </div>
+    </div>
+    <h3>Brand Tape Strip</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-tape','pack-brand-tape')">Download PNG</button>
+  </div>
+
+  <!-- 6. Hang tag -->
+  <div class="card">
+    <div class="card__content" id="pack-tag">
+      <div style="width:120px;min-height:180px;background:#fff;border:2px solid #e0e0e0;border-radius:6px 6px 6px 6px;display:flex;flex-direction:column;align-items:center;padding:14px 10px;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.06)">
+        <div style="width:16px;height:16px;border-radius:50%;border:2px solid #ccc;margin-bottom:10px"></div>
+        <span class="logo-icon" data-icon-w="30" data-icon-h="38" style="display:inline-flex;align-items:center;margin-bottom:6px"></span>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:12px;color:#207D43;letter-spacing:1px">FUN</div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:12px;color:#1A1A1A;letter-spacing:1px">DACHA</div>
+        <div style="width:30px;height:1px;background:#e0e0e0;margin:8px 0"></div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:7px;color:#7A7A7A;text-align:center;line-height:1.4">Насіння<br>Добрива<br>Захист</div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:6px;color:#aaa;margin-top:auto;padding-top:8px">fun-dacha.com.ua</div>
+      </div>
+    </div>
+    <h3>Product Hang Tag</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-tag','pack-hang-tag')">Download PNG</button>
+  </div>
+
+  <!-- 7. Shipping label -->
+  <div class="card">
+    <div class="card__content" id="pack-ship">
+      <div style="width:280px;min-height:140px;background:#fff;border:2px solid #207D43;border-radius:6px;display:flex;overflow:hidden">
+        <div style="background:#207D43;width:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px">
+          <span class="logo-icon" data-icon-w="22" data-icon-h="28" style="display:inline-flex;align-items:center;margin-bottom:4px"></span>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:9px;color:#fff;letter-spacing:1px">FUN</div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:9px;color:#fff;letter-spacing:1px">DACHA</div>
+        </div>
+        <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;justify-content:space-between">
+          <div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:8px;color:#207D43;letter-spacing:1px;margin-bottom:4px">ВІДПРАВНИК</div>
+            <div style="font-family:'Open Sans',sans-serif;font-size:9px;color:#4A4A4A;line-height:1.4">ФОП «Fun Dacha»<br>м. Київ, Україна</div>
+          </div>
+          <div style="border-top:1px dashed #e0e0e0;padding-top:8px;margin-top:8px">
+            <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:8px;color:#8B5E3C;letter-spacing:1px;margin-bottom:2px">ОТРИМУВАЧ</div>
+            <div style="font-family:'Open Sans',sans-serif;font-size:9px;color:#bbb;line-height:1.4">_________________________<br>_________________________</div>
+          </div>
+          <div style="font-family:'Open Sans',sans-serif;font-size:7px;color:#aaa;margin-top:6px">fun-dacha.com.ua</div>
+        </div>
+      </div>
+    </div>
+    <h3>Branded Shipping Label</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-ship','pack-shipping-label')">Download PNG</button>
+  </div>
+
+  <!-- 8. Box wrap art — decorative pattern panel -->
+  <div class="card">
+    <div class="card__content" id="pack-art" style="padding:1rem">
+      <div style="width:280px;height:180px;background:#207D43;border-radius:6px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="280" height="180" style="position:absolute;top:0;left:0">
+          <pattern id="leafPat" x="0" y="0" width="56" height="60" patternUnits="userSpaceOnUse">
+            <path d="M14,50 L14,30" stroke="rgba(255,255,255,.06)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M14,38 C8,32 2,30 0,28 C4,32 8,34 14,38 Z" fill="rgba(255,255,255,.05)"/>
+            <path d="M14,32 C20,26 26,24 28,22 C24,26 20,28 14,32 Z" fill="rgba(255,255,255,.04)"/>
+            <path d="M42,50 L42,30" stroke="rgba(255,255,255,.06)" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M42,38 C36,32 30,30 28,28 C32,32 36,34 42,38 Z" fill="rgba(255,255,255,.05)"/>
+            <path d="M42,32 C48,26 54,24 56,22 C52,26 48,28 42,32 Z" fill="rgba(255,255,255,.04)"/>
+          </pattern>
+          <rect width="280" height="180" fill="url(#leafPat)"/>
+        </svg>
+        <div style="z-index:1;display:flex;flex-direction:column;align-items:center">
+          <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.2)">
+            <span class="logo-icon" data-icon-w="36" data-icon-h="46" style="display:inline-flex;align-items:center"></span>
+          </div>
+          <div class="logo-line" style="font-size:18px;gap:5px;margin-top:10px">
+            <span class="logo-fun logo-fun--light">FUN</span>
+            <span class="logo-dacha logo-dacha--white">DACHA</span>
+          </div>
+          <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:rgba(255,255,255,.5);margin-top:4px;letter-spacing:1px">НАСІННЯ · ДОБРИВА · ЗАХИСТ</div>
+        </div>
+      </div>
+    </div>
+    <h3>Box Art Panel</h3>
+    <button class="btn-dl" onclick="downloadCard('pack-art','pack-box-art')">Download PNG</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<h2>Step 7. Banners <small>Social media, web, print — with QR &amp; typography</small></h2>
+<!-- ═══════════════════════════════════════════════ -->
+
+<div style="display:flex;flex-direction:column;gap:1.5rem">
+
+  <!-- Banner 1: Wide hero (web / social) -->
+  <div class="card">
+    <div class="card__content" id="banner-hero" style="padding:0;overflow:hidden;border-radius:10px">
+      <div style="width:600px;height:200px;background:linear-gradient(135deg,#207D43 0%,#1a6a38 60%,#0F3B47 100%);display:flex;align-items:center;padding:0 2.5rem;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.04)"></div>
+        <div style="position:absolute;right:40px;top:30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
+        <div style="flex:1">
+          <div class="logo-wrap" style="align-items:flex-start">
+            <div class="logo-line" style="font-size:36px;gap:8px">
+              <span class="logo-fun logo-fun--light">FUN</span>
+              <span class="logo-icon" data-icon-w="30" data-icon-h="38" style="display:inline-flex;align-items:center"></span>
+              <span class="logo-dacha logo-dacha--white">DACHA</span>
+            </div>
+            <div class="logo-slogan logo-slogan--muted" style="font-size:14px;margin-top:6px">Насіння · Добрива · Захист рослин</div>
+          </div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:18px;color:#E8A838;margin-top:10px">Замовляй онлайн — доставка по Україні!</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;margin-left:1.5rem">
+          <div class="qr-wrap" id="qrBanner1" style="padding:8px;border-radius:8px"></div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:#fff;margin-top:6px">fun-dacha.com.ua</div>
+        </div>
+      </div>
+    </div>
+    <h3>Hero Banner — Wide</h3>
+    <button class="btn-dl" onclick="downloadCard('banner-hero','banner-hero-wide')">Download PNG</button>
+  </div>
+
+  <!-- Banner 2: Square (Instagram) -->
+  <div class="card" style="align-self:flex-start">
+    <div class="card__content" id="banner-square" style="padding:0;overflow:hidden;border-radius:10px">
+      <div style="width:400px;height:400px;background:#FFF8F0;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#207D43,#2d9554,#8B5E3C)"></div>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:6px;background:linear-gradient(90deg,#8B5E3C,#2d9554,#207D43)"></div>
+        <div class="logo-wrap">
+          <div class="logo-line" style="font-size:42px;gap:8px">
+            <span class="logo-fun">FUN</span>
+            <span class="logo-icon" data-icon-w="36" data-icon-h="46" style="display:inline-flex;align-items:center"></span>
+            <span class="logo-dacha">DACHA</span>
+          </div>
+        </div>
+        <div style="width:80px;height:2px;background:#207D43;margin:14px 0;opacity:.3"></div>
+        <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:22px;color:#207D43;text-align:center;line-height:1.3">ВЕСНЯНИЙ РОЗПРОДАЖ</div>
+        <div style="font-family:'Open Sans',sans-serif;font-weight:600;font-size:13px;color:#4A4A4A;margin-top:8px;text-align:center">Знижки до −30% на все насіння</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:20px">
+          <div class="qr-wrap" id="qrBanner2" style="padding:6px;border-radius:6px;border:2px solid #207D43"></div>
+          <div style="display:flex;flex-direction:column">
+            <div style="font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;color:#207D43">Скануй та замовляй</div>
+            <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:#8B5E3C;margin-top:2px">fun-dacha.com.ua</div>
+          </div>
+        </div>
+        <div style="font-family:'Open Sans',sans-serif;font-size:10px;color:#8B5E3C;margin-top:14px">Насіння · Добрива · Захист</div>
+      </div>
+    </div>
+    <h3>Square Banner — Instagram</h3>
+    <button class="btn-dl" onclick="downloadCard('banner-square','banner-square-insta')">Download PNG</button>
+  </div>
+
+  <!-- Banner 3: Dark promo -->
+  <div class="card">
+    <div class="card__content" id="banner-dark" style="padding:0;overflow:hidden;border-radius:10px">
+      <div style="width:600px;height:200px;background:#1A1A1A;display:flex;align-items:center;padding:0 2.5rem;position:relative;overflow:hidden">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:6px;background:#207D43"></div>
+        <div style="flex:1">
+          <div class="logo-line" style="font-size:28px;gap:6px">
+            <span class="logo-fun logo-fun--light">FUN</span>
+            <span class="logo-icon" data-icon-w="22" data-icon-h="28" style="display:inline-flex;align-items:center"></span>
+            <span class="logo-dacha logo-dacha--white">DACHA</span>
+          </div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:22px;color:#E8A838;margin-top:8px">БЕЗКОШТОВНА ДОСТАВКА</div>
+          <div style="font-family:'Open Sans',sans-serif;font-weight:600;font-size:13px;color:rgba(255,255,255,.6);margin-top:4px">При замовленні від 2000 ₴ · Нова Пошта</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;margin-left:1.5rem">
+          <div class="qr-wrap" id="qrBanner3" style="padding:8px;border-radius:8px"></div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:9px;color:#2d9554;margin-top:6px">fun-dacha.com.ua</div>
+        </div>
+      </div>
+    </div>
+    <h3>Dark Promo Banner</h3>
+    <button class="btn-dl" onclick="downloadCard('banner-dark','banner-dark-promo')">Download PNG</button>
+  </div>
+
+  <!-- Banner 4: Vertical story -->
+  <div class="card" style="align-self:flex-start">
+    <div class="card__content" id="banner-story" style="padding:0;overflow:hidden;border-radius:10px">
+      <div style="width:240px;height:420px;background:linear-gradient(180deg,#207D43 0%,#1a6a38 50%,#0F3B47 100%);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2rem 1.5rem;position:relative;overflow:hidden">
+        <div style="position:absolute;top:60px;left:-40px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
+        <div style="position:absolute;bottom:80px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.03)"></div>
+        <div class="logo-wrap" style="text-align:center">
+          <div class="logo-line" style="font-size:22px;gap:5px;justify-content:center">
+            <span class="logo-fun logo-fun--light">FUN</span>
+            <span class="logo-icon" data-icon-w="18" data-icon-h="24" style="display:inline-flex;align-items:center"></span>
+            <span class="logo-dacha logo-dacha--white">DACHA</span>
+          </div>
+          <div class="logo-slogan logo-slogan--muted" style="font-size:9px;letter-spacing:1px">ІНТЕРНЕТ-МАГАЗИН</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Montserrat',sans-serif;font-weight:900;font-size:26px;color:#fff;line-height:1.2">СЕЗОН<br>ВІДКРИТО!</div>
+          <div style="font-family:'Open Sans',sans-serif;font-weight:600;font-size:12px;color:#E8A838;margin-top:8px">Свіже насіння<br>вже у продажу</div>
+        </div>
+        <div style="text-align:center">
+          <div class="qr-wrap" id="qrBanner4" style="padding:8px;border-radius:8px"></div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:#fff;margin-top:8px">fun-dacha.com.ua</div>
+          <div style="font-family:'Open Sans',sans-serif;font-size:8px;color:rgba(255,255,255,.5);margin-top:2px">Насіння · Добрива · Захист</div>
+        </div>
+      </div>
+    </div>
+    <h3>Story / Vertical Banner</h3>
+    <button class="btn-dl" onclick="downloadCard('banner-story','banner-story-vertical')">Download PNG</button>
+  </div>
+
+  <!-- Banner 5: Cream elegant -->
+  <div class="card">
+    <div class="card__content" id="banner-cream" style="padding:0;overflow:hidden;border-radius:10px">
+      <div style="width:600px;height:180px;background:#FFF8F0;display:flex;align-items:center;padding:0 2.5rem;position:relative;overflow:hidden;border:2.5px solid #207D43;border-radius:10px">
+        <div style="position:absolute;top:8px;left:8px;right:8px;bottom:8px;border:1px dashed rgba(32,125,67,.2);border-radius:6px"></div>
+        <div style="flex:1;z-index:1">
+          <div class="logo-wrap" style="align-items:flex-start">
+            <div class="logo-line" style="font-size:30px;gap:6px">
+              <span class="logo-fun">FUN</span>
+              <span class="logo-icon" data-icon-w="24" data-icon-h="32" style="display:inline-flex;align-items:center"></span>
+              <span class="logo-dacha">DACHA</span>
+            </div>
+            <div class="logo-slogan logo-slogan--brown" style="font-size:13px;margin-top:6px">Якісне насіння, добрива та засоби захисту рослин</div>
+          </div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:11px;color:#207D43;margin-top:8px;background:rgba(32,125,67,.1);display:inline-block;padding:4px 14px;border-radius:20px">Доставка по всій Україні</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;margin-left:1.5rem;z-index:1">
+          <div class="qr-wrap" id="qrBanner5" style="padding:6px;border-radius:6px;border:2px solid #207D43"></div>
+          <div style="font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;color:#207D43;margin-top:6px">fun-dacha.com.ua</div>
+        </div>
+      </div>
+    </div>
+    <h3>Cream Elegant Banner</h3>
+    <button class="btn-dl" onclick="downloadCard('banner-cream','banner-cream-elegant')">Download PNG</button>
+  </div>
+
+</div>
+
 <hr style="margin-top:3rem; border: 1px solid #bbb;">
-<p style="color:#888;font-size:12px;text-align:center;margin-top:1rem">Fun Dacha — Marketing Assets v6 | Logo · Bundles · Promos · QR Stickers</p>
+<p style="color:#888;font-size:12px;text-align:center;margin-top:1rem">Fun Dacha — Marketing Assets v7 | Logo · Bundles · Promos · QR · Packaging · Banners</p>
 
 <script>
 const iconSizes = { large: { w: 56, h: 72 }, small: { w: 28, h: 36 }, stacked: { w: 48, h: 62 } };
@@ -1486,18 +1812,25 @@ function pickIcon(el) {
   const svg = el.querySelector('svg');
   document.querySelectorAll('.logo-icon').forEach(function(slot) {
     const clone = svg.cloneNode(true);
-    const parent = slot.closest('.logo-line');
-    const isStacked = !parent;
-    const isSmall = parent && parent.classList.contains('logo-line--sm');
-    if (isStacked) {
-      clone.setAttribute('width', iconSizes.stacked.w);
-      clone.setAttribute('height', iconSizes.stacked.h);
-    } else if (isSmall) {
-      clone.setAttribute('width', iconSizes.small.w);
-      clone.setAttribute('height', iconSizes.small.h);
+    const customW = slot.getAttribute('data-icon-w');
+    const customH = slot.getAttribute('data-icon-h');
+    if (customW && customH) {
+      clone.setAttribute('width', customW);
+      clone.setAttribute('height', customH);
     } else {
-      clone.setAttribute('width', iconSizes.large.w);
-      clone.setAttribute('height', iconSizes.large.h);
+      const parent = slot.closest('.logo-line');
+      const isStacked = !parent;
+      const isSmall = parent && parent.classList.contains('logo-line--sm');
+      if (isStacked) {
+        clone.setAttribute('width', iconSizes.stacked.w);
+        clone.setAttribute('height', iconSizes.stacked.h);
+      } else if (isSmall) {
+        clone.setAttribute('width', iconSizes.small.w);
+        clone.setAttribute('height', iconSizes.small.h);
+      } else {
+        clone.setAttribute('width', iconSizes.large.w);
+        clone.setAttribute('height', iconSizes.large.h);
+      }
     }
     slot.innerHTML = '';
     slot.appendChild(clone);
@@ -1538,7 +1871,12 @@ document.addEventListener('DOMContentLoaded', function() {
     { id: 'qrTarget2', size: 120, dark: '#207D43' },
     { id: 'qrTarget3', size: 100, dark: '#207D43' },
     { id: 'qrTarget4', size: 80, dark: '#1a6a38' },
-    { id: 'qrTarget5', size: 100, dark: '#207D43' }
+    { id: 'qrTarget5', size: 100, dark: '#207D43' },
+    { id: 'qrBanner1', size: 100, dark: '#207D43' },
+    { id: 'qrBanner2', size: 80, dark: '#207D43' },
+    { id: 'qrBanner3', size: 100, dark: '#207D43' },
+    { id: 'qrBanner4', size: 90, dark: '#1a6a38' },
+    { id: 'qrBanner5', size: 80, dark: '#207D43' }
   ];
   qrTargets.forEach(function(t) {
     const el = document.getElementById(t.id);
