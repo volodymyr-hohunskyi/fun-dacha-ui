@@ -22,11 +22,9 @@ class HomeBundles extends \Opencart\System\Engine\Controller {
 		foreach ($bundles_meta as $meta) {
 			$product_info = $this->model_catalog_product->getProduct($meta['product_id']);
 
-			if (!$product_info) {
-				continue;
-			}
-
-			$href = $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $meta['product_id']);
+			$href = $product_info
+				? $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $meta['product_id'])
+				: '';
 
 			$data['bundles'][] = [
 				'name'  => $meta['name_' . $lang_key],

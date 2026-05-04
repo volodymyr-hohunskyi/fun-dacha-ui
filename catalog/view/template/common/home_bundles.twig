@@ -8,12 +8,21 @@
     <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-3">
       {% for bundle in bundles %}
         <div class="col">
-          <a href="{{ bundle.href }}" class="home-bundles__card">
-            <div class="home-bundles__img-wrap">
-              <img src="{{ bundle.image }}" alt="{{ bundle.name }}" class="home-bundles__img" loading="lazy">
+          {% if bundle.href %}
+            <a href="{{ bundle.href }}" class="home-bundles__card">
+              <div class="home-bundles__img-wrap">
+                <img src="{{ bundle.image }}" alt="{{ bundle.name }}" class="home-bundles__img" loading="lazy">
+              </div>
+              <span class="home-bundles__link">Переглянути <i class="fa-solid fa-arrow-right"></i></span>
+            </a>
+          {% else %}
+            <div class="home-bundles__card">
+              <div class="home-bundles__img-wrap">
+                <img src="{{ bundle.image }}" alt="{{ bundle.name }}" class="home-bundles__img" loading="lazy">
+              </div>
+              <span class="home-bundles__link" style="color:var(--color-text-muted)">Незабаром</span>
             </div>
-            <span class="home-bundles__link">Переглянути <i class="fa-solid fa-arrow-right"></i></span>
-          </a>
+          {% endif %}
         </div>
       {% endfor %}
     </div>
