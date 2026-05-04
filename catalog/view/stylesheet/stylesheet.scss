@@ -828,15 +828,22 @@ div.required .col-form-label:before, div.required .form-label:before {
 .site-footer__brand {
   margin-bottom: 1rem;
 }
-.site-footer__logo {
-  max-height: 44px;
-  width: auto;
-  margin-bottom: 0.5rem;
+.site-footer__brand-link {
+  text-decoration: none;
+  &:hover { text-decoration: none; }
 }
 .site-footer__brand-name {
   font-family: var(--font-heading);
   font-weight: 900;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.04em;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.site-footer__brand-fun {
+  color: var(--color-primary);
+}
+.site-footer__brand-dacha {
   color: #fff;
 }
 .site-footer__slogan {

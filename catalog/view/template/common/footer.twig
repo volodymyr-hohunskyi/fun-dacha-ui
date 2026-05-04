@@ -5,11 +5,9 @@
       <div class="row">
         <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
           <div class="site-footer__brand">
-            {% if logo %}
-              <a href="{{ home }}"><img src="{{ logo }}" alt="{{ name }}" class="site-footer__logo"></a>
-            {% else %}
-              <span class="site-footer__brand-name">{{ name }}</span>
-            {% endif %}
+            <a href="{{ home }}" class="site-footer__brand-link">
+              <span class="site-footer__brand-name"><span class="site-footer__brand-fun">FUN</span> <span class="site-footer__brand-dacha">DACHA</span></span>
+            </a>
             <p class="site-footer__slogan">Насіння. Добрива. Захист.</p>
           </div>
           {% for information in informations %}
