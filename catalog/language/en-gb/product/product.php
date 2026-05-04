@@ -58,3 +58,8 @@ $_['entry_rating']               = 'Rating';
 $_['tab_description']            = 'Description';
 $_['tab_attribute']              = 'Specification';
 $_['tab_review']                 = 'Reviews (%s)';
+
+// Bundle
+$_['text_bundle_includes']       = 'What\'s included';
+$_['text_bundle_savings']        = 'You save';
+$_['text_bundle_add']            = 'Add bundle to cart';

@@ -59,4 +59,9 @@ $_['tab_description']            = 'Опис';
 $_['tab_attribute']              = 'Характеристики';
 $_['tab_review']                 = 'Відгуки (%s)';
 
+// Bundle
+$_['text_bundle_includes']       = 'Що входить до набору';
+$_['text_bundle_savings']        = 'Економія';
+$_['text_bundle_add']            = 'Додати набір до кошика';
+
 

@@ -2636,56 +2636,28 @@ div.required .col-form-label:before, div.required .form-label:before {
   }
 }
 
-/* ── Bundle Landing Page ── */
-.bundle-page__hero {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-  padding: 1.25rem;
-  background: var(--color-cream-bg, #FFF8F0);
-  border-radius: var(--border-radius, 8px);
+/* ── Bundle PDP — Children Section ── */
+.bundle-pdp-children {
+  padding: 1.5rem 0;
 }
-.bundle-page__hero-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 1.25rem;
-}
-.bundle-page__title {
+.bundle-pdp-children__heading {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-text-primary);
-  margin: 0 0 0.35rem;
+  margin-bottom: 1rem;
+  i { margin-right: 0.5rem; color: var(--color-primary); }
 }
-.bundle-page__desc {
-  font-size: 0.9rem;
-  color: var(--color-text-muted);
-  line-height: 1.5;
-  margin: 0;
-}
-.bundle-page__actions {
-  margin-bottom: 1.25rem;
-}
-.bundle-page__add-all {
-  background: var(--color-primary);
+.bundle-pdp-children__badge {
+  display: inline-block;
+  background: #d94444;
   color: #fff;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: var(--border-radius, 8px);
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: background 0.2s;
-  &:hover { background: var(--color-primary-dark); color: #fff; }
-  &:disabled { opacity: 0.6; cursor: wait; }
-  i { margin-right: 0.35rem; }
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  vertical-align: middle;
 }
 
 /* ── Home Seasons Section ── */
@@ -2938,14 +2910,30 @@ div.required .col-form-label:before, div.required .form-label:before {
 
 /* ── Home Bundles Section ── */
 .home-bundles {
-  padding: 2rem 0;
+  padding: 2.5rem 0;
+}
+.home-bundles__header {
+  margin-bottom: 1.5rem;
+}
+.home-bundles__title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 0.25rem;
+  i { margin-right: 0.5rem; color: var(--color-primary); }
+}
+.home-bundles__subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  margin: 0;
 }
 .home-bundles__card {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 1.25rem 1rem;
+  padding: 1rem 0.75rem;
   border-radius: var(--border-radius, 8px);
   border: 1px solid var(--color-border-light, #e8e8e8);
   background: #fff;
@@ -2960,30 +2948,58 @@ div.required .col-form-label:before, div.required .form-label:before {
     color: var(--color-text-primary);
   }
 }
-.home-bundles__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border-radius: 50%;
-  background: rgba(32, 125, 67, 0.1);
-  color: var(--color-primary);
-  font-size: 1.25rem;
+.home-bundles__img-wrap {
+  position: relative;
   margin-bottom: 0.75rem;
+}
+.home-bundles__img {
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  border-radius: var(--border-radius, 8px);
+}
+.home-bundles__badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #d94444;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
 }
 .home-bundles__name {
   font-family: var(--font-heading);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 700;
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.3rem;
 }
 .home-bundles__desc {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: var(--color-text-muted);
   line-height: 1.4;
   margin: 0 0 0.5rem;
   flex-grow: 1;
+}
+.home-bundles__price {
+  margin-bottom: 0.5rem;
+}
+.home-bundles__sale {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #d94444;
+}
+.home-bundles__was {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  text-decoration: line-through;
+  margin-left: 0.25rem;
+}
+.home-bundles__regular {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text-primary);
 }
 .home-bundles__link {
   font-size: 0.8rem;
@@ -2991,6 +3007,11 @@ div.required .col-form-label:before, div.required .form-label:before {
   color: var(--color-primary);
   i { margin-left: 0.2rem; transition: transform 0.2s; }
   .home-bundles__card:hover & i { transform: translateX(3px); }
+}
+@media (max-width: 575px) {
+  .home-bundles__img { max-width: 120px; }
+  .home-bundles__name { font-size: 0.8rem; }
+  .home-bundles__card { padding: 0.75rem 0.5rem; }
 }
 
 /* ── Blog Page ── */

@@ -65,7 +65,7 @@
             {% endif %}
             <li>{{ text_stock }} {{ stock }}</li>
           </ul>
-          {% if quick_specs is defined and quick_specs %}
+          {% if quick_specs is defined and quick_specs and not is_bundle %}
             <div class="pdp-quick-specs">
               {% for spec in quick_specs %}
                 <span class="pdp-quick-specs__tag">
@@ -124,6 +124,7 @@
               {% endif %}
             </ul>
             {% endif %}
+            {% if not is_bundle %}
             <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-pack-inline">
               <h2 id="pdp-heading-pack-inline" class="pdp-detail-section__title">{{ text_pdp_size_heading }}</h2>
               <div class="pdp-detail-section__body">
@@ -152,6 +153,7 @@
                 {% endif %}
               </div>
             </section>
+            {% endif %}
           {% endif %}
           <div id="product">
             <form id="form-product">
@@ -304,6 +306,21 @@
                   <div id="error-subscription" class="invalid-feedback"></div>
                 </div>
               {% endif %}
+{% if is_bundle %}
+<section class="pdp-pack-under-price mt-3 mb-3">
+  <div class="pdp-detail-section__body">
+    <div class="d-flex flex-column gap-2 align-items-stretch pdp-qty-cart-row">
+      <button type="submit"
+              id="button-cart"
+              class="btn btn-primary btn-lg text-white add-to-cart-btn">
+        <i class="fa-solid fa-box-open"></i> {{ text_bundle_add }}
+      </button>
+    </div>
+    <input type="hidden" name="quantity" value="1" />
+    <input type="hidden" name="product_id" value="{{ product_id }}" />
+  </div>
+</section>
+{% else %}
 <section class="pdp-pack-under-price mt-3 mb-3" aria-labelledby="pdp-heading-quantity">
   <h2 id="pdp-heading-quantity" class="pdp-detail-section__title">{{ text_pdp_quantity_heading }}</h2>
   <div class="pdp-detail-section__body">
@@ -343,11 +360,17 @@
     <div id="error-quantity" class="form-text"></div>
   </div>
 </section>
+{% endif %}
 
               <div class="pdp-trust-badges mt-3">
+                {% if is_bundle %}
+                <div class="pdp-trust-badge"><i class="fa-solid fa-box-open"></i> Все в одному наборі</div>
+                {% endif %}
                 <div class="pdp-trust-badge"><i class="fa-solid fa-truck-fast"></i> Нова Пошта 1-3 дні</div>
                 <div class="pdp-trust-badge"><i class="fa-solid fa-money-bill-wave"></i> Оплата при отриманні</div>
+                {% if not is_bundle %}
                 <div class="pdp-trust-badge"><i class="fa-solid fa-circle-check"></i> Гарантія сходження</div>
+                {% endif %}
               </div>
 
               {% if minimum > 1 %}
@@ -409,6 +432,19 @@
           {% endif %}
         </div>
       </div>
+      {% if is_bundle and bundle_children %}
+      <section class="bundle-pdp-children mt-4">
+        <h3 class="bundle-pdp-children__heading">
+          <i class="fa-solid fa-box-open"></i> {{ text_bundle_includes }}
+          <span class="bundle-pdp-children__badge">-{{ bundle_savings_percent }}%</span>
+        </h3>
+        <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-xl-6">
+          {% for child in bundle_children %}
+            <div class="col mb-3">{{ child }}</div>
+          {% endfor %}
+        </div>
+      </section>
+      {% endif %}
       {{ related }}
       {{ cross_sell }}
       {{ content_bottom }}

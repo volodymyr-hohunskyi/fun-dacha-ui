@@ -492,6 +492,16 @@ class Product extends \Opencart\System\Engine\Controller {
 
 			$data['cross_sell'] = $this->load->controller('product/cross_sell');
 
+			$data['is_bundle'] = $this->isBundleProduct($product_id);
+			$data['bundle_children'] = [];
+			$data['bundle_savings_percent'] = 20;
+
+			if ($data['is_bundle']) {
+				$data['bundle_children'] = $this->loadBundleChildren($product_id);
+				$data['related'] = '';
+				$data['cross_sell'] = '';
+			}
+
 			$data['tags'] = [];
 
 			if ($product_info['tag']) {
@@ -1372,6 +1382,69 @@ class Product extends \Opencart\System\Engine\Controller {
 		}
 		
 		return $twitter;
+	}
+
+	private const BUNDLE_CATEGORY_ID = 600;
+
+	private function isBundleProduct(int $product_id): bool {
+		$categories = $this->model_catalog_product->getCategories($product_id);
+
+		foreach ($categories as $cat) {
+			if ((int)$cat['category_id'] === self::BUNDLE_CATEGORY_ID) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private function loadBundleChildren(int $product_id): array {
+		$results = $this->model_catalog_product->getRelated($product_id);
+
+		if (empty($results)) {
+			return [];
+		}
+
+		[$thumb_w, $thumb_h] = Thumb::listThumbDimensions($this->config);
+
+		$badge_ids = array_column($results, 'product_id');
+		$all_badges = $this->model_catalog_product->getBadgeAttributes($badge_ids);
+
+		$children = [];
+
+		foreach ($results as $result) {
+			if ($result['image'] && is_file(DIR_IMAGE . html_entity_decode($result['image'], ENT_QUOTES, 'UTF-8'))) {
+				$image = $result['image'];
+			} else {
+				$image = 'placeholder.png';
+			}
+
+			if ($this->customer->isLogged() || !$this->config->get('config_customer_price')) {
+				$price = $this->currency->format($this->tax->calculate($result['price'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$price = false;
+			}
+
+			if ((float)$result['special']) {
+				$special = $this->currency->format($this->tax->calculate($result['special'], $result['tax_class_id'], $this->config->get('config_tax')), $this->session->data['currency']);
+			} else {
+				$special = false;
+			}
+
+			$product_data = [
+				'thumb'   => $this->model_tool_image->resize($image, $thumb_w, $thumb_h),
+				'price'   => $price,
+				'special' => $special,
+				'tax'     => false,
+				'minimum' => $result['minimum'] > 0 ? $result['minimum'] : 1,
+				'badges'  => $all_badges[(int)$result['product_id']] ?? [],
+				'href'    => $this->url->link('product/product', 'language=' . $this->config->get('config_language') . '&product_id=' . $result['product_id'])
+			] + $result;
+
+			$children[] = $this->load->controller('product/thumb', $product_data);
+		}
+
+		return $children;
 	}
 
 	private function extractQuickSpecs(array $attribute_groups): array {
