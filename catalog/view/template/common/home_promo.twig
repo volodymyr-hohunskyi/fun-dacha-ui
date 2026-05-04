@@ -3,19 +3,17 @@
   <div class="container">
     <div class="home-promo__header">
       <h2 class="home-promo__title"><i class="fa-solid fa-tags"></i> {{ heading_title }}</h2>
-      <p class="home-promo__subtitle">{{ heading_subtitle }}</p>
     </div>
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-6 g-3">
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-3">
       {% for promo in promos %}
         <div class="col">
           <a href="{{ promo.href }}" class="home-promo__card" style="--promo-color: {{ promo.color }};">
             {% if promo.image %}
-              <img src="{{ promo.image }}" alt="{{ promo.name }}" class="home-promo__card-img" loading="lazy" width="140" height="140">
+              <img src="{{ promo.image }}" alt="{{ promo.name }}" class="home-promo__card-img" loading="lazy">
             {% else %}
               <span class="home-promo__card-icon"><i class="fa-solid {{ promo.icon }}"></i></span>
             {% endif %}
             <h3 class="home-promo__card-name">{{ promo.name }}</h3>
-            <p class="home-promo__card-sub">{{ promo.subtitle }}</p>
             <span class="home-promo__card-link">Переглянути <i class="fa-solid fa-arrow-right"></i></span>
           </a>
         </div>
