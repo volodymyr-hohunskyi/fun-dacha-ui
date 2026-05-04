@@ -10,21 +10,8 @@
         <div class="col">
           <a href="{{ bundle.href }}" class="home-bundles__card">
             <div class="home-bundles__img-wrap">
-              <img src="{{ bundle.thumb }}" alt="{{ bundle.name }}" class="home-bundles__img" loading="lazy" width="228" height="228">
-              <span class="home-bundles__badge">−20%</span>
+              <img src="{{ bundle.image }}" alt="{{ bundle.name }}" class="home-bundles__img" loading="lazy">
             </div>
-            <h3 class="home-bundles__name">{{ bundle.name }}</h3>
-            <p class="home-bundles__desc">{{ bundle.description }}</p>
-            {% if bundle.special %}
-              <div class="home-bundles__price">
-                <span class="home-bundles__sale">{{ bundle.special }}</span>
-                <span class="home-bundles__was">{{ bundle.price }}</span>
-              </div>
-            {% elseif bundle.price %}
-              <div class="home-bundles__price">
-                <span class="home-bundles__regular">{{ bundle.price }}</span>
-              </div>
-            {% endif %}
             <span class="home-bundles__link">Переглянути <i class="fa-solid fa-arrow-right"></i></span>
           </a>
         </div>
