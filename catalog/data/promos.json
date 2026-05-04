@@ -1,0 +1,80 @@
+[
+  {
+    "slug": "khit-prodazhiv",
+    "name_uk": "Хіт продажів",
+    "name_en": "Bestsellers",
+    "description_uk": "Найпопулярніші товари серед наших покупців — перевірені сорти овочів, зелені та квітів, які обирають знову і знову.",
+    "subtitle_uk": "Обирайте перевірене — те, що купують найчастіше",
+    "icon": "fa-star",
+    "image": "brand/promo/promo-bestseller.png",
+    "color": "#D4961A",
+    "product_ids": [4, 76, 117, 139, 178, 274, 315, 322, 260, 425, 433, 464],
+    "sort_order": 1,
+    "status": 1
+  },
+  {
+    "slug": "eko-produktsiia",
+    "name_uk": "100% Натуральне",
+    "name_en": "Eco Products",
+    "description_uk": "Біопрепарати, органічні добрива та стимулятори росту — екологічно чистий захист і живлення ваших рослин без хімії.",
+    "subtitle_uk": "Еко продукція для свідомого городника",
+    "icon": "fa-leaf",
+    "image": "brand/promo/promo-eco-natural.png",
+    "color": "#3DA05B",
+    "product_ids": [1310, 1324, 1334, 1336, 1338, 1339, 1340, 1371, 1374, 1394, 1385, 1370],
+    "sort_order": 2,
+    "status": 1
+  },
+  {
+    "slug": "bezkoshtovna-dostavka",
+    "name_uk": "Безкоштовна доставка",
+    "name_en": "Free Shipping",
+    "description_uk": "Зберіть замовлення від 2000 ₴ та отримайте безкоштовну доставку по всій Україні. Ось що варто додати до кошика.",
+    "subtitle_uk": "Від 2000 ₴ — доставка за наш рахунок",
+    "icon": "fa-truck-fast",
+    "image": "brand/promo/promo-free-shipping.png",
+    "color": "#0F3B47",
+    "product_ids": [1507, 1515, 1502, 1504, 1339, 1385, 1382, 1324, 1338, 1340, 1373],
+    "sort_order": 3,
+    "status": 1
+  },
+  {
+    "slug": "ideya-dlya-podarunka",
+    "name_uk": "Ідея для подарунка",
+    "name_en": "Gift Ideas",
+    "description_uk": "Квіти, ароматні трави, декоративні рослини та садові набори — чудовий подарунок для тих, хто любить город і сад.",
+    "subtitle_uk": "Подаруйте радість вирощування",
+    "icon": "fa-gift",
+    "image": "brand/promo/promo-gift-idea.png",
+    "color": "#8B5E3C",
+    "product_ids": [462, 464, 465, 478, 479, 425, 429, 431, 435, 1503, 1497, 1489],
+    "sort_order": 4,
+    "status": 1
+  },
+  {
+    "slug": "nove-nadkhodzhennya",
+    "name_uk": "Нове надходження",
+    "name_en": "New Arrivals",
+    "description_uk": "Свіжі поставки сезону 2025 — нові сорти насіння, садовий інвентар та засоби догляду за рослинами вже у продажу.",
+    "subtitle_uk": "Сезон 2025 — свіже насіння вже у продажу",
+    "icon": "fa-sparkles",
+    "image": "brand/promo/promo-new-arrival.png",
+    "color": "#278C4C",
+    "product_ids": [1520, 1519, 1515, 1514, 1507, 1504, 1502, 1501, 1500, 1498, 1496, 1494],
+    "sort_order": 5,
+    "status": 1
+  },
+  {
+    "slug": "znyzhka-20",
+    "name_uk": "−20% знижка",
+    "name_en": "20% Off",
+    "description_uk": "Спеціальна пропозиція для нових покупців — знижка 20% на перше замовлення. Почніть свій город вигідно!",
+    "subtitle_uk": "На перше замовлення — економте з першого кроку",
+    "icon": "fa-percent",
+    "image": "brand/promo/promo-sale-20.png",
+    "color": "#D94444",
+    "product_ids": [4, 40, 81, 117, 135, 146, 172, 256, 274, 315, 350, 424],
+    "sort_order": 6,
+    "status": 1
+  }
+]
