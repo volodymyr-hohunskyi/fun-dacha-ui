@@ -12,8 +12,8 @@ $_['text_month']                 = 'місяць';
 $_['text_year']                  = 'рік';
 $_['text_no_results']            = 'Ваш кошик порожній!';
 $_['text_model']                 = 'ID';
-$_['text_cart']                  = 'Переглянути Кошик';
-$_['text_checkout']              = 'Оформити Замовлення';
+$_['text_cart']                  = 'Кошик';
+$_['text_checkout']              = 'Замовити';
 
 // Error
 $_['error_product']              = 'Попередження: Товар не знайдено!';
