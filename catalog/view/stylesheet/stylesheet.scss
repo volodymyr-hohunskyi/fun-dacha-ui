@@ -2042,7 +2042,9 @@ div.required .col-form-label:before, div.required .form-label:before {
 #common-home .home-reviews-carousel-section .container,
 #common-home .blog-section .container,
 #common-home .home-recently-viewed-wrapper,
-#common-home .home-brands-section .container {
+#common-home .home-brands-section .container,
+#common-home .home-bundles .container,
+#common-home .home-promo .container {
   padding-left: var(--home-content-padding-x);
   padding-right: var(--home-content-padding-x);
   max-width: none;

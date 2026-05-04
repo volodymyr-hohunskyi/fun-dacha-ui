@@ -5,7 +5,7 @@
       <h2 class="home-bundles__title"><i class="fa-solid fa-box-open"></i> {{ heading_title }}</h2>
       <p class="home-bundles__subtitle">{{ heading_subtitle }}</p>
     </div>
-    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-3">
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-lg-5 g-2">
       {% for bundle in bundles %}
         <div class="col">
           {% set tag = bundle.href ? 'a' : 'div' %}
