@@ -4,8 +4,14 @@
     <div class="container">
       <div class="row">
         <div class="col-md-6 col-lg-3 mb-4 mb-lg-0">
-          <h5 class="site-footer__heading">Про нас</h5>
-          <p class="site-footer__store">{{ name }}</p>
+          <div class="site-footer__brand">
+            {% if logo %}
+              <a href="{{ home }}"><img src="{{ logo }}" alt="{{ name }}" class="site-footer__logo"></a>
+            {% else %}
+              <span class="site-footer__brand-name">{{ name }}</span>
+            {% endif %}
+            <p class="site-footer__slogan">Насіння. Добрива. Захист.</p>
+          </div>
           {% for information in informations %}
             <a href="{{ information.href }}" class="site-footer__link">{{ information.title }}</a>
           {% endfor %}

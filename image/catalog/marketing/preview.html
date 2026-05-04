@@ -138,11 +138,8 @@
 <h1>Fun Dacha — Marketing Assets</h1>
 <p class="subtitle">Brand: <strong style="color:#207D43">#207D43</strong> | <strong style="color:#8B5E3C">#8B5E3C</strong> | <strong style="color:#0F3B47">#0F3B47</strong></p>
 
-<!-- ═══════════════════════════════════════════════ -->
-<h2>Step 1. Pick an Icon <small>Click to preview in logo</small></h2>
-<!-- ═══════════════════════════════════════════════ -->
-
-<div class="icon-grid" id="iconGrid">
+<!-- Icon grid hidden — basket is the chosen icon, kept in DOM for JS init -->
+<div class="icon-grid" id="iconGrid" style="display:none">
 
   <!-- 1. Seedling in pot -->
   <div class="icon-option" onclick="pickIcon(this)" data-name="Seedling in pot">
@@ -286,7 +283,7 @@
   </div>
 
   <!-- 10. Basket with veggies -->
-  <div class="icon-option" onclick="pickIcon(this)" data-name="Harvest basket">
+  <div class="icon-option active" onclick="pickIcon(this)" data-name="Harvest basket">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 70 70" width="50" height="64">
       <path d="M10,35 L16,60 C17,64 20,66 24,66 L46,66 C50,66 53,64 54,60 L60,35 Z" fill="#C4883C" stroke="#8B5E3C" stroke-width="1.5"/>
       <line x1="15" y1="42" x2="55" y2="42" stroke="#8B5E3C" stroke-width="1" opacity=".4"/>
@@ -388,7 +385,7 @@
   </div>
 
   <!-- 16. Tomato -->
-  <div class="icon-option active" onclick="pickIcon(this)" data-name="Tomato">
+  <div class="icon-option" onclick="pickIcon(this)" data-name="Tomato">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 65" width="50" height="64">
       <circle cx="30" cy="36" r="22" fill="#D94040"/>
       <path d="M30,14 C20,14 12,22 12,36" fill="#c03030" opacity=".2"/>
@@ -948,7 +945,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 2. Preview & Download <small>Logo with selected icon</small></h2>
+<h2>Step 1. Logo Variants <small>Download with basket icon</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div class="grid">
@@ -1134,7 +1131,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 3. Bundle Labels <small>«Готові Набори» — 5 curated sets</small></h2>
+<h2>Step 2. Bundle Labels <small>«Готові Набори» — 5 curated sets</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div class="grid">
@@ -1248,7 +1245,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 4. Promo Badges <small>Discounts, shipping, bestsellers</small></h2>
+<h2>Step 3. Promo Badges <small>Discounts, shipping, bestsellers</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div class="grid">
@@ -1391,7 +1388,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 5. QR Code Stickers <small>Scan → fun-dacha.com.ua</small></h2>
+<h2>Step 4. QR Code Stickers <small>Scan → fun-dacha.com.ua</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div class="grid">
@@ -1475,7 +1472,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 6. Packaging &amp; Labels <small>Brand stickers, sleeves, inserts for any product</small></h2>
+<h2>Step 5. Packaging &amp; Labels <small>Brand stickers, sleeves, inserts for any product</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div class="grid">
@@ -1657,7 +1654,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 7. Banners <small>Social media, web, print — with QR &amp; typography</small></h2>
+<h2>Step 6. Banners <small>Social media, web, print — with QR &amp; typography</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div style="display:flex;flex-direction:column;gap:1.5rem">
@@ -1801,7 +1798,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════ -->
-<h2>Step 8. Trust Layer <small>Germination badges, climate certification, quality marks</small></h2>
+<h2>Step 7. Trust Layer <small>Germination badges, climate certification, quality marks</small></h2>
 <!-- ═══════════════════════════════════════════════ -->
 
 <div class="grid">

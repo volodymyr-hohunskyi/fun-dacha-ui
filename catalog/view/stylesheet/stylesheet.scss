@@ -825,6 +825,25 @@ div.required .col-form-label:before, div.required .form-label:before {
   color: #fff;
   margin-bottom: 0.75rem;
 }
+.site-footer__brand {
+  margin-bottom: 1rem;
+}
+.site-footer__logo {
+  max-height: 44px;
+  width: auto;
+  margin-bottom: 0.5rem;
+}
+.site-footer__brand-name {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 1.25rem;
+  color: #fff;
+}
+.site-footer__slogan {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
 .site-footer__link {
   display: block;
   color: rgba(255, 255, 255, 0.75);

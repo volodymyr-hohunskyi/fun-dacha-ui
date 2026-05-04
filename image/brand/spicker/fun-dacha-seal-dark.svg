@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="200">
+      <circle cx="120" cy="120" r="116" fill="#207D43"/>
+      <circle cx="120" cy="120" r="110" stroke="#2d9554" stroke-width="2" fill="none"/>
+      <circle cx="120" cy="120" r="102" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="4 3" opacity=".5"/>
+      <g transform="translate(120, 72)" class="seal-icon">
+        <path d="M0,22 L0,0" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <path d="M0,12 C-10,5 -20,1 -26,-3 C-18,5 -10,9 0,12 Z" fill="#fff" opacity=".9"/>
+        <path d="M0,5 C10,-2 20,-6 26,-10 C18,-2 10,2 0,5 Z" fill="#FFF8F0" opacity=".8"/>
+        <path d="M0,0 C-8,-7 -16,-11 -22,-15 C-14,-9 -8,-5 0,0 Z" fill="#FFF8F0" opacity=".8"/>
+        <path d="M0,-4 C8,-11 14,-15 20,-19 C14,-13 8,-9 0,-4 Z" fill="#fff" opacity=".7"/>
+        <ellipse cx="0" cy="26" rx="16" ry="4" fill="#1a6a38" opacity=".5"/>
+      </g>
+      <text x="120" y="130" text-anchor="middle" fill="#fff" font-family="Montserrat, sans-serif" font-weight="900" font-size="18" letter-spacing="2">FUN DACHA</text>
+      <line x1="40" y1="142" x2="200" y2="142" stroke="#fff" stroke-width="1" opacity=".3"/>
+      <text x="120" y="162" text-anchor="middle" fill="#FFF8F0" font-family="Open Sans, sans-serif" font-weight="600" font-size="9" letter-spacing="1.5" opacity=".85">НАСІННЯ • ДОБРИВА • ЗАХИСТ</text>
+      <text x="120" y="180" text-anchor="middle" fill="#FFF8F0" font-family="Montserrat, sans-serif" font-weight="700" font-size="10" letter-spacing=".3" opacity=".7">fun-dacha.com.ua</text>
+    </svg>
