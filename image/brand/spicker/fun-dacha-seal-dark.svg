@@ -1,14 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="200">
-      <circle cx="120" cy="120" r="116" fill="#207D43"/>
-      <circle cx="120" cy="120" r="110" stroke="#2d9554" stroke-width="2" fill="none"/>
+      <circle cx="120" cy="120" r="116" fill="#1a1a1a"/>
+      <circle cx="120" cy="120" r="110" stroke="#1a6a38" stroke-width="2" fill="none"/>
       <circle cx="120" cy="120" r="102" fill="none" stroke="#fff" stroke-width="1.2" stroke-dasharray="4 3" opacity=".5"/>
-      <g transform="translate(120, 72)" class="seal-icon">
-        <path d="M0,22 L0,0" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-        <path d="M0,12 C-10,5 -20,1 -26,-3 C-18,5 -10,9 0,12 Z" fill="#fff" opacity=".9"/>
-        <path d="M0,5 C10,-2 20,-6 26,-10 C18,-2 10,2 0,5 Z" fill="#FFF8F0" opacity=".8"/>
-        <path d="M0,0 C-8,-7 -16,-11 -22,-15 C-14,-9 -8,-5 0,0 Z" fill="#FFF8F0" opacity=".8"/>
-        <path d="M0,-4 C8,-11 14,-15 20,-19 C14,-13 8,-9 0,-4 Z" fill="#fff" opacity=".7"/>
-        <ellipse cx="0" cy="26" rx="16" ry="4" fill="#1a6a38" opacity=".5"/>
+      <g transform="translate(120, 68)" class="seal-icon">
+        <!-- Tomato body -->
+        <ellipse cx="0" cy="8" rx="16" ry="13" fill="#e53935"/>
+        <ellipse cx="0" cy="11" rx="14" ry="10" fill="#c62828"/>
+        <ellipse cx="0" cy="7" rx="15" ry="12" fill="#e53935"/>
+        <!-- Highlight -->
+        <ellipse cx="-5" cy="3" rx="6" ry="4" fill="#ef5350" opacity=".6"/>
+        <!-- Stem -->
+        <rect x="-1.5" y="-8" width="3" height="7" rx="1.5" fill="#2e7d32"/>
+        <!-- Leaves -->
+        <path d="M0,-4 C-6,-10 -12,-11 -14,-9 C-10,-8 -5,-5 0,-4 Z" fill="#388e3c"/>
+        <path d="M0,-5 C6,-11 12,-12 14,-10 C10,-9 5,-6 0,-5 Z" fill="#4caf50"/>
+        <!-- Shadow -->
+        <ellipse cx="0" cy="22" rx="12" ry="3" fill="#1a6a38" opacity=".4"/>
       </g>
       <text x="120" y="130" text-anchor="middle" fill="#fff" font-family="Montserrat, sans-serif" font-weight="900" font-size="18" letter-spacing="2">FUN DACHA</text>
       <line x1="40" y1="142" x2="200" y2="142" stroke="#fff" stroke-width="1" opacity=".3"/>
